@@ -24,7 +24,7 @@
     <RelativeLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="125sp"
+        android:layout_height="107sp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/container_bgd"
         android:padding="5sp">
@@ -42,12 +42,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@id/seekBar"
-            android:layout_marginLeft="20sp"
+            android:layout_marginLeft="30sp"
             android:textSize="20sp"
             android:textColor="#000"
-            android:layout_marginBottom="10sp"
+            android:layout_marginBottom="-1sp"
             android:visibility="visible"
-            android:text="Radius Adjustment" />
+            android:text="Adjust Radius" />
 
         <Button
             android:id="@+id/regular"
