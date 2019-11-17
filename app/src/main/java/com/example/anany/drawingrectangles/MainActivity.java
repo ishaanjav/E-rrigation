@@ -48,15 +48,22 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                makeToast("MODE: " + dv.currentMode);
                 switch (dv.currentMode) {
+                    case DOTPLOT:
+                        dv.currentMode = DrawingView.Mode.DRAWING;
+                        dv.invalidate();
+                        break;
                     case PLOT:
                         //Current mode is drawing.
                         dv.currentMode = DrawingView.Mode.RESET;
                         dv.resetTouchPoints();
                         //dv.invalidate();
+                        break;
                     case DRAWING:
                         dv.resetTouchPoints();
-                        dv.currentMode = DrawingView.Mode.RECORDING;
+                        //dv.currentMode = DrawingView.Mode.RECORDING;
+                        //dv.currentMode = DrawingView.Mode.DOTPLOT;
                         dv.invalidate();
                         button.setText("Draw Line");
                         break;
@@ -86,7 +93,9 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> ylist = new ArrayList<>();
         List<Integer> xs = new ArrayList<>();
         List<Integer> ys = new ArrayList<>();
-        Mode currentMode = Mode.PLOT;
+        //TODO Comment out below if you want to use a dotplot
+      //  Mode currentMode = Mode.PLOT;
+        Mode currentMode = Mode.DOTPLOT;
         Context context;
         Paint linePaint;
         Canvas cd;
@@ -108,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             circlePaint = new Paint();
             circlePath = new Path();
             circlePaint.setAntiAlias(true);
-            circlePaint.setColor(Color.BLUE);
+            circlePaint.setColor(Color.RED);
             circlePaint.setStyle(Paint.Style.STROKE);
             circlePaint.setStrokeJoin(Paint.Join.MITER);
             circlePaint.setStrokeWidth(4f);
@@ -118,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
             linePaint = new Paint();
             linePaint.setAntiAlias(true);
-            linePaint.setColor(Color.WHITE);
+            linePaint.setColor(Color.RED);
             linePaint.setStyle(Paint.Style.STROKE);
             linePaint.setStrokeJoin(Paint.Join.MITER);
             linePaint.setStrokeWidth(4f);
@@ -130,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
             ylist = new ArrayList<>();
             xs = new ArrayList<>();
             ys = new ArrayList<>();
+            Log.wtf("RESET RESET", "Touch points were reset");
             invalidate();
         }
 
@@ -164,11 +174,18 @@ public class MainActivity extends AppCompatActivity {
             //drawCustomLine(mCanvas, downx, downy, upx, upy);
 
             switch (currentMode) {
+                case DOTPLOT:
+                    showDots(canvas);
+                    Log.wtf("DOTPLOT", "DOT Plot being called");
+                    drawLine(canvas);
+                    break;
                 case RESET:
                     //Need to reset the canvas
                     currentMode = Mode.PLOT;
+                    makeToast("Resetting");
                     //TODO Try uncommenting and commenting out below line to see if it works after reset button
-                    linePaint.setColor(Color.WHITE);
+                    //linePaint.setColor(Color.WHITE);
+                    Log.wtf("RESET RESET RESET RESET RESET", "Reset was called. Reset screen.");
                     break;
                 case PLOT:
                     drawCustomLine(mCanvas, downx, downy, upx, upy);
@@ -195,8 +212,9 @@ public class MainActivity extends AppCompatActivity {
 
             int x = (int) event.getX();
             int y = (int) event.getY();
-
-            switch (event.getAction()) {
+makeToast("TAPPED");
+            //INFO Uncomment below if you are trying to do drawCustomLine()
+            /*switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     makeToast("Finger Down: " + x + " " + y);
                     if (down) {
@@ -205,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
                         xlist.add(x);
                         ylist.add(y);
                         down = false;
-                        Log.wtf("Coordinates---------------------------", "Finger Down: " + x + " " + y);
+                        //Log.wtf("Coordinates---------------------------", "Finger Down: " + x + " " + y);
                     }
                 case MotionEvent.ACTION_MOVE:
                     up = true;
@@ -217,32 +235,32 @@ public class MainActivity extends AppCompatActivity {
                         xlist.add(upx);
                         ylist.add(upy);
                         up = false;
-                        Log.wtf("Coordinates---------------------------", "Finger Up: " + x + " " + y);
+                       // Log.wtf("Coordinates---------------------------", "Finger Up: " + x + " " + y);
                         down = true;
                         invalidate();
                     }
-            }
+            }*/
 
-            /*if (currentMode == Mode.RECORDING) {
-                float x = event.getX();
+            if (currentMode == Mode.DOTPLOT) {
+                /*float x = event.getX();
                 float y = event.getY();
-                Log.d("Touch Point", "Co x:" + x + ", y:" + y);
+                Log.d("Touch Point", "Co x:" + x + ", y:" + y);*/
                 //TODO Write function to iterate through both lists and check a point's distance. Dont' just do it for the lastest one.
                 boolean duplicate = checkForDuplicate(x, y);
-                if (*//*xlist.size() > 0 && xlist.get((int) xlist.size() - 1) < (int) x + 30 && xlist.get((int) xlist.size() - 1) > (int) x - 30
-                        && ylist.get((int) ylist.size() - 1) < (int) y + 30 && ylist.get((int) ylist.size() - 1) > (int) y - 30*//*
-                duplicate) {
+                /*if (*//*xlist.size() > 0 && xlist.get((int) xlist.size() - 1) < (int) x + 30 && xlist.get((int) xlist.size() - 1) > (int) x - 30
+                        && ylist.get((int) ylist.size() - 1) < (int) y + 30 && ylist.get((int) ylist.size() - 1) > (int) y - 30
+                *//*duplicate) {
                     //duplicate touch recording, skip it
                     Log.d("Duplicate", "Avoiding it");
-                } else {
+                } else {*/
                     xlist.add((int) x);
                     ylist.add((int) y);
                     //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
                     // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
                     // That's why try writing your customDrawLine() code in onDraw().
-                    //invalidate();
-                }
-            }*/
+                    invalidate();
+                //}
+            }
             return true;
         }
 
@@ -284,6 +302,8 @@ public class MainActivity extends AppCompatActivity {
 
         private void drawCustomLine(Canvas canvas, int x1, int y1, int x2, int y2) {
             //try calling invalidate()
+            makeToast("Being called");
+            Log.wtf("Draw Custom Line being called", "Draw Custom Line being called");
             linePaint.setColor(Color.BLUE);
             //canvas.drawLine(x1, y1, x2, y2, linePaint);
             xs.add(x1);
@@ -292,15 +312,16 @@ public class MainActivity extends AppCompatActivity {
             ys.add(y2);
             for(int i = 0; i < xs.size(); i+=2)
                 canvas.drawLine(xs.get(i), ys.get(i), xs.get(i+1), ys.get(i+1), linePaint);
-            linePaint.setColor(Color.WHITE);
+            linePaint.setColor(Color.GREEN);
 
             //invalidate();
         }
 
         private void showDots(Canvas canvas) {
+            Log.wtf("Showing dots", "Showing circles on canvas");
             if (xlist.size() > 0) {
                 for (int i = 0; i < xlist.size(); i++) {
-                    //canvas.drawCircle(xlist.get(i), ylist.get(i), 5.0f, circlePaint);
+                    canvas.drawCircle(xlist.get(i), ylist.get(i), 5.0f, circlePaint);
                 }
             }
 
@@ -311,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET}
+        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT}
 
     }
 
