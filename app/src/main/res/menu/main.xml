@@ -7,4 +7,10 @@
         app:showAsAction = "never"
         android:title="Draw Circle"/>
 
+    <item
+        android:id="@+id/sprinklers"
+        app:showAsAction="always"
+        android:title="Plot Sprinklers"
+        />
+
 </menu>

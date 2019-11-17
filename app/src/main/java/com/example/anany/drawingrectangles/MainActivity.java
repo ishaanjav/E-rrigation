@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         btnUndo = findViewById(R.id.btnUndo);
         setButtonClick();
         setRadiusBar();
+        dv.sradius = radius.getProgress();
 
         //radius.setVisibility(View.VISIBLE);
         //real.setVisibility(View.VISIBLE);
@@ -87,7 +88,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                dv.radius = progress;
+                if (dv.currentMode == DrawingView.Mode.drawc)
+                    dv.radius = progress;
+                else if (dv.currentMode == DrawingView.Mode.splot)
+                    dv.sradius = progress;
                 dv.invalidate();
             }
         });
@@ -98,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO Deal with making a polygon.
+
             }
         });
         button.setOnClickListener(new View.OnClickListener() {
@@ -105,6 +110,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 makeToast("MODE: " + dv.currentMode);
                 switch (dv.currentMode) {
+                    case splot:
+                        //TODO Reset the sprinkler points.
+                        dv.currentMode = DrawingView.Mode.sreset;
+                        dv.invalidate();
+                        break;
                     case drawc:
                         dv.currentMode = DrawingView.Mode.resetc;
                         dv.invalidate();
@@ -139,7 +149,12 @@ public class MainActivity extends AppCompatActivity {
         btnUndo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dv.undo();
+                if (dv.currentMode != DrawingView.Mode.splot)
+                    dv.undo();
+                else {
+                    dv.removeLastSprinkler();
+                }
+
             }
         });
     }
@@ -149,8 +164,12 @@ public class MainActivity extends AppCompatActivity {
         public int width;
         public int height;
         public int radius = -5;
+        public int sradius = -5;
         List<Integer> xlist = new ArrayList<>();
         List<Integer> ylist = new ArrayList<>();
+        List<Integer> sprinkx = new ArrayList<>();
+        List<Integer> sprinky = new ArrayList<>();
+        List<Integer> sprinkr = new ArrayList<>();
         List<Integer> xs = new ArrayList<>();
         List<Integer> ys = new ArrayList<>();
         //TODO Comment out below if you want to use a dotplot
@@ -164,6 +183,10 @@ public class MainActivity extends AppCompatActivity {
         private Path mPath;
         private Paint mBitmapPaint;
         private Paint circlePaint;
+        private Paint sprinklerC;
+        private Paint sprinklerSurround;
+        private Paint sprinklerBorder;
+        private Paint fillPaint;
         TextView display;
         private Path circlePath;
         private float mX, mY;
@@ -178,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
             circlePaint = new Paint();
             circlePath = new Path();
             circlePaint.setAntiAlias(true);
-            circlePaint.setColor(Color.RED);
+            circlePaint.setColor(Color.BLACK);
             circlePaint.setStyle(Paint.Style.STROKE);
             circlePaint.setStrokeJoin(Paint.Join.MITER);
             circlePaint.setStrokeWidth(8f);
@@ -189,13 +212,36 @@ public class MainActivity extends AppCompatActivity {
             this.display = display;
             makeToast("HI");
 
-            linePaint = new Paint();
-            linePaint.setAntiAlias(true);
-            linePaint.setColor(Color.RED);
-            linePaint.setStyle(Paint.Style.STROKE);
-            linePaint.setStrokeJoin(Paint.Join.MITER);
-            linePaint.setStrokeWidth(8f);
+            fillPaint = new Paint();
+            fillPaint.setAntiAlias(true);
+            fillPaint.setColor(0XAA76f760);
+            fillPaint.setStyle(Paint.Style.FILL);
+            fillPaint.setStrokeJoin(Paint.Join.MITER);
 
+            sprinklerSurround = new Paint();
+            sprinklerSurround.setAntiAlias(true);
+            sprinklerSurround.setColor(0XAA76f760);
+            sprinklerSurround.setStyle(Paint.Style.FILL);
+            sprinklerSurround.setStrokeJoin(Paint.Join.MITER);
+
+            sprinklerC = new Paint();
+            sprinklerC.setAntiAlias(true);
+            sprinklerC.setColor(Color.GREEN);
+            sprinklerC.setStyle(Paint.Style.FILL);
+            sprinklerC.setStrokeJoin(Paint.Join.MITER);
+
+            linePaint = new Paint();
+            linePaint.setStrokeWidth(8f);
+            linePaint.setColor(Color.parseColor("#369646"));
+            linePaint.setStrokeWidth(8f);
+            linePaint.setStyle(Paint.Style.STROKE);
+        }
+
+        public void resetSprinklers() {
+            sprinkx = new ArrayList<>();
+            sprinky = new ArrayList<>();
+            sprinkr = new ArrayList<>();
+            invalidate();
         }
 
         public void resetTouchPoints() {
@@ -204,6 +250,15 @@ public class MainActivity extends AppCompatActivity {
             xs = new ArrayList<>();
             ys = new ArrayList<>();
             Log.wtf("RESET RESET", "Touch points were reset");
+            invalidate();
+        }
+
+        public void removeLastSprinkler() {
+            if (sprinkx.size() > 0) {
+                sprinkx.remove(sprinkx.size() - 1);
+                sprinkr.remove(sprinkr.size() - 1);
+                sprinky.remove(sprinky.size() - 1);
+            }
             invalidate();
         }
 
@@ -238,6 +293,16 @@ public class MainActivity extends AppCompatActivity {
             //drawCustomLine(mCanvas, downx, downy, upx, upy);
 
             switch (currentMode) {
+                case splot:
+                    plotSprinklers(canvas);
+                    makeToast("Plotting sprinklers");
+                    drawLine(canvas);
+                    break;
+                case sreset:
+                    currentMode = Mode.splot;
+                    resetSprinklers();
+                    makeToast("Resetting sprinklers.");
+                    break;
                 case DOTPLOT:
                     showDots(canvas);
                     Log.wtf("DOTPLOT", "DOT Plot being called");
@@ -247,6 +312,7 @@ public class MainActivity extends AppCompatActivity {
                     //Need to reset the canvas
                     currentMode = Mode.DOTPLOT;
                     resetTouchPoints();
+                    resetSprinklers();
                     makeToast("Resetting");
                     //TODO Try uncommenting and commenting out below line to see if it works after reset button
                     //linePaint.setColor(Color.WHITE);
@@ -261,11 +327,17 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case drawc:
                     //makeToast("In draw c");
-                    if (radius == -5)
-                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30, 300, linePaint);
-                    else
-                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30, radius * (screenW / 200), linePaint);
-
+                    if (radius == -5) {
+                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                300, fillPaint);
+                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                308, linePaint);
+                    } else {
+                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                radius * (screenW / 200), fillPaint);
+                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                radius * (screenW / 200) + 8, linePaint);
+                    }
                     break;
                 case DRAWING:
                     //showDots(canvas);
@@ -323,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
                 float y = event.getY();
                 Log.d("Touch Point", "Co x:" + x + ", y:" + y);*/
                 //TODO Write function to iterate through both lists and check a point's distance. Dont' just do it for the lastest one.
-                boolean duplicate = checkForDuplicate(x, y);
+                boolean duplicate = checkForDuplicate(x, y, false);
                 if (/*xlist.size() > 0 && xlist.get((int) xlist.size() - 1) < (int) x + 30 && xlist.get((int) xlist.size() - 1) > (int) x - 30
                         && ylist.get((int) ylist.size() - 1) < (int) y + 30 && ylist.get((int) ylist.size() - 1) > (int) y - 30
                 */duplicate) {
@@ -341,23 +413,39 @@ public class MainActivity extends AppCompatActivity {
                         makeToast("You have exceeded the limit on the number of sides.");
                     }
                 }
-            } else if (currentMode == Mode.drawc) {
-                //TODO Deal with drawing circle.
+            } else if (currentMode == Mode.splot) {
+                //TODO Deal with plotting sprinklers.
 
+                boolean duplicate = checkForDuplicate(x, y, true);
+                sprinkx.add((int) x);
+                sprinky.add((int) y);
+                sprinkr.add(sradius * 2);
+                invalidate();
             }
             return true;
         }
 
-        protected boolean checkForDuplicate(float x, float y) {
+        protected boolean checkForDuplicate(float x, float y, boolean sprinkler) {
             double distance = 0;
-            for (int i = 0; i < xlist.size(); i++) {
-                int xTemp = xlist.get(i);
-                int yTemp = ylist.get(i);
-                distance = Math.sqrt(Math.pow(xTemp - x, 2) + Math.pow(yTemp - y, 2));
-                if (distance < 120)
-                    return true;
+            if (!sprinkler) {
+                for (int i = 0; i < xlist.size(); i++) {
+                    int xTemp = xlist.get(i);
+                    int yTemp = ylist.get(i);
+                    distance = Math.sqrt(Math.pow(xTemp - x, 2) + Math.pow(yTemp - y, 2));
+                    if (distance < 120)
+                        return true;
+                }
+                return false;
+            } else {
+                for (int i = 0; i < sprinkx.size(); i++) {
+                    int xTemp = sprinkr.get(i);
+                    int yTemp = sprinky.get(i);
+                    distance = Math.sqrt(Math.pow(xTemp - x, 2) + Math.pow(yTemp - y, 2));
+                    if (distance < 30)
+                        return true;
+                }
+                return false;
             }
-            return false;
         }
 
         private void drawLine(Canvas canvas) {
@@ -381,6 +469,16 @@ public class MainActivity extends AppCompatActivity {
                 String s = Double.toString(df);
                 //makeToast("Display is good: " + (display == null));
                 //display.setText(s);
+            }
+        }
+
+
+        private void plotSprinklers(Canvas canvas) {
+            Log.wtf("Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
+            if (sprinkx.size() > 0) {
+                for (int i = 0; i < sprinkx.size(); i++) {
+                    canvas.drawCircle(sprinkx.get(i), sprinky.get(i), 20f, sprinklerC);
+                }
             }
         }
 
@@ -416,7 +514,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT, drawc, resetc}
+        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT, drawc, resetc, splot, sreset}
 
     }
 
@@ -432,6 +530,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.circle:
                 //TODO Have to draw circle.
+                dv.resetSprinklers();
                 if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
                     //INFO Need to switch from circle to polygon
                     radius.setVisibility(View.INVISIBLE);
@@ -448,6 +547,13 @@ public class MainActivity extends AppCompatActivity {
                     radius.setVisibility(View.VISIBLE);
                     dv.invalidate();
                 }
+                return true;
+
+            case R.id.sprinklers:
+                //polygon.setText("");
+                polygon.setVisibility(View.INVISIBLE);
+                radius.setVisibility(View.VISIBLE);
+                dv.currentMode = DrawingView.Mode.splot;
                 return true;
         }
         return super.onOptionsItemSelected(item);
