@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 makeToast("MODE: " + dv.currentMode);
                 switch (dv.currentMode) {
                     case DOTPLOT:
-                        dv.currentMode = DrawingView.Mode.DRAWING;
+                        dv.currentMode = DrawingView.Mode.RESET;
                         dv.invalidate();
                         break;
                     case PLOT:
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             circlePaint.setColor(Color.RED);
             circlePaint.setStyle(Paint.Style.STROKE);
             circlePaint.setStrokeJoin(Paint.Join.MITER);
-            circlePaint.setStrokeWidth(4f);
+            circlePaint.setStrokeWidth(8f);
 
             this.display = display;
             makeToast("HI");
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             linePaint.setColor(Color.RED);
             linePaint.setStyle(Paint.Style.STROKE);
             linePaint.setStrokeJoin(Paint.Join.MITER);
-            linePaint.setStrokeWidth(4f);
+            linePaint.setStrokeWidth(8f);
 
         }
 
@@ -181,7 +181,8 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case RESET:
                     //Need to reset the canvas
-                    currentMode = Mode.PLOT;
+                    currentMode = Mode.DOTPLOT;
+                    resetTouchPoints();
                     makeToast("Resetting");
                     //TODO Try uncommenting and commenting out below line to see if it works after reset button
                     //linePaint.setColor(Color.WHITE);
@@ -247,19 +248,19 @@ makeToast("TAPPED");
                 Log.d("Touch Point", "Co x:" + x + ", y:" + y);*/
                 //TODO Write function to iterate through both lists and check a point's distance. Dont' just do it for the lastest one.
                 boolean duplicate = checkForDuplicate(x, y);
-                /*if (*//*xlist.size() > 0 && xlist.get((int) xlist.size() - 1) < (int) x + 30 && xlist.get((int) xlist.size() - 1) > (int) x - 30
+                if (/*xlist.size() > 0 && xlist.get((int) xlist.size() - 1) < (int) x + 30 && xlist.get((int) xlist.size() - 1) > (int) x - 30
                         && ylist.get((int) ylist.size() - 1) < (int) y + 30 && ylist.get((int) ylist.size() - 1) > (int) y - 30
-                *//*duplicate) {
+                */duplicate) {
                     //duplicate touch recording, skip it
                     Log.d("Duplicate", "Avoiding it");
-                } else {*/
+                } else {
                     xlist.add((int) x);
                     ylist.add((int) y);
                     //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
                     // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
                     // That's why try writing your customDrawLine() code in onDraw().
                     invalidate();
-                //}
+                }
             }
             return true;
         }
@@ -270,7 +271,7 @@ makeToast("TAPPED");
                 int xTemp = xlist.get(i);
                 int yTemp = ylist.get(i);
                 distance = Math.sqrt(Math.pow(xTemp - x, 2) + Math.pow(yTemp - y, 2));
-                if (distance < 30)
+                if (distance < 120)
                     return true;
             }
             return false;
@@ -321,7 +322,7 @@ makeToast("TAPPED");
             Log.wtf("Showing dots", "Showing circles on canvas");
             if (xlist.size() > 0) {
                 for (int i = 0; i < xlist.size(); i++) {
-                    canvas.drawCircle(xlist.get(i), ylist.get(i), 5.0f, circlePaint);
+                    canvas.drawCircle(xlist.get(i), ylist.get(i), 9.0f, circlePaint);
                 }
             }
 
