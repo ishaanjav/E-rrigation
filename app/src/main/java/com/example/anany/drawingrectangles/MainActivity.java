@@ -10,6 +10,9 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> xs = new ArrayList<>();
         List<Integer> ys = new ArrayList<>();
         //TODO Comment out below if you want to use a dotplot
-      //  Mode currentMode = Mode.PLOT;
+        //  Mode currentMode = Mode.PLOT;
         Mode currentMode = Mode.DOTPLOT;
         Context context;
         Paint linePaint;
@@ -213,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
             int x = (int) event.getX();
             int y = (int) event.getY();
-makeToast("TAPPED");
+            //makeToast("TAPPED");
             //INFO Uncomment below if you are trying to do drawCustomLine()
             /*switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -254,12 +257,16 @@ makeToast("TAPPED");
                     //duplicate touch recording, skip it
                     Log.d("Duplicate", "Avoiding it");
                 } else {
-                    xlist.add((int) x);
-                    ylist.add((int) y);
-                    //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
-                    // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
-                    // That's why try writing your customDrawLine() code in onDraw().
-                    invalidate();
+                    if (xlist.size() <= 12) {
+                        xlist.add((int) x);
+                        ylist.add((int) y);
+                        //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
+                        // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
+                        // That's why try writing your customDrawLine() code in onDraw().
+                        invalidate();
+                    } else {
+                        makeToast("You have exceeded the limit on the number of sides.");
+                    }
                 }
             }
             return true;
@@ -296,14 +303,14 @@ makeToast("TAPPED");
                 int z = c - d;
                 double df = Math.sqrt(z);
                 String s = Double.toString(df);
-                makeToast("Display is good: " + (display == null));
+                //makeToast("Display is good: " + (display == null));
                 //display.setText(s);
             }
         }
 
         private void drawCustomLine(Canvas canvas, int x1, int y1, int x2, int y2) {
             //try calling invalidate()
-            makeToast("Being called");
+            //makeToast("Being called");
             Log.wtf("Draw Custom Line being called", "Draw Custom Line being called");
             linePaint.setColor(Color.BLUE);
             //canvas.drawLine(x1, y1, x2, y2, linePaint);
@@ -311,15 +318,15 @@ makeToast("TAPPED");
             xs.add(x2);
             ys.add(y1);
             ys.add(y2);
-            for(int i = 0; i < xs.size(); i+=2)
-                canvas.drawLine(xs.get(i), ys.get(i), xs.get(i+1), ys.get(i+1), linePaint);
+            for (int i = 0; i < xs.size(); i += 2)
+                canvas.drawLine(xs.get(i), ys.get(i), xs.get(i + 1), ys.get(i + 1), linePaint);
             linePaint.setColor(Color.GREEN);
 
             //invalidate();
         }
 
         private void showDots(Canvas canvas) {
-            Log.wtf("Showing dots", "Showing circles on canvas");
+            Log.wtf("Showing dots", "X List size: " + xlist.size());
             if (xlist.size() > 0) {
                 for (int i = 0; i < xlist.size(); i++) {
                     canvas.drawCircle(xlist.get(i), ylist.get(i), 9.0f, circlePaint);
@@ -333,8 +340,27 @@ makeToast("TAPPED");
         }
 
 
-        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT}
+        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT, drawc, resetc}
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.circle:
+                //TODO Have to draw circle.
+                dv.currentMode = DrawingView.Mode.drawc;
+                dv.invalidate();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void makeToast(String s) {
