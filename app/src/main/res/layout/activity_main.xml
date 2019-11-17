@@ -33,17 +33,38 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/regular"
+            android:layout_above="@id/seekBar"
+            android:visibility="invisible"
             android:text="TextView" />
 
+        <TextView
+            android:id="@+id/real"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/seekBar"
+            android:layout_marginLeft="20sp"
+            android:textSize="20sp"
+            android:textColor="#000"
+            android:layout_marginBottom="10sp"
+            android:visibility="visible"
+            android:text="Radius Adjustment" />
 
         <Button
             android:id="@+id/regular"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/llBottomBar"
-            android:text="Straighten Lines"
+            android:text="Make Into Regular Polygon"
             android:textAlignment="center" />
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_above="@id/llBottomBar"
+            android:min="50"
+            android:max="100"
+            android:layout_width="match_parent"
+            android:visibility="invisible"
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:id="@+id/llBottomBar"
@@ -68,5 +89,7 @@
                 android:layout_weight="1"
                 android:text="Undo" />
         </LinearLayout>
+
+
     </RelativeLayout>
 </RelativeLayout>

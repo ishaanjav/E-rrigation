@@ -7,8 +7,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,30 +32,83 @@ public class MainActivity extends AppCompatActivity {
     RelativeLayout rlDvHolder;
     DrawingView dv;
     TextView display;
+    TextView real;
+    Button polygon;
+    SeekBar radius;
     RelativeLayout background;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         display = findViewById(R.id.textView);
-        dv = new DrawingView(getApplicationContext(), display);
+        real = (TextView) findViewById(R.id.real);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+
+        dv = new DrawingView(getApplicationContext(), display, height, width);
 
         setContentView(R.layout.activity_main);
         rlDvHolder = findViewById(R.id.dvHolder);
         rlDvHolder.addView(dv);
+        polygon = findViewById(R.id.regular);
 
         button = findViewById(R.id.button);
         background = findViewById(R.id.layout);
+        radius = findViewById(R.id.seekBar);
+
         btnUndo = findViewById(R.id.btnUndo);
         setButtonClick();
+        setRadiusBar();
 
+        //radius.setVisibility(View.VISIBLE);
+        //real.setVisibility(View.VISIBLE);
+        radius.getProgressDrawable().setColorFilter(Color.parseColor("#70c48c"), PorterDuff.Mode.SRC_IN);
+        radius.getThumb().setColorFilter(Color.parseColor("#3abd66"), PorterDuff.Mode.SRC_IN);
+        //polygon.setVisibility(View.INVISIBLE);
+    }
+
+    private void setRadiusBar() {
+        radius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //INFO this is when the user lets go of the slider
+                //makeToast("Invalidating");
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                dv.radius = progress;
+                dv.invalidate();
+            }
+        });
     }
 
     private void setButtonClick() {
+        polygon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO Deal with making a polygon.
+            }
+        });
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 makeToast("MODE: " + dv.currentMode);
                 switch (dv.currentMode) {
+                    case drawc:
+                        dv.currentMode = DrawingView.Mode.resetc;
+                        dv.invalidate();
+                        break;
                     case DOTPLOT:
                         dv.currentMode = DrawingView.Mode.RESET;
                         dv.invalidate();
@@ -92,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         private static final float TOUCH_TOLERANCE = 4;
         public int width;
         public int height;
+        public int radius = -5;
         List<Integer> xlist = new ArrayList<>();
         List<Integer> ylist = new ArrayList<>();
         List<Integer> xs = new ArrayList<>();
@@ -110,8 +167,9 @@ public class MainActivity extends AppCompatActivity {
         TextView display;
         private Path circlePath;
         private float mX, mY;
+        int screenW, screenH;
 
-        public DrawingView(Context c, TextView display) {
+        public DrawingView(Context c, TextView display, int height, int width) {
             super(c);
             context = c;
             mPath = new Path();
@@ -124,6 +182,9 @@ public class MainActivity extends AppCompatActivity {
             circlePaint.setStyle(Paint.Style.STROKE);
             circlePaint.setStrokeJoin(Paint.Join.MITER);
             circlePaint.setStrokeWidth(8f);
+
+            screenW = width;
+            screenH = height;
 
             this.display = display;
             makeToast("HI");
@@ -193,6 +254,18 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case PLOT:
                     drawCustomLine(mCanvas, downx, downy, upx, upy);
+                    break;
+                case resetc:
+                    currentMode = Mode.drawc;
+                    makeToast("Reset c. Mode is draw c");
+                    break;
+                case drawc:
+                    //makeToast("In draw c");
+                    if (radius == -5)
+                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30, 300, linePaint);
+                    else
+                        mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30, radius * (screenW / 200), linePaint);
+
                     break;
                 case DRAWING:
                     //showDots(canvas);
@@ -268,6 +341,9 @@ public class MainActivity extends AppCompatActivity {
                         makeToast("You have exceeded the limit on the number of sides.");
                     }
                 }
+            } else if (currentMode == Mode.drawc) {
+                //TODO Deal with drawing circle.
+
             }
             return true;
         }
@@ -356,8 +432,22 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.circle:
                 //TODO Have to draw circle.
-                dv.currentMode = DrawingView.Mode.drawc;
-                dv.invalidate();
+                if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
+                    //INFO Need to switch from circle to polygon
+                    radius.setVisibility(View.INVISIBLE);
+                    polygon.setVisibility(View.VISIBLE);
+                    dv.currentMode = DrawingView.Mode.DOTPLOT;
+                    dv.resetTouchPoints();
+                    item.setTitle("Draw again");
+                    dv.invalidate();
+                } else {
+                    //INFO Currently on polygon. Switch to circle.
+                    dv.currentMode = DrawingView.Mode.drawc;
+                    polygon.setVisibility(View.INVISIBLE);
+                    item.setTitle("Draw Circle");
+                    radius.setVisibility(View.VISIBLE);
+                    dv.invalidate();
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
