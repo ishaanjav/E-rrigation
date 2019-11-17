@@ -436,14 +436,14 @@ public class MainActivity extends AppCompatActivity {
                     //INFO Need to switch from circle to polygon
                     radius.setVisibility(View.INVISIBLE);
                     polygon.setVisibility(View.VISIBLE);
-                    item.setTitle("Draw Shapes");
+                    item.setTitle("Draw Circle");
                     dv.currentMode = DrawingView.Mode.DOTPLOT;
                     dv.resetTouchPoints();
                     dv.invalidate();
                 } else {
                     //INFO Currently on polygon. Switch to circle.
                     dv.currentMode = DrawingView.Mode.drawc;
-                    item.setTitle("Draw again");
+                    item.setTitle("Draw Shapes");
                     polygon.setVisibility(View.INVISIBLE);
                     radius.setVisibility(View.VISIBLE);
                     dv.invalidate();
