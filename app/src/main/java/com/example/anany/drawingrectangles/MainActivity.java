@@ -682,13 +682,17 @@ public class MainActivity extends AppCompatActivity {
                 int blueValue = Color.blue(pixel);
                 int greenValue = Color.green(pixel);
 
-                String pix = redValue +""+blueValue+""+greenValue;
-                hm.put(pix,
-                        hm.getOrDefault(pix, 0) + 1);
+                String red = "", blue = "", green = "";
+                red += (redValue < 10) ? ("0" + redValue) : (redValue);
+                blue += (blueValue < 10) ? ("0" + redValue) : (redValue);
+                green += (greenValue < 10) ? ("0" + redValue) : (redValue);
+
+                String pix = red + "" + blue + "" + green;
+                hm.put(pix, hm.getOrDefault(pix, 0) + 1);
             }
         }
         //makeToast(hm.toString());
-        Log.wtf("Iterating Through Pixels ----", "Result: " + hm.toString());
+        Log.wtf("Iterating Through Pixels ----", "Result: \n" + hm.toString());
     }
 
     private void makeToast(String s) {
