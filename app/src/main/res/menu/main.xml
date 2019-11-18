@@ -13,4 +13,10 @@
         android:title="Plot Sprinklers"
         />
 
+    <item
+        android:id="@+id/calculate"
+        app:showAsAction="never"
+        android:title="Count Pixels"
+        />
+
 </menu>

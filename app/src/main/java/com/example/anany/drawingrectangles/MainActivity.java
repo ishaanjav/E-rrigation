@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorSpace;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -23,7 +25,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.Buffer;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
 
+
         dv = new DrawingView(getApplicationContext(), display, height, width);
 
         setContentView(R.layout.activity_main);
@@ -68,6 +76,51 @@ public class MainActivity extends AppCompatActivity {
         radius.getProgressDrawable().setColorFilter(Color.parseColor("#70c48c"), PorterDuff.Mode.SRC_IN);
         radius.getThumb().setColorFilter(Color.parseColor("#3abd66"), PorterDuff.Mode.SRC_IN);
         //polygon.setVisibility(View.INVISIBLE);
+    }
+
+    public Bitmap takeScreenShot(View view) {
+        // configuramos para que la view almacene la cache en una imagen
+        view.setDrawingCacheEnabled(true);
+        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+        view.buildDrawingCache();
+
+        if (view.getDrawingCache() == null) return null; // Verificamos antes de que no sea null
+
+        // utilizamos esa cache, para crear el bitmap que tendra la imagen de la view actual
+        Bitmap snapshot = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        view.destroyDrawingCache();
+
+        return snapshot;
+    }
+
+    public File takeScreenShot2() {
+        Date now = new Date();
+        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+
+        try {
+            // image naming and path  to include sd card  appending name you choose for file
+            String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
+
+            // create bitmap screen capture
+            View v1 = getWindow().getDecorView().getRootView();
+            v1.setDrawingCacheEnabled(true);
+            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+            v1.setDrawingCacheEnabled(false);
+
+            File imageFile = new File(mPath);
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            int quality = 105;
+            bitmap.compress(Bitmap.CompressFormat.PNG, quality, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            return imageFile;
+        } catch (Throwable e) {
+            // Several error may come out with file handling or OOM
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void setRadiusBar() {
@@ -605,8 +658,59 @@ public class MainActivity extends AppCompatActivity {
                 radius.setVisibility(View.VISIBLE);
                 dv.currentMode = DrawingView.Mode.splot;
                 return true;
+
+            case R.id.calculate:
+                Bitmap bmp = takeScreenShot(dv);
+                makeToast("Got Bitmap: " + (bmp != null));
+                iterateThroughPixels(bmp);
+                File file = takeScreenShot2();
+                iterateThroughPixels(file);
+                Log.wtf("Getting Bitmap of DrawingView", "Status = Complete.");
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void iterateThroughPixels(File f){
+        /*BufferedImage image = ImageIO.read(file);
+
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                final int clr = image.getRGB(x, y);
+                final int red = (clr & 0x00ff0000) >> 16;
+                final int green = (clr & 0x0000ff00) >> 8;
+                final int blue = clr & 0x000000ff;
+
+                // Color Red get cordinates
+                if (red == 255) {
+                    System.out.println(String.format("Coordinate %d %d", x, y));
+                } else {
+                    System.out.println("Red Color value = " + red);
+                    System.out.println("Green Color value = " + green);
+                    System.out.println("Blue Color value = " + blue);
+                }
+            }
+        }*/
+    }
+
+    private void iterateThroughPixels(Bitmap bmp) {
+        //Buffer
+        HashMap<String, Integer> hm = new HashMap<>();
+        for (int y = 0; y < bmp.getHeight(); y++) {
+            for (int x = 0; x < bmp.getWidth(); x++) {
+                int pixel = bmp.getPixel(x, y);
+
+                int redValue = Color.red(pixel);
+                int blueValue = Color.blue(pixel);
+                int greenValue = Color.green(pixel);
+
+                String pix = redValue +""+blueValue+""+greenValue;
+                hm.put(pix,
+                        hm.getOrDefault(pix, 0) + 1);
+            }
+        }
+        makeToast(hm.toString());
+        Log.wtf("Iterating Through Pixels ----", "Result: " + hm.toString());
     }
 
     private void makeToast(String s) {
