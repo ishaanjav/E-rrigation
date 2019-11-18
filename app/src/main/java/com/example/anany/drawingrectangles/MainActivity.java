@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
             File imageFile = new File(mPath);
             FileOutputStream outputStream = new FileOutputStream(imageFile);
-            int quality = 105;
+            int quality = 100;
             bitmap.compress(Bitmap.CompressFormat.PNG, quality, outputStream);
             outputStream.flush();
             outputStream.close();
@@ -661,36 +661,14 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.calculate:
                 Bitmap bmp = takeScreenShot(dv);
-                makeToast("Got Bitmap: " + (bmp != null));
+                makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
+                Log.wtf("BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
                 iterateThroughPixels(bmp);
-                File file = takeScreenShot2();
-                iterateThroughPixels(file);
-                Log.wtf("Getting Bitmap of DrawingView", "Status = Complete.");
+                //File file = takeScreenShot2();
+                //iterateThroughPixels(file);
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void iterateThroughPixels(File f){
-        /*BufferedImage image = ImageIO.read(file);
-
-        for (int x = 0; x < image.getWidth(); x++) {
-            for (int y = 0; y < image.getHeight(); y++) {
-                final int clr = image.getRGB(x, y);
-                final int red = (clr & 0x00ff0000) >> 16;
-                final int green = (clr & 0x0000ff00) >> 8;
-                final int blue = clr & 0x000000ff;
-
-                // Color Red get cordinates
-                if (red == 255) {
-                    System.out.println(String.format("Coordinate %d %d", x, y));
-                } else {
-                    System.out.println("Red Color value = " + red);
-                    System.out.println("Green Color value = " + green);
-                    System.out.println("Blue Color value = " + blue);
-                }
-            }
-        }*/
     }
 
     private void iterateThroughPixels(Bitmap bmp) {
@@ -709,7 +687,7 @@ public class MainActivity extends AppCompatActivity {
                         hm.getOrDefault(pix, 0) + 1);
             }
         }
-        makeToast(hm.toString());
+        //makeToast(hm.toString());
         Log.wtf("Iterating Through Pixels ----", "Result: " + hm.toString());
     }
 
