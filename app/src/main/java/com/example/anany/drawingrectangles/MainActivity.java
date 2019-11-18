@@ -77,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //INFO this is when the user lets go of the slider
                 //makeToast("Invalidating");
-
+                dv.sradius = seekBar.getProgress();
+                makeToast("Updating sradius: " + dv.sradius);
             }
 
             @Override
@@ -88,10 +89,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
+                dv.sradius = progress;
                 if (dv.currentMode == DrawingView.Mode.drawc)
                     dv.radius = progress;
-                else if (dv.currentMode == DrawingView.Mode.splot)
-                    dv.sradius = progress;
+
                 dv.invalidate();
             }
         });
@@ -190,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
         TextView display;
         private Path circlePath;
         private float mX, mY;
+        public boolean wasCircle = false;
         int screenW, screenH;
 
         public DrawingView(Context c, TextView display, int height, int width) {
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
             fillPaint = new Paint();
             fillPaint.setAntiAlias(true);
-            fillPaint.setColor(0XAA76f760);
+            fillPaint.setColor(0X1A187507);
             fillPaint.setStyle(Paint.Style.FILL);
             fillPaint.setStrokeJoin(Paint.Join.MITER);
 
@@ -226,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
             sprinklerC = new Paint();
             sprinklerC.setAntiAlias(true);
-            sprinklerC.setColor(Color.GREEN);
+            sprinklerC.setColor(0X7557c4ff);
             sprinklerC.setStyle(Paint.Style.FILL);
             sprinklerC.setStrokeJoin(Paint.Join.MITER);
 
@@ -291,12 +293,27 @@ public class MainActivity extends AppCompatActivity {
             //README I think when you call invalidate() it calls onDraw again. Check it out by putting
             // your custom draw function for the line here. Test it out.
             //drawCustomLine(mCanvas, downx, downy, upx, upy);
-
             switch (currentMode) {
                 case splot:
                     plotSprinklers(canvas);
-                    makeToast("Plotting sprinklers");
-                    drawLine(canvas);
+                    //makeToast("Plotting sprinklers");
+                    //mmakeToast("Was Circle? : " + wasCircle);
+                    if (!wasCircle)
+                        drawLine(canvas);
+                    else {
+                        if (radius == -5) {
+                            mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                    300, fillPaint);
+                            mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                    308, linePaint);
+                        } else {
+                            mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                    radius * (screenW / 200), fillPaint);
+                            mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
+                                    radius * (screenW / 200) + 8, linePaint);
+                        }
+                    }
+
                     break;
                 case sreset:
                     currentMode = Mode.splot;
@@ -327,6 +344,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case drawc:
                     //makeToast("In draw c");
+                    wasCircle = true;
                     if (radius == -5) {
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                 300, fillPaint);
@@ -417,10 +435,12 @@ public class MainActivity extends AppCompatActivity {
                 //TODO Deal with plotting sprinklers.
 
                 boolean duplicate = checkForDuplicate(x, y, true);
-                sprinkx.add((int) x);
-                sprinky.add((int) y);
-                sprinkr.add(sradius * 2);
-                invalidate();
+                if (!duplicate) {
+                    sprinkx.add((int) x);
+                    sprinky.add((int) y);
+                    sprinkr.add((int) Math.pow(sradius / 9, 2));
+                    invalidate();
+                }
             }
             return true;
         }
@@ -438,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             } else {
                 for (int i = 0; i < sprinkx.size(); i++) {
-                    int xTemp = sprinkr.get(i);
+                    int xTemp = sprinkx.get(i);
                     int yTemp = sprinky.get(i);
                     distance = Math.sqrt(Math.pow(xTemp - x, 2) + Math.pow(yTemp - y, 2));
                     if (distance < 30)
@@ -477,7 +497,7 @@ public class MainActivity extends AppCompatActivity {
             Log.wtf("Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
             if (sprinkx.size() > 0) {
                 for (int i = 0; i < sprinkx.size(); i++) {
-                    canvas.drawCircle(sprinkx.get(i), sprinky.get(i), 20f, sprinklerC);
+                    canvas.drawCircle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                 }
             }
         }
@@ -516,6 +536,30 @@ public class MainActivity extends AppCompatActivity {
 
         enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT, drawc, resetc, splot, sreset}
 
+        public double polygonArea() {
+            // Initialze area
+            if (currentMode == Mode.splot || currentMode == Mode.RESET) {
+                int n = xlist.size();
+                double area = 0.0;
+
+                // Calculate value using shoelace formula
+                int j = n - 1;
+                for (int i = 0; i < n; i++) {
+                    area += (xlist.get(j) + xlist.get(i)) * (ylist.get(j) - ylist.get(i));
+                    // j is previous vertex to i
+                    j = i;
+                }
+                // Return absolute value
+                return Math.abs(area / 2.0);
+            } else {
+                if (radius == -5)
+                    return (int) 90000 * Math.PI;
+                else {
+                    double curRadius = radius * (screenW / 200);
+                    return (int) Math.pow(curRadius, 2) * Math.PI;
+                }
+            }
+        }
     }
 
     @Override
@@ -527,26 +571,32 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        makeToast("Polygon area: " + dv.polygonArea());
         switch (item.getItemId()) {
             case R.id.circle:
                 //TODO Have to draw circle.
-                dv.resetSprinklers();
                 if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
                     //INFO Need to switch from circle to polygon
                     radius.setVisibility(View.INVISIBLE);
                     polygon.setVisibility(View.VISIBLE);
                     item.setTitle("Draw Circle");
                     dv.currentMode = DrawingView.Mode.DOTPLOT;
+                    dv.wasCircle = false;
+                    dv.resetSprinklers();
                     dv.resetTouchPoints();
                     dv.invalidate();
                 } else {
                     //INFO Currently on polygon. Switch to circle.
                     dv.currentMode = DrawingView.Mode.drawc;
+                    dv.wasCircle = true;
                     item.setTitle("Draw Shapes");
+                    dv.resetTouchPoints();
+                    dv.resetSprinklers();
                     polygon.setVisibility(View.INVISIBLE);
                     radius.setVisibility(View.VISIBLE);
                     dv.invalidate();
                 }
+                // dv.resetSprinklers();
                 return true;
 
             case R.id.sprinklers:
