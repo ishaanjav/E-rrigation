@@ -1,6 +1,7 @@
 package com.example.anany.drawingrectangles;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -97,16 +100,22 @@ public class MainActivity extends AppCompatActivity {
     public File takeScreenShot2() {
         Date now = new Date();
         android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
-
+        View view = dv;
         try {
             // image naming and path  to include sd card  appending name you choose for file
             String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
 
             // create bitmap screen capture
-            View v1 = getWindow().getDecorView().getRootView();
-            v1.setDrawingCacheEnabled(true);
-            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
-            v1.setDrawingCacheEnabled(false);
+            view.setDrawingCacheEnabled(true);
+            view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+            view.buildDrawingCache();
+
+            if (view.getDrawingCache() == null) return null; // Verificamos antes de que no sea null
+
+            // utilizamos esa cache, para crear el bitmap que tendra la imagen de la view actual
+            Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+            view.setDrawingCacheEnabled(false);
+            view.destroyDrawingCache();
 
             File imageFile = new File(mPath);
             FileOutputStream outputStream = new FileOutputStream(imageFile);
@@ -115,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
             outputStream.flush();
             outputStream.close();
 
+            openScreenshot(imageFile);
             return imageFile;
         } catch (Throwable e) {
             // Several error may come out with file handling or OOM
@@ -196,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
                         button.setText("Reset");
                         break;
                 }
-
             }
         });
 
@@ -265,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
             screenH = height;
 
             this.display = display;
-            makeToast("HI");
+            //makeToast("HI");
 
             fillPaint = new Paint();
             fillPaint.setAntiAlias(true);
@@ -661,6 +670,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.calculate:
                 Bitmap bmp = takeScreenShot(dv);
+                takeScreenShot2();
                 makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
                 Log.wtf("BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
                 iterateThroughPixels(bmp);
@@ -671,8 +681,15 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void openScreenshot(File imageFile) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        Uri uri = Uri.fromFile(imageFile);
+        intent.setDataAndType(uri, "image/*");
+        startActivity(intent);
+    }
+
     private void iterateThroughPixels(Bitmap bmp) {
-        //Buffer
         HashMap<String, Integer> hm = new HashMap<>();
         for (int y = 0; y < bmp.getHeight(); y++) {
             for (int x = 0; x < bmp.getWidth(); x++) {
@@ -683,16 +700,24 @@ public class MainActivity extends AppCompatActivity {
                 int greenValue = Color.green(pixel);
 
                 String red = "", blue = "", green = "";
-                red += (redValue < 10) ? ("0" + redValue) : (redValue);
-                blue += (blueValue < 10) ? ("0" + redValue) : (redValue);
-                green += (greenValue < 10) ? ("0" + redValue) : (redValue);
+                //red += (redValue < 10) ? ("0" + redValue) : (redValue);
+                //blue += (blueValue < 10) ? ("0" + redValue) : (redValue);
+                //green += (greenValue < 10) ? ("0" + redValue) : (redValue);
+
 
                 String pix = red + "" + blue + "" + green;
+                pix = redValue + "" + blueValue + "" + greenValue;
                 hm.put(pix, hm.getOrDefault(pix, 0) + 1);
             }
         }
-        //makeToast(hm.toString());
-        Log.wtf("Iterating Through Pixels ----", "Result: \n" + hm.toString());
+        makeToast(hm.toString());
+        String logger = "Result: ";
+        int counter = 0;
+        for (Map.Entry<String, Integer> entry : hm.entrySet()) {
+            logger += "\n" + entry.toString();
+        }
+
+        Log.wtf("Iterating Through Pixels ----", logger);
     }
 
     private void makeToast(String s) {
