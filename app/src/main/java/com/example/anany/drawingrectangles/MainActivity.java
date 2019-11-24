@@ -3,6 +3,7 @@ package com.example.anany.drawingrectangles;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
@@ -22,6 +23,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -56,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
-
 
         dv = new DrawingView(getApplicationContext(), display, height, width);
 
@@ -124,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             outputStream.flush();
             outputStream.close();
 
-            openScreenshot(imageFile);
+            //openScreenshot(imageFile);
             return imageFile;
         } catch (Throwable e) {
             // Several error may come out with file handling or OOM
@@ -338,18 +339,18 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            /*Path path = new Path();
-            boolean first = true;
-            for(Point point : points){
-                if(first){
-                    first = false;
-                    path.moveTo(point.x, point.y);
-                }
-                else{
-                    path.lineTo(point.x, point.y);
-                }
-            }
-            canvas.drawPath(path, paint);*/
+           /*Path path = new Path();
+           boolean first = true;
+           for(Point point : points){
+               if(first){
+                   first = false;
+                   path.moveTo(point.x, point.y);
+               }
+               else{
+                   path.lineTo(point.x, point.y);
+               }
+           }
+           canvas.drawPath(path, paint);*/
             mCanvas = canvas;
 
             //README I think when you call invalidate() it calls onDraw again. Check it out by putting
@@ -443,42 +444,42 @@ public class MainActivity extends AppCompatActivity {
             int y = (int) event.getY();
             //makeToast("TAPPED");
             //INFO Uncomment below if you are trying to do drawCustomLine()
-            /*switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    makeToast("Finger Down: " + x + " " + y);
-                    if (down) {
-                        downx = x;
-                        downy = y;
-                        xlist.add(x);
-                        ylist.add(y);
-                        down = false;
-                        //Log.wtf("Coordinates---------------------------", "Finger Down: " + x + " " + y);
-                    }
-                case MotionEvent.ACTION_MOVE:
-                    up = true;
-                case MotionEvent.ACTION_UP:
-                    makeToast("Finger Up: " + x + " " + y);
-                    if (up) {
-                        upx = x;
-                        upy = y;
-                        xlist.add(upx);
-                        ylist.add(upy);
-                        up = false;
-                       // Log.wtf("Coordinates---------------------------", "Finger Up: " + x + " " + y);
-                        down = true;
-                        invalidate();
-                    }
-            }*/
+           /*switch (event.getAction()) {
+               case MotionEvent.ACTION_DOWN:
+                   makeToast("Finger Down: " + x + " " + y);
+                   if (down) {
+                       downx = x;
+                       downy = y;
+                       xlist.add(x);
+                       ylist.add(y);
+                       down = false;
+                       //Log.wtf("Coordinates---------------------------", "Finger Down: " + x + " " + y);
+                   }
+               case MotionEvent.ACTION_MOVE:
+                   up = true;
+               case MotionEvent.ACTION_UP:
+                   makeToast("Finger Up: " + x + " " + y);
+                   if (up) {
+                       upx = x;
+                       upy = y;
+                       xlist.add(upx);
+                       ylist.add(upy);
+                       up = false;
+                      // Log.wtf("Coordinates---------------------------", "Finger Up: " + x + " " + y);
+                       down = true;
+                       invalidate();
+                   }
+           }*/
 
             if (currentMode == Mode.DOTPLOT) {
-                /*float x = event.getX();
-                float y = event.getY();
-                Log.d("Touch Point", "Co x:" + x + ", y:" + y);*/
+               /*float x = event.getX();
+               float y = event.getY();
+               Log.d("Touch Point", "Co x:" + x + ", y:" + y);*/
                 //TODO Write function to iterate through both lists and check a point's distance. Dont' just do it for the lastest one.
                 boolean duplicate = checkForDuplicate(x, y, false);
                 if (/*xlist.size() > 0 && xlist.get((int) xlist.size() - 1) < (int) x + 30 && xlist.get((int) xlist.size() - 1) > (int) x - 30
-                        && ylist.get((int) ylist.size() - 1) < (int) y + 30 && ylist.get((int) ylist.size() - 1) > (int) y - 30
-                */duplicate) {
+                       && ylist.get((int) ylist.size() - 1) < (int) y + 30 && ylist.get((int) ylist.size() - 1) > (int) y - 30
+               */duplicate) {
                     //duplicate touch recording, skip it
                     Log.d("Duplicate", "Avoiding it");
                 } else {
@@ -556,7 +557,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         private void plotSprinklers(Canvas canvas) {
-            Log.wtf("Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
+            //Log.wtf("Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
             if (sprinkx.size() > 0) {
                 for (int i = 0; i < sprinkx.size(); i++) {
                     canvas.drawCircle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
@@ -670,8 +671,22 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.calculate:
                 Bitmap bmp = takeScreenShot(dv);
+               /*try (FileOutputStream out = new FileOutputStream("test.png")) {
+                   bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+               } catch (Exception e) {
+                   makeToast(e.toString());
+                   Log.wtf("ERROR WITH SAVING IMAGE: ", e.toString());
+               }
+               File root = Environment.getExternalStorageDirectory();
+               Bitmap open = BitmapFactory.decodeFile(root + "/images/test.png");
+               Intent opener = new Intent();
+               opener.setAction(Intent.ACTION_VIEW);
+               File temp = new File("sdcard/Images/test.png");
+               opener.setDataAndType(Uri.parse("/test.png"), "image/*");
+               startActivity(opener);*/
+
                 takeScreenShot2();
-                makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
+                //makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
                 Log.wtf("BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
                 iterateThroughPixels(bmp);
                 //File file = takeScreenShot2();
@@ -679,6 +694,15 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    HashMap<String, Integer> hm;
+    private String convertTo16(int a){
+        String t =  Integer.toString(
+                Integer.parseInt(a+"", 10),
+                16);
+        if(t.length()==1)
+            return "0"+t;
+        return t;
     }
 
     private void openScreenshot(File imageFile) {
@@ -690,7 +714,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void iterateThroughPixels(Bitmap bmp) {
-        HashMap<String, Integer> hm = new HashMap<>();
+        hm = new HashMap<>();
         for (int y = 0; y < bmp.getHeight(); y++) {
             for (int x = 0; x < bmp.getWidth(); x++) {
                 int pixel = bmp.getPixel(x, y);
@@ -705,8 +729,9 @@ public class MainActivity extends AppCompatActivity {
                 //green += (greenValue < 10) ? ("0" + redValue) : (redValue);
 
 
-                String pix = red + "" + blue + "" + green;
-                pix = redValue + "" + blueValue + "" + greenValue;
+                String pix = red + "," + blue + "," + green;
+                pix = redValue + "," + blueValue + "," + greenValue;
+                pix = convertTo16(redValue) + convertTo16(greenValue) + convertTo16(blueValue);
                 hm.put(pix, hm.getOrDefault(pix, 0) + 1);
             }
         }
