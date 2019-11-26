@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.reflect.Array;
 import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -560,6 +561,7 @@ public class MainActivity extends AppCompatActivity {
             //Log.wtf("Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
             if (sprinkx.size() > 0) {
                 for (int i = 0; i < sprinkx.size(); i++) {
+                    Log.wtf("Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i))
                     canvas.drawCircle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                 }
             }
@@ -685,9 +687,16 @@ public class MainActivity extends AppCompatActivity {
                opener.setDataAndType(Uri.parse("/test.png"), "image/*");
                startActivity(opener);*/
 
+                //TRY Before counting pixel colors, try compressing PNG to 50% quality or less
+                //  that way there are fewer colors for sprinkler.
+                //TODO When calculating area of overlapping regions, actually calculate proper
+                //  areas of 1 sprinkler and 2 sprinklers with formula.
+                //  for the rest, then you can use pixels
+
                 takeScreenShot2();
                 //makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
                 Log.wtf("BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
+                getIndividualCircles();
                 iterateThroughPixels(bmp);
                 //File file = takeScreenShot2();
                 //iterateThroughPixels(file);
@@ -695,13 +704,55 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     HashMap<String, Integer> hm;
-    private String convertTo16(int a){
-        String t =  Integer.toString(
-                Integer.parseInt(a+"", 10),
+
+    ArrayList<Double> singleX = new ArrayList<>();
+    ArrayList<Double> singleY = new ArrayList<>();
+    ArrayList<Double> singleR = new ArrayList<>();
+    ArrayList<Integer> singleP = new ArrayList<>();
+
+    private void getIndividualCircles() {
+        singleX.clear();
+        singleY.clear();
+        singleR.clear();
+        singleP.clear();
+
+        for (int i = 0; i < dv.sprinkx.size(); i++) {
+            double x = dv.sprinkx.get(i);
+            double y = dv.sprinky.get(i);
+            double r = dv.sprinkr.get(i);
+
+            boolean good = true;
+            for (int j = 0; j < dv.sprinkx.size(); j++) {
+                double tempX = dv.sprinkx.get(j);
+                double tempY = dv.sprinky.get(j);
+                double tempR = dv.sprinkr.get(j);
+
+                double distance = Math.sqrt(Math.pow(tempX - x, 2) + Math.pow(tempY - y, 2));
+                if (distance <= tempR + r) {
+                    good = false;
+                    break;
+                }
+            }
+
+            if (good) {
+                singleX.add(x);
+                singleY.add(y);
+                singleR.add(r);
+                singleP.add(i);
+            }
+
+        }
+    }
+
+
+    private String convertTo16(int a) {
+        String t = Integer.toString(
+                Integer.parseInt(a + "", 10),
                 16);
-        if(t.length()==1)
-            return "0"+t;
+        if (t.length() == 1)
+            return "0" + t;
         return t;
     }
 
@@ -714,7 +765,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void iterateThroughPixels(Bitmap bmp) {
+        //TODO Use singleX... arraylists and in for for, check if point is inside circle.
+        //  IF inside circle, then
         hm = new HashMap<>();
+        ArrayList<String> notGood = new ArrayList<>();
         for (int y = 0; y < bmp.getHeight(); y++) {
             for (int x = 0; x < bmp.getWidth(); x++) {
                 int pixel = bmp.getPixel(x, y);
@@ -732,17 +786,47 @@ public class MainActivity extends AppCompatActivity {
                 String pix = red + "," + blue + "," + green;
                 pix = redValue + "," + blueValue + "," + greenValue;
                 pix = convertTo16(redValue) + convertTo16(greenValue) + convertTo16(blueValue);
-                hm.put(pix, hm.getOrDefault(pix, 0) + 1);
+
+                boolean good = true;
+
+                for (int i = 0; i < singleX.size(); i++) {
+                    double distance = Math.sqrt(Math.pow(x - singleX.get(i), 2) + Math.pow(y - singleY.get(i), 2));
+                    if (distance <= singleR.get(i)) {
+                        good = false;
+                        break;
+                    }
+                }
+
+                if (good)
+                    hm.put(pix, hm.getOrDefault(pix, 0) + 1);
+                else
+                    notGood.add(pix + ":---  " + x + " " + y);;
             }
         }
         makeToast(hm.toString());
         String logger = "Result: ";
         int counter = 0;
+        int sum = 0;
         for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
+            if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
+                counter += entry.getValue();
+            }
+        }
+
+        String output = "";
+        counter = 0;
+        for(String a: notGood){
+            output += a + "  ";
+            counter++;
+            if(counter %5 == 0)
+                output+="\n";
         }
 
         Log.wtf("Iterating Through Pixels ----", logger);
+        Log.wtf("Not accepted ----", output);
+        Log.wtf("Sprinkler Area: --------", "" + counter);
+        Log.wtf("TOTAL AREA COVERED: --------", "" + ((double) counter / (bmp.getWidth() * bmp.getHeight())));
     }
 
     private void makeToast(String s) {
