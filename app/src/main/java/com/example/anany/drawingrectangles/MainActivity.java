@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -315,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
             ylist = new ArrayList<>();
             xs = new ArrayList<>();
             ys = new ArrayList<>();
-            Log.wtf("RESET RESET", "Touch points were reset");
+            Log.wtf("*RESET RESET", "Touch points were reset");
             invalidate();
         }
 
@@ -386,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case DOTPLOT:
                     showDots(canvas);
-                    Log.wtf("DOTPLOT", "DOT Plot being called");
+                    Log.wtf("*DOTPLOT", "DOT Plot being called");
                     drawLine(canvas);
                     break;
                 case RESET:
@@ -397,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
                     makeToast("Resetting");
                     //TODO Try uncommenting and commenting out below line to see if it works after reset button
                     //linePaint.setColor(Color.WHITE);
-                    Log.wtf("RESET RESET RESET RESET RESET", "Reset was called. Reset screen.");
+                    Log.wtf("*RESET RESET RESET RESET RESET", "Reset was called. Reset screen.");
                     break;
                 case PLOT:
                     drawCustomLine(mCanvas, downx, downy, upx, upy);
@@ -454,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
                        xlist.add(x);
                        ylist.add(y);
                        down = false;
-                       //Log.wtf("Coordinates---------------------------", "Finger Down: " + x + " " + y);
+                       //Log.wtf("*Coordinates---------------------------", "Finger Down: " + x + " " + y);
                    }
                case MotionEvent.ACTION_MOVE:
                    up = true;
@@ -466,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
                        xlist.add(upx);
                        ylist.add(upy);
                        up = false;
-                      // Log.wtf("Coordinates---------------------------", "Finger Up: " + x + " " + y);
+                      // Log.wtf("*Coordinates---------------------------", "Finger Up: " + x + " " + y);
                        down = true;
                        invalidate();
                    }
@@ -558,10 +559,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         private void plotSprinklers(Canvas canvas) {
-            //Log.wtf("Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
+            //Log.wtf("*Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
             if (sprinkx.size() > 0) {
                 for (int i = 0; i < sprinkx.size(); i++) {
-                    Log.wtf("Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i))
+                    //Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
                     canvas.drawCircle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                 }
             }
@@ -570,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
         private void drawCustomLine(Canvas canvas, int x1, int y1, int x2, int y2) {
             //try calling invalidate()
             //makeToast("Being called");
-            Log.wtf("Draw Custom Line being called", "Draw Custom Line being called");
+            Log.wtf("*Draw Custom Line being called", "Draw Custom Line being called");
             linePaint.setColor(Color.BLUE);
             //canvas.drawLine(x1, y1, x2, y2, linePaint);
             xs.add(x1);
@@ -585,7 +586,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void showDots(Canvas canvas) {
-            Log.wtf("Showing dots", "X List size: " + xlist.size());
+            Log.wtf("*Showing dots", "X List size: " + xlist.size());
             if (xlist.size() > 0) {
                 for (int i = 0; i < xlist.size(); i++) {
                     canvas.drawCircle(xlist.get(i), ylist.get(i), 9.0f, circlePaint);
@@ -677,7 +678,7 @@ public class MainActivity extends AppCompatActivity {
                    bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
                } catch (Exception e) {
                    makeToast(e.toString());
-                   Log.wtf("ERROR WITH SAVING IMAGE: ", e.toString());
+                   Log.wtf("*ERROR WITH SAVING IMAGE: ", e.toString());
                }
                File root = Environment.getExternalStorageDirectory();
                Bitmap open = BitmapFactory.decodeFile(root + "/images/test.png");
@@ -687,16 +688,22 @@ public class MainActivity extends AppCompatActivity {
                opener.setDataAndType(Uri.parse("/test.png"), "image/*");
                startActivity(opener);*/
 
-                //TRY Before counting pixel colors, try compressing PNG to 50% quality or less
+                //DONE Before counting pixel colors, try compressing PNG to 50% quality or less
                 //  that way there are fewer colors for sprinkler.
                 //TODO When calculating area of overlapping regions, actually calculate proper
                 //  areas of 1 sprinkler and 2 sprinklers with formula.
                 //  for the rest, then you can use pixels
 
-                takeScreenShot2();
+                //takeScreenShot2();
                 //makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
-                Log.wtf("BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
+                for (int i = 0; i < dv.sprinkx.size(); i++) {
+                    Log.wtf("*  Sprinkler Location ", "X: " + dv.sprinkx.get(i) + "  Y: " + dv.sprinky.get(i) + "  R: " + dv.sprinkr.get(i));
+                }
+                Log.wtf("*BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
                 getIndividualCircles();
+                Log.wtf("*Done getting circles", " DONE GETTING CIRCLES");
+                //README Make Bitmap smaller.
+                bmp = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 1), (int) (bmp.getHeight() * 1), true);
                 iterateThroughPixels(bmp);
                 //File file = takeScreenShot2();
                 //iterateThroughPixels(file);
@@ -717,6 +724,7 @@ public class MainActivity extends AppCompatActivity {
         singleY.clear();
         singleR.clear();
         singleP.clear();
+        Log.wtf("*Still getting circles", " Still GETTING CIRCLES");
 
         for (int i = 0; i < dv.sprinkx.size(); i++) {
             double x = dv.sprinkx.get(i);
@@ -724,7 +732,7 @@ public class MainActivity extends AppCompatActivity {
             double r = dv.sprinkr.get(i);
 
             boolean good = true;
-            for (int j = 0; j < dv.sprinkx.size(); j++) {
+            for (int j = 1; j < dv.sprinkx.size(); j++) {
                 double tempX = dv.sprinkx.get(j);
                 double tempY = dv.sprinky.get(j);
                 double tempR = dv.sprinkr.get(j);
@@ -764,11 +772,42 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    ArrayList<ArrayList<String>> colors = new ArrayList<>();
+    ArrayList<String> pos2 = new ArrayList<String>() {{
+        add("4dc4ff");
+        add("54c4ff");
+        add("55caff");
+    }};
+
+    ArrayList<String> pos3 = new ArrayList<String>() {{
+        add("58c2ff");
+        add("54c3ff");
+        add("54c2ff");
+    }};
+
+    ArrayList<String> pos4 = new ArrayList<String>() {{
+        add("49c8ff");
+        add("51c0ff");
+        add("51b9ff");
+        add("4cc6ff");
+        add("51c1ff");
+    }};
+
+    ArrayList<String> pos5 = new ArrayList<String>() {{
+        add("54c5ff");
+        add("54c6ff");
+        add("54c7ff");
+    }};
+
     private void iterateThroughPixels(Bitmap bmp) {
         //TODO Use singleX... arraylists and in for for, check if point is inside circle.
         //  IF inside circle, then
         hm = new HashMap<>();
         ArrayList<String> notGood = new ArrayList<>();
+
+        //README area is the wasted amount of wasted water.
+        int area = 0;
+        int tracker = 0;
         for (int y = 0; y < bmp.getHeight(); y++) {
             for (int x = 0; x < bmp.getWidth(); x++) {
                 int pixel = bmp.getPixel(x, y);
@@ -789,21 +828,49 @@ public class MainActivity extends AppCompatActivity {
 
                 boolean good = true;
 
-                for (int i = 0; i < singleX.size(); i++) {
+                for (int i = 0; i < singleR.size(); i++) {
                     double distance = Math.sqrt(Math.pow(x - singleX.get(i), 2) + Math.pow(y - singleY.get(i), 2));
-                    if (distance <= singleR.get(i)) {
+                    if ((int) distance <= singleR.get(i)) {
                         good = false;
                         break;
                     }
                 }
 
-                if (good)
+                //INFO if good: pixel is not in sprinkler which means it is in an overlapping region or no sprinkler.
+                if (good) {
+                    //TODO Since pixel is not in the sprinkler, you have to do the pixel count stuff.
+                    if (pos2.contains(pix))
+                        area += 1;
+                    else if (pos3.contains(pix))
+                        area += 2;
+                    else if (pos4.contains(pix))
+                        area += 3;
+                    else if (pos5.contains(pix))
+                        area += 4;
+                    else {
+                        //INFO It was none of the above. This means that 25% 2 sprinklers, 25% 3 sprinklers, 50% 6+.
+                        if (!pix.equals("000000") && !pix.equals("369646")) {
+                            tracker++;
+                            if (tracker % 4 == 1) area += 1;
+                            else if (tracker % 4 == 2) area += 2;
+                            else area += 6;
+                        }
+                    }
                     hm.put(pix, hm.getOrDefault(pix, 0) + 1);
-                else
-                    notGood.add(pix + ":---  " + x + " " + y);;
+                } else {
+                    //INFO If !good: pixel is inside sprinkler.
+                    //notGood.add(pix + ":---  " + x + " " + y);
+                }
+                //hm.put(pix, hm.getOrDefault(pix, 0) + 1);
+
             }
         }
-        makeToast(hm.toString());
+        if(dv.sprinkx.size() == singleX.size())
+            area = 0;
+
+        Log.wtf("*ITERATION STATUS:", "Done iterating through pixels");
+        // makeToast(hm.toString());
+        //makeToast("SIZE: " + singleX.size());
         String logger = "Result: ";
         int counter = 0;
         int sum = 0;
@@ -813,20 +880,29 @@ public class MainActivity extends AppCompatActivity {
                 counter += entry.getValue();
             }
         }
+        Log.wtf("*ITERATION STATUS:", "Done tallying");
 
-        String output = "";
-        counter = 0;
-        for(String a: notGood){
+        int non = 0;
+        for (double m : singleR)
+            non += Math.pow(m, 2) * Math.PI;
+
+        Log.wtf("*ITERATION STATUS:", "Done calculating non");
+
+        /*String output = "";
+        int counter2 = 0;
+        for (String a : notGood) {
             output += a + "  ";
-            counter++;
-            if(counter %5 == 0)
-                output+="\n";
-        }
-
-        Log.wtf("Iterating Through Pixels ----", logger);
-        Log.wtf("Not accepted ----", output);
-        Log.wtf("Sprinkler Area: --------", "" + counter);
-        Log.wtf("TOTAL AREA COVERED: --------", "" + ((double) counter / (bmp.getWidth() * bmp.getHeight())));
+            counter2++;
+            if (counter2 % 5 == 0)
+                output += "\n";
+        }*/
+        String output = "hi";
+        Log.wtf("*   Iterating Through Pixels ----", logger);
+        //Log.wtf("*  Not accepted ----", "O: " + output);
+        Log.wtf("*  Non overlap Sprinkler Area: ----", "" + non);
+        Log.wtf("*  Sprinkler Area with overlaps: --------", "" + counter);
+        Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
+        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (counter + non) / (bmp.getWidth() * bmp.getHeight())) + "\n");
     }
 
     private void makeToast(String s) {
