@@ -839,6 +839,8 @@ public class MainActivity extends AppCompatActivity {
                 //INFO if good: pixel is not in sprinkler which means it is in an overlapping region or no sprinkler.
                 if (good) {
                     //TODO Since pixel is not in the sprinkler, you have to do the pixel count stuff.
+                    //TRY Checking (for pos 2 and maybe pos 3) if it is within a range of colors using compareTo
+                    //  Do not just use discrete values. Check in a range to make sure.
                     if (pos2.contains(pix))
                         area += 1;
                     else if (pos3.contains(pix))
@@ -849,6 +851,14 @@ public class MainActivity extends AppCompatActivity {
                         area += 4;
                     else {
                         //INFO It was none of the above. This means that 25% 2 sprinklers, 25% 3 sprinklers, 50% 6+.
+                        //TODO Change above weights since it overstimates.
+                        //TRY Checking if pix is in a certain range of colors by using compareTo (that way it doesn't get whites)
+                        // , then add water wastage amount using new weights.
+                        //NOTES
+                        //  maybe ignore things starting with 4d-53 and treat it like it was in only one sprinkler.
+                        //  Maybe just go up to 60 as max or something.
+                        //  Then come up with 2/3 other intervals. Give the smallest ones weights of 2 and 3, with 2 being bigger.
+                        //  Then in else case, just have it be 6;
                         if (!pix.equals("000000") && !pix.equals("369646")) {
                             tracker++;
                             if (tracker % 4 == 1) area += 1;
