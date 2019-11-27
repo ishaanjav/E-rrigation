@@ -805,8 +805,10 @@ public class MainActivity extends AppCompatActivity {
         hm = new HashMap<>();
         ArrayList<String> notGood = new ArrayList<>();
 
-        //README area is the wasted amount of wasted water.
+        //README area is the amount of wasted water.
         int area = 0;
+        //README Below variable is for sprinkler that intersects with others, but pixel is region of only 1 sprinkler.
+        int overlappingButOnly1SprinklerRegion = 0;
         int tracker = 0;
         for (int y = 0; y < bmp.getHeight(); y++) {
             for (int x = 0; x < bmp.getWidth(); x++) {
@@ -851,7 +853,7 @@ public class MainActivity extends AppCompatActivity {
                         area += 4;
                     else {
                         //INFO It was none of the above. This means that 25% 2 sprinklers, 25% 3 sprinklers, 50% 6+.
-                        //TODO Change above weights since it overstimates.
+                        //FIXME Change above weights since it overstimates.
                         //TRY Checking if pix is in a certain range of colors by using compareTo (that way it doesn't get whites)
                         // , then add water wastage amount using new weights.
                         //NOTES
@@ -861,9 +863,20 @@ public class MainActivity extends AppCompatActivity {
                         //  Then in else case, just have it be 6;
                         if (!pix.equals("000000") && !pix.equals("369646")) {
                             tracker++;
-                            if (tracker % 4 == 1) area += 1;
+
+                            if ("4b".compareTo(pix) < 0 && "48".compareTo(pix) > 0)
+                                overlappingButOnly1SprinklerRegion++;
+                            else if ("49a".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
+                                area += 4;
+                            else if ("54c5ff".compareTo(pix) < 0 && "54c8".compareTo(pix) > 0)
+                                area += 5;
+                            else if ("6".compareTo(pix) < 0)
+                                area += 6;
+
+                            //OLD code to try to count whether 6 sprinklers are overlapping.
+                            /*if (tracker % 4 == 1) area += 1;
                             else if (tracker % 4 == 2) area += 2;
-                            else area += 6;
+                            else area += 6;*/
                         }
                     }
                     hm.put(pix, hm.getOrDefault(pix, 0) + 1);
@@ -875,7 +888,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-        if(dv.sprinkx.size() == singleX.size())
+        if (dv.sprinkx.size() == singleX.size())
             area = 0;
 
         Log.wtf("*ITERATION STATUS:", "Done iterating through pixels");
@@ -884,6 +897,7 @@ public class MainActivity extends AppCompatActivity {
         String logger = "Result: ";
         int counter = 0;
         int sum = 0;
+        //OLD Code for calculating non-wasted water. INACCURATE
         for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
             if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
@@ -909,10 +923,16 @@ public class MainActivity extends AppCompatActivity {
         String output = "hi";
         Log.wtf("*   Iterating Through Pixels ----", logger);
         //Log.wtf("*  Not accepted ----", "O: " + output);
+        //INFO Area of individual sprinklers calculated with formula.           NOT WASTED
         Log.wtf("*  Non overlap Sprinkler Area: ----", "" + non);
-        Log.wtf("*  Sprinkler Area with overlaps: --------", "" + counter);
+        //INFO All sprinkler regions that are not individual
+        //Log.wtf("*  Sprinkler Area with overlaps: --------", "" + counter);
+        //INFO Area of intersecting sprinkler, nonoverlap part.                 NOT WASTED
+        Log.wtf("*  Intersecting Sprinkler, But Only 1 Region: --------", "" + overlappingButOnly1SprinklerRegion);
+        //INFO Amount of intersecting sprinkler, overlap part.
         Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
-        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (counter + non) / (bmp.getWidth() * bmp.getHeight())) + "\n");
+        Log.wtf("*      TOTAL AMOUNT WASTED: -------", "" + ((double) (area) / (non + counter) + "\n");
+        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + counter) / (bmp.getWidth() * bmp.getHeight())) + "\n");
     }
 
     private void makeToast(String s) {
