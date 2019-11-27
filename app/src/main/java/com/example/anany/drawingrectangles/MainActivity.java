@@ -931,7 +931,7 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*  Intersecting Sprinkler, But Only 1 Region: --------", "" + overlappingButOnly1SprinklerRegion);
         //INFO Amount of intersecting sprinkler, overlap part.
         Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
-        Log.wtf("*      TOTAL AMOUNT WASTED: -------", "" + ((double) (area) / (non + counter) + "\n");
+        Log.wtf("*      TOTAL AMOUNT WASTED: -------", "" + ((double) (area) / (non + counter) + "\n"));
         Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + counter) / (bmp.getWidth() * bmp.getHeight())) + "\n");
     }
 
