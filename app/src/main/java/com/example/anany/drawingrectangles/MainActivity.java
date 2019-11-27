@@ -799,6 +799,26 @@ public class MainActivity extends AppCompatActivity {
         add("54c7ff");
     }};
 
+    //FUTURE FILES Idea for accurately calculating area:
+    //  Have an ArrayList of ArrayList<OBJECT> where OBJECT contains a position (int), x (int), y (int)
+    //  Using math formula, for each circle, go through all circles and see whether it intersects, storing
+    //  the x,y coordinate and the position of the intersecting circle from original list with all sprinklers.
+    //  ------------------------------
+    //  Now in this ArrayList of ArrayList, go through each position and check if that ArrayList length is 2.
+    //  (If 2 that means that it was intersected by 1 circle.) Then, go and calculate intersection area using
+    //  the x, y, and then position to get the radius.
+    // ----
+    // Do this for all and add themp up. Then divide by 2 for duplicates ---> Result
+    //README NOTES INFO Consideration for this is that it does not account for fact that 1 of the 2 circles
+    // may have more than 2 intersection points and may have a 3-way intersection with 2 other circles
+    // in addition to that 1 circle that was used to calculate.
+    //NOTES I have no idea how to calculate the rest of the intersections (3-way+).
+    //  Even with pixel counting, how will I avoid counting double-intersections
+    //README INFO Answer to above question is avoid counting the intersecting pairs by having an ArrayList of every circle
+    //  (x, y, r) that had ONLY 2 intersections. Then, check if point is inside intersection. If it is, don't count.
+    //  NOW YOU would have to check in case of circle that has such a pair, but also intersects other circles, how to
+    // not count regions of only that circle where it is not sharing any other regions.
+
     private void iterateThroughPixels(Bitmap bmp) {
         //TODO Use singleX... arraylists and in for for, check if point is inside circle.
         //  IF inside circle, then
@@ -810,40 +830,72 @@ public class MainActivity extends AppCompatActivity {
         //README Below variable is for sprinkler that intersects with others, but pixel is region of only 1 sprinkler.
         int overlappingButOnly1SprinklerRegion = 0;
         int tracker = 0;
-        for (int y = 0; y < bmp.getHeight(); y++) {
-            for (int x = 0; x < bmp.getWidth(); x++) {
-                int pixel = bmp.getPixel(x, y);
+        int non = 0, counter = 0;
 
-                int redValue = Color.red(pixel);
-                int blueValue = Color.blue(pixel);
-                int greenValue = Color.green(pixel);
+        if (singleR.size() == dv.sprinkx.size()) {
+            //Do nothing.
+        } else if (singleR.size() + 2 == dv.sprinkx.size()) {
+//Calculate the intersection area of 2 circles.
+            int[] temp = calculateWastage(true);
+            area += temp[0];
+            //INFO Increase the area of non-individual sprinklers.
+            counter += temp[1] - area;
+        } else if (singleR.size() + 3 == dv.sprinkx.size()) {
+            //Just double the intersection area of any 2 circles.
+            int temp[] = calculateWastage(false);
+            area += temp[0] * 2;
+            //INFO Increase the area of non-individual sprinklers.
+            counter += temp[1] - area;
+        } else {
 
-                String red = "", blue = "", green = "";
-                //red += (redValue < 10) ? ("0" + redValue) : (redValue);
-                //blue += (blueValue < 10) ? ("0" + redValue) : (redValue);
-                //green += (greenValue < 10) ? ("0" + redValue) : (redValue);
+            for (int y = 0; y < bmp.getHeight(); y++) {
+                for (int x = 0; x < bmp.getWidth(); x++) {
+                    int pixel = bmp.getPixel(x, y);
+
+                    int redValue = Color.red(pixel);
+                    int blueValue = Color.blue(pixel);
+                    int greenValue = Color.green(pixel);
+
+                    String red = "", blue = "", green = "";
+                    //red += (redValue < 10) ? ("0" + redValue) : (redValue);
+                    //blue += (blueValue < 10) ? ("0" + redValue) : (redValue);
+                    //green += (greenValue < 10) ? ("0" + redValue) : (redValue);
 
 
-                String pix = red + "," + blue + "," + green;
-                pix = redValue + "," + blueValue + "," + greenValue;
-                pix = convertTo16(redValue) + convertTo16(greenValue) + convertTo16(blueValue);
+                    String pix = red + "," + blue + "," + green;
+                    pix = redValue + "," + blueValue + "," + greenValue;
+                    pix = convertTo16(redValue) + convertTo16(greenValue) + convertTo16(blueValue);
 
-                boolean good = true;
+                    boolean good = true;
 
-                for (int i = 0; i < singleR.size(); i++) {
-                    double distance = Math.sqrt(Math.pow(x - singleX.get(i), 2) + Math.pow(y - singleY.get(i), 2));
-                    if ((int) distance <= singleR.get(i)) {
-                        good = false;
-                        break;
+                    for (int i = 0; i < singleR.size(); i++) {
+                        double distance = Math.sqrt(Math.pow(x - singleX.get(i), 2) + Math.pow(y - singleY.get(i), 2));
+                        if ((int) distance <= singleR.get(i)) {
+                            good = false;
+                            break;
+                        }
                     }
-                }
 
-                //INFO if good: pixel is not in sprinkler which means it is in an overlapping region or no sprinkler.
-                if (good) {
-                    //TODO Since pixel is not in the sprinkler, you have to do the pixel count stuff.
-                    //TRY Checking (for pos 2 and maybe pos 3) if it is within a range of colors using compareTo
-                    //  Do not just use discrete values. Check in a range to make sure.
-                    if (pos2.contains(pix))
+                    //INFO if good: pixel is not in sprinkler which means it is in an overlapping region or no sprinkler.
+                    if (good) {
+                        //TODO Since pixel is not in the sprinkler, you have to do the pixel count stuff.
+                        //TRY Checking (for pos 2 and maybe pos 3) if it is within a range of colors using compareTo
+                        //  Do not just use discrete values. Check in a range to make sure.
+
+                        if ("4b".compareTo(pix) < 0 && "50".compareTo(pix) > 0)
+                            overlappingButOnly1SprinklerRegion++;
+                        else if ("49".compareTo(pix) < 0 && "52".compareTo(pix) > 0)
+                            area += 4;
+                        else if ("54".compareTo(pix) < 0 && "55".compareTo(pix) > 0)
+                            area += 5;
+                        else if ("52".compareTo(pix) < 0 && "54".compareTo(pix) > 0)
+                            area += 3;
+                        else if ("55".compareTo(pix) < 0 && "59".compareTo(pix) > 0)
+                            area += 2;
+                        else if ("59".compareTo(pix) < 0 && "65".compareTo(pix) > 0)
+                            area += 6;
+
+                    /*if (pos2.contains(pix))
                         area += 1;
                     else if (pos3.contains(pix))
                         area += 2;
@@ -864,28 +916,36 @@ public class MainActivity extends AppCompatActivity {
                         if (!pix.equals("000000") && !pix.equals("369646")) {
                             tracker++;
 
-                            if ("4b".compareTo(pix) < 0 && "48".compareTo(pix) > 0)
+                           *//* if ("4b".compareTo(pix) < 0 && "48".compareTo(pix) > 0)
                                 overlappingButOnly1SprinklerRegion++;
                             else if ("49a".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
+                                area += 4;*//*
+                           if ("4b".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
                                 area += 4;
                             else if ("54c5ff".compareTo(pix) < 0 && "54c8".compareTo(pix) > 0)
                                 area += 5;
                             else if ("6".compareTo(pix) < 0)
                                 area += 6;
+                            else
+                                area+=0;
 
                             //OLD code to try to count whether 6 sprinklers are overlapping.
-                            /*if (tracker % 4 == 1) area += 1;
+                            *//*if (tracker % 4 == 1) area += 1;
                             else if (tracker % 4 == 2) area += 2;
-                            else area += 6;*/
+                            else area += 6;*//*
                         }
-                    }
-                    hm.put(pix, hm.getOrDefault(pix, 0) + 1);
-                } else {
-                    //INFO If !good: pixel is inside sprinkler.
-                    //notGood.add(pix + ":---  " + x + " " + y);
-                }
-                //hm.put(pix, hm.getOrDefault(pix, 0) + 1);
 
+
+                }*/
+                        hm.put(pix, hm.getOrDefault(pix, 0) + 1);
+                    } else {
+                        //INFO If !good: pixel is inside sprinkler.
+                        //  Area already calculated in non.
+                        //notGood.add(pix + ":---  " + x + " " + y);
+                    }
+                    //hm.put(pix, hm.getOrDefault(pix, 0) + 1);
+
+                }
             }
         }
         if (dv.sprinkx.size() == singleX.size())
@@ -895,44 +955,87 @@ public class MainActivity extends AppCompatActivity {
         // makeToast(hm.toString());
         //makeToast("SIZE: " + singleX.size());
         String logger = "Result: ";
-        int counter = 0;
         int sum = 0;
         //OLD Code for calculating non-wasted water. INACCURATE
         for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
             if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
-                counter += entry.getValue();
+                //README This statement is making sure that counter is a sprinkler.
+                if ("42".compareTo(entry.getKey()) < 0 && "a0".compareTo(entry.getKey()) > 0)
+                    counter += entry.getValue();
             }
         }
         Log.wtf("*ITERATION STATUS:", "Done tallying");
 
-        int non = 0;
         for (double m : singleR)
             non += Math.pow(m, 2) * Math.PI;
 
         Log.wtf("*ITERATION STATUS:", "Done calculating non");
 
-        /*String output = "";
-        int counter2 = 0;
-        for (String a : notGood) {
-            output += a + "  ";
-            counter2++;
-            if (counter2 % 5 == 0)
-                output += "\n";
-        }*/
+    /*String output = "";
+    int counter2 = 0;
+    for (String a : notGood) {
+        output += a + "  ";
+        counter2++;
+        if (counter2 % 5 == 0)
+            output += "\n";
+    }*/
         String output = "hi";
         Log.wtf("*   Iterating Through Pixels ----", logger);
         //Log.wtf("*  Not accepted ----", "O: " + output);
         //INFO Area of individual sprinklers calculated with formula.           NOT WASTED
         Log.wtf("*  Non overlap Sprinkler Area: ----", "" + non);
-        //INFO All sprinkler regions that are not individual
-        //Log.wtf("*  Sprinkler Area with overlaps: --------", "" + counter);
+        //INFO All sprinkler regions that are not individual                    EITHER
+        Log.wtf("*  Everything Besides Individual (not non): --------", "" + counter);
         //INFO Area of intersecting sprinkler, nonoverlap part.                 NOT WASTED
         Log.wtf("*  Intersecting Sprinkler, But Only 1 Region: --------", "" + overlappingButOnly1SprinklerRegion);
         //INFO Amount of intersecting sprinkler, overlap part.
         Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
         Log.wtf("*      TOTAL AMOUNT WASTED: -------", "" + ((double) (area) / (non + counter) + "\n"));
+        //TODO Calculate polygon area.
         Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + counter) / (bmp.getWidth() * bmp.getHeight())) + "\n");
+    }
+
+    private int[] calculateWastage(boolean two) {
+        double firstX, firstY, firstR, secondX, secondY, secondR;
+        boolean firstUsed = false;
+        double totalArea = 0;
+        for (int i = 0; i < dv.sprinkx.size(); i++) {
+            if (!singleX.contains(dv.sprinkx.get(i))) {
+                totalArea = Math.PI * Math.pow(dv.sprinkr.get(i), 2);
+                if (!firstUsed) {
+                    firstX = dv.sprinkx.get(i);
+                    firstR = dv.sprinkr.get(i);
+                    firstY = dv.sprinky.get(i);
+                    firstUsed = true;
+                    totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2);
+                } else {
+                    secondX = dv.sprinkx.get(i);
+                    secondR = dv.sprinkr.get(i);
+                    secondY = dv.sprinky.get(i);
+                    totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2);
+                    if (two) {
+                        firstUsed = false;
+                        break;
+                    } else {
+                        if (!firstUsed) {
+                            firstUsed = true;
+                        } else {
+                            totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        //NOTES return {intersection, area of all circles combined}
+        double intersectionArea = 0;
+        //DONE Calculate total sprinkler coverage area.
+        //TODO DO calculation to calculate intersection area.
+
+
+        return new int[]{(int) intersectionArea, (int) totalArea};
+
     }
 
     private void makeToast(String s) {
