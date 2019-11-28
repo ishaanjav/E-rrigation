@@ -169,7 +169,40 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO Deal with making a polygon.
+                if(dv.xlist.size() > 2){
+                    //dv.currentMode = DrawingView.Mode.POLYGON;
+                    //ArrayList<Integer> newX = new ArrayList<>();
+                    //ArrayList<Integer> newY = new ArrayList<>();
+                    int tL = 1000, bR = 0;
+                    int tLy = 1000, bRy = 0;
+                    for(int i  = 0; i < dv.xlist.size();i++){
+                        if(dv.xlist.get(i) < tL)  tL = dv.xlist.get(i);
+                        if(dv.ylist.get(i) < tLy)  tLy = dv.ylist.get(i);
 
+                        if(dv.xlist.get(i) > bR)   bR = dv.xlist.get(i);
+                        if(dv.ylist.get(i) > bRy)  bRy =  dv.ylist.get(i);
+                    }
+                    dv.resetTouchPoints();
+
+                    dv.xlist.add(tL);
+                    dv.xlist.add(bR);
+                    dv.xlist.add(bR);
+                    dv.xlist.add(tL);
+                    dv.ylist.add(tLy);
+                    dv.ylist.add(tLy);
+                    dv.ylist.add(bRy);
+                    dv.ylist.add(bRy);
+
+                    dv.xs.add(tL);
+                    dv.xs.add(bR);
+                    dv.xs.add(bR);
+                    dv.xs.add(tL);
+                    dv.ys.add(tLy);
+                    dv.ys.add(tLy);
+                    dv.ys.add(bRy);
+                    dv.ys.add(bRy);
+                    dv.invalidate();
+                }
             }
         });
         button.setOnClickListener(new View.OnClickListener() {
@@ -184,14 +217,17 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case drawc:
                         dv.currentMode = DrawingView.Mode.resetc;
+                        dv.pastMode = DrawingView.PastMode.CIRCLE;
                         dv.invalidate();
                         break;
                     case DOTPLOT:
                         dv.currentMode = DrawingView.Mode.RESET;
+                        dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.invalidate();
                         break;
                     case PLOT:
                         //Current mode is drawing.
+                        dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.currentMode = DrawingView.Mode.RESET;
                         dv.resetTouchPoints();
                         //dv.invalidate();
@@ -200,11 +236,13 @@ public class MainActivity extends AppCompatActivity {
                         dv.resetTouchPoints();
                         //dv.currentMode = DrawingView.Mode.RECORDING;
                         //dv.currentMode = DrawingView.Mode.DOTPLOT;
+                        dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.invalidate();
                         button.setText("Draw Line");
                         break;
                     case RECORDING:
                         dv.currentMode = DrawingView.Mode.DRAWING;
+                        dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.invalidate();
                         button.setText("Reset");
                         break;
@@ -241,6 +279,7 @@ public class MainActivity extends AppCompatActivity {
         //TODO Comment out below if you want to use a dotplot
         //  Mode currentMode = Mode.PLOT;
         Mode currentMode = Mode.DOTPLOT;
+        PastMode pastMode = PastMode.DRAW;
         Context context;
         Paint linePaint;
         Canvas cd;
@@ -600,11 +639,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT, drawc, resetc, splot, sreset}
+        enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT, drawc, resetc, splot, sreset, POLYGON}
+        enum PastMode{DRAW, CIRCLE};
 
         public double polygonArea() {
             // Initialze area
-            if (currentMode == Mode.splot || currentMode == Mode.RESET) {
+            //if (currentMode == Mode.splot || currentMode == Mode.RESET) {
+            if (pastMode == PastMode.DRAW) {
                 int n = xlist.size();
                 double area = 0.0;
 
@@ -984,6 +1025,14 @@ public class MainActivity extends AppCompatActivity {
         String logger = "Result: ";
         int sum = 0;
         //OLD Code for calculating non-wasted water. INACCURATE
+        if (dv.sprinkx.size() < 4) {
+        }else if(dv.sprinkx.size() < 8)
+            counter *= 1.85;
+        else if(dv.sprinkx.size()<15)
+            counter*= 3;
+        else
+            counter *= 5;
+
         for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
             if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
@@ -1020,7 +1069,7 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
         Log.wtf("*      TOTAL AMOUNT WASTED: -------", ((double) (area) / (non + counter + overlappingButOnly1SprinklerRegion) + "\n"));
         //TODO Calculate polygon area.
-        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (bmp.getWidth() * bmp.getHeight())) + "\n");
+        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (dv.polygonArea())) + "\n");
         Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
     }
 

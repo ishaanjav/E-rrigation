@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/llBottomBar"
-            android:text="Make Into Regular Polygon"
+            android:text="Make Into Rectangle"
             android:textAlignment="center" />
 
         <SeekBar
