@@ -11,11 +11,10 @@
         android:id="@+id/dvHolder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#fff"
+        android:layout_above="@id/container"
         android:layout_alignParentTop="true"
         android:layout_marginBottom="3sp"
-        android:layout_above="@id/container"
-        >
+        android:background="#fff">
 
 
     </RelativeLayout>
@@ -24,7 +23,7 @@
     <RelativeLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="107sp"
+        android:layout_height="140sp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/container_bgd"
         android:padding="5sp">
@@ -33,9 +32,41 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/seekBar"
-            android:visibility="invisible"
-            android:text="TextView" />
+            android:layout_above="@id/real"
+            android:layout_marginBottom="8sp"
+            android:textSize="17sp"
+            android:layout_marginLeft="11sp"
+            android:textColor="#000"
+            android:text="Length of the first side/radius:"
+            android:visibility="visible" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/length"
+            android:layout_toRightOf="@+id/textView"
+            android:layout_marginLeft="5sp"
+            android:ems="3"
+            android:layout_above="@+id/real"
+            android:layout_marginBottom="-4sp"
+            android:hint=""
+            android:textSize="19sp"
+            android:inputType="number"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textColor="#000"
+            android:textStyle="bold"
+            android:layout_marginLeft="0sp"
+            android:text="ft"
+            android:layout_above="@id/real"
+            android:layout_marginBottom="5sp"
+            android:layout_toRightOf="@+id/length"
+            />
+
 
         <TextView
             android:id="@+id/real"
@@ -43,11 +74,11 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/seekBar"
             android:layout_marginLeft="30sp"
-            android:textSize="20sp"
-            android:textColor="#000"
             android:layout_marginBottom="-1sp"
-            android:visibility="visible"
-            android:text="Adjust Radius" />
+            android:text="Adjust Radius"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:visibility="visible" />
 
         <Button
             android:id="@+id/regular"
@@ -59,12 +90,12 @@
 
         <SeekBar
             android:id="@+id/seekBar"
-            android:layout_above="@id/llBottomBar"
-            android:min="50"
-            android:max="100"
             android:layout_width="match_parent"
-            android:visibility="invisible"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_above="@id/llBottomBar"
+            android:max="100"
+            android:min="50"
+            android:visibility="invisible" />
 
         <LinearLayout
             android:id="@+id/llBottomBar"

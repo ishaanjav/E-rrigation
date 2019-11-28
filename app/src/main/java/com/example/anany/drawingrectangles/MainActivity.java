@@ -3,6 +3,7 @@ package com.example.anany.drawingrectangles;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,6 +23,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -57,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
     Button polygon;
     SeekBar radius;
     RelativeLayout background;
-    Context context;
+    public static Context context;
+    EditText length;
+    RelativeLayout container;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
-
+container = findViewById(R.id.container);
         dv = new DrawingView(getApplicationContext(), display, height, width);
 
         setContentView(R.layout.activity_main);
@@ -80,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
         background = findViewById(R.id.layout);
         radius = findViewById(R.id.seekBar);
 
+        length = background.findViewById(R.id.length);
+        String temp = length.getText().toString();
+
+
         btnUndo = findViewById(R.id.btnUndo);
         setButtonClick();
         setRadiusBar();
@@ -90,10 +98,49 @@ public class MainActivity extends AppCompatActivity {
         radius.getProgressDrawable().setColorFilter(Color.parseColor("#70c48c"), PorterDuff.Mode.SRC_IN);
         radius.getThumb().setColorFilter(Color.parseColor("#3abd66"), PorterDuff.Mode.SRC_IN);
         //polygon.setVisibility(View.INVISIBLE);
+        context = getApplicationContext();
+        //askForLength(true, 2);
     }
     //README this function asks user for length of side after user has plotted 1 side.
+    private void askForLength(boolean plot, int a){
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getApplicationContext());
+        LayoutInflater inflater =  getLayoutInflater();
+        final View dialogCoordinate = inflater.inflate(R.layout.specify_length, null);
+        dialogBuilder.setCancelable(false);
+        dialogBuilder.setView(background);
+
+        dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+        /*AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
+        builder1.setMessage("Write your message here.");
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        builder1.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();*/
+    }
     private static void askForLength(boolean plot) {
-        final Dialog dialog = new Dialog(new MainActivity().getApplicationContext());
+        /*final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.specify_length);
@@ -108,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                     "Please specify its radius in feet.");
 
         final EditText input = dialog.findViewById(R.id.length);
-        TextWatcher textWatcher = new TextWatcher() {
+        *//*TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -123,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 input.setText(editable.toString() + "ft");
             }
         };
-        input.addTextChangedListener(textWatcher);
+        input.addTextChangedListener(textWatcher);*//*
 
         Button undo = (Button) dialog.findViewById(R.id.undo);
         undo.setOnClickListener(new View.OnClickListener() {
@@ -147,16 +194,16 @@ public class MainActivity extends AppCompatActivity {
                     if(num > 0){
                         dv.length = num;
                     }else{
-                        makeToast("Please specify a length greater than 0 feet.");
+                       // makeToast("Please specify a length greater than 0 feet.");
                     }
                 }else{
-                    makeToast("Please specify the side length in feet.");
+                    //makeToast("Please specify the side length in feet.");
                 }
             }
         });
 
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        dialog.show();
+        dialog.show();*/
     }
 
     public Bitmap takeScreenShot(View view) {
@@ -509,7 +556,7 @@ public class MainActivity extends AppCompatActivity {
                         //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
                         //NOTES Make it non-dimissible, but provide an Undo and a done button. for undo,
                         //  call dv.undo();
-                        MainActivity.askForLength(true);
+                        //MainActivity.askForLength(true);
                     }
                     break;
                 case RESET:
@@ -532,7 +579,7 @@ public class MainActivity extends AppCompatActivity {
                 case drawc:
                     //makeToast("In draw c");
                     //README This is for drawing the circle region.
-                    MainActivity.askForLength(false);
+                    //MainActivity.askForLength(false);
                     wasCircle = true;
                     if (radius == -5) {
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
@@ -1237,8 +1284,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void makeToast(String s) {
-        Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
+    private static void makeToast(String s) {
+        //README I am providing a static context since makeToast is static in order to call it from
+        // ask for length which is static because it has to be called in onDraw();
+        // FIXME-- If you get any errors with making Toast, try making it unstatic.
+        Toast.makeText(context, s, Toast.LENGTH_LONG).show();
     }
 
 }
