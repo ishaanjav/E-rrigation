@@ -699,9 +699,9 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < dv.sprinkx.size(); i++) {
                     Log.wtf("*  Sprinkler Location ", "X: " + dv.sprinkx.get(i) + "  Y: " + dv.sprinky.get(i) + "  R: " + dv.sprinkr.get(i));
                 }
-                Log.wtf("*BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
+                //Log.wtf("*BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
                 getIndividualCircles();
-                Log.wtf("*Done getting circles", " DONE GETTING CIRCLES");
+                //Log.wtf("*Done getting circles", " DONE GETTING CIRCLES");
                 //README Make Bitmap smaller.
                 bmp = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 1), (int) (bmp.getHeight() * 1), true);
                 iterateThroughPixels(bmp);
@@ -724,33 +724,42 @@ public class MainActivity extends AppCompatActivity {
         singleY.clear();
         singleR.clear();
         singleP.clear();
-        Log.wtf("*Still getting circles", " Still GETTING CIRCLES");
+        //Log.wtf("*Still getting circles", " Still GETTING CIRCLES");
 
-        for (int i = 0; i < dv.sprinkx.size(); i++) {
-            double x = dv.sprinkx.get(i);
-            double y = dv.sprinky.get(i);
-            double r = dv.sprinkr.get(i);
+        if(dv.sprinkx.size() == 1){
+            singleX.add( (double) dv.sprinkx.get(0));
+            singleY.add((double) dv.sprinky.get(0));
+            singleR.add((double) dv.sprinkr.get(0));
+            singleP.add(0);
+        }else {
+            for (int i = 0; i < dv.sprinkx.size(); i++) {
+                double x = dv.sprinkx.get(i);
+                double y = dv.sprinky.get(i);
+                double r = dv.sprinkr.get(i);
 
-            boolean good = true;
-            for (int j = 1; j < dv.sprinkx.size(); j++) {
-                double tempX = dv.sprinkx.get(j);
-                double tempY = dv.sprinky.get(j);
-                double tempR = dv.sprinkr.get(j);
+                boolean good = true;
+                for (int j = 0; j < dv.sprinkx.size(); j++) {
+                    double tempX = dv.sprinkx.get(j);
+                    double tempY = dv.sprinky.get(j);
+                    double tempR = dv.sprinkr.get(j);
 
-                double distance = Math.sqrt(Math.pow(tempX - x, 2) + Math.pow(tempY - y, 2));
-                if (distance <= tempR + r) {
-                    good = false;
-                    break;
+                    if(j != i) {
+                        double distance = Math.sqrt(Math.pow(tempX - x, 2) + Math.pow(tempY - y, 2));
+                        if (distance <= tempR + r) {
+                            good = false;
+                            break;
+                        }
+                    }
                 }
-            }
 
-            if (good) {
-                singleX.add(x);
-                singleY.add(y);
-                singleR.add(r);
-                singleP.add(i);
-            }
+                if (good) {
+                    singleX.add(x);
+                    singleY.add(y);
+                    singleR.add(r);
+                    singleP.add(i);
+                }
 
+            }
         }
     }
 
@@ -832,6 +841,8 @@ public class MainActivity extends AppCompatActivity {
         int tracker = 0;
         int non = 0, counter = 0;
 
+        makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
+        Log.wtf("* Sprinkler INFO: ", "SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
         if (singleR.size() == dv.sprinkx.size()) {
             //Do nothing.
         } else if (singleR.size() + 2 == dv.sprinkx.size()) {
@@ -839,15 +850,22 @@ public class MainActivity extends AppCompatActivity {
             int[] temp = calculateWastage(true);
             area += temp[0];
             //INFO Increase the area of non-individual sprinklers.
-            counter += temp[1] - area;
+            //counter += temp[1] - area;
+            counter = temp[1];
+
+            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
+            Log.wtf("*  Calculations 2", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else if (singleR.size() + 3 == dv.sprinkx.size()) {
             //Just double the intersection area of any 2 circles.
             int temp[] = calculateWastage(false);
             area += temp[0] * 2;
             //INFO Increase the area of non-individual sprinklers.
-            counter += temp[1] - area;
+            counter+= temp[1];
+            //counter += temp[1] - area;
+            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
+            Log.wtf("*  Calculations 3", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else {
-
+            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
             for (int y = 0; y < bmp.getHeight(); y++) {
                 for (int x = 0; x < bmp.getWidth(); x++) {
                     int pixel = bmp.getPixel(x, y);
@@ -882,18 +900,27 @@ public class MainActivity extends AppCompatActivity {
                         //TRY Checking (for pos 2 and maybe pos 3) if it is within a range of colors using compareTo
                         //  Do not just use discrete values. Check in a range to make sure.
 
-                        if ("4b".compareTo(pix) < 0 && "50".compareTo(pix) > 0)
+                        if (("4b".compareTo(pix) < 0 && "51".compareTo(pix) > 0) )
                             overlappingButOnly1SprinklerRegion++;
-                        else if ("49".compareTo(pix) < 0 && "52".compareTo(pix) > 0)
+                        else if ("51".compareTo(pix) < 0 && "52".compareTo(pix) > 0) {
                             area += 4;
-                        else if ("54".compareTo(pix) < 0 && "55".compareTo(pix) > 0)
-                            area += 5;
-                        else if ("52".compareTo(pix) < 0 && "54".compareTo(pix) > 0)
+                            counter+=4;
+                        }
+                        else if ("54".compareTo(pix) < 0 && "57".compareTo(pix) > 0) {
+                            overlappingButOnly1SprinklerRegion++;
+                        }
+                        else if ("52".compareTo(pix) < 0 && "54".compareTo(pix) > 0) {
                             area += 3;
-                        else if ("55".compareTo(pix) < 0 && "59".compareTo(pix) > 0)
+                            counter+=3;
+                        }
+                        else if ("57".compareTo(pix) < 0 && "61".compareTo(pix) > 0) {
                             area += 2;
-                        else if ("59".compareTo(pix) < 0 && "65".compareTo(pix) > 0)
-                            area += 6;
+                            counter+=2;
+                        }
+                        else if ("61".compareTo(pix) < 0 && "65".compareTo(pix) > 0) {
+                            area += 5;
+                            counter+=5;
+                        }
 
                     /*if (pos2.contains(pix))
                         area += 1;
@@ -951,7 +978,7 @@ public class MainActivity extends AppCompatActivity {
         if (dv.sprinkx.size() == singleX.size())
             area = 0;
 
-        Log.wtf("*ITERATION STATUS:", "Done iterating through pixels");
+        //Log.wtf("*ITERATION STATUS:", "Done iterating through pixels");
         // makeToast(hm.toString());
         //makeToast("SIZE: " + singleX.size());
         String logger = "Result: ";
@@ -961,16 +988,16 @@ public class MainActivity extends AppCompatActivity {
             logger += "\n" + entry.toString();
             if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
                 //README This statement is making sure that counter is a sprinkler.
-                if ("42".compareTo(entry.getKey()) < 0 && "a0".compareTo(entry.getKey()) > 0)
+                if ("42".compareTo(entry.getKey()) < 0 && "65".compareTo(entry.getKey()) > 0)
                     counter += entry.getValue();
             }
         }
-        Log.wtf("*ITERATION STATUS:", "Done tallying");
+        //Log.wtf("*ITERATION STATUS:", "Done tallying");
 
         for (double m : singleR)
             non += Math.pow(m, 2) * Math.PI;
 
-        Log.wtf("*ITERATION STATUS:", "Done calculating non");
+        //Log.wtf("*ITERATION STATUS:", "Done calculating non");
 
     /*String output = "";
     int counter2 = 0;
@@ -985,19 +1012,20 @@ public class MainActivity extends AppCompatActivity {
         //Log.wtf("*  Not accepted ----", "O: " + output);
         //INFO Area of individual sprinklers calculated with formula.           NOT WASTED
         Log.wtf("*  Non overlap Sprinkler Area: ----", "" + non);
-        //INFO All sprinkler regions that are not individual                    EITHER
+        //INFO Counter is the area of each sprinkler that overlaps. FULL AREA - multicounts overlapping
         Log.wtf("*  Everything Besides Individual (not non): --------", "" + counter);
         //INFO Area of intersecting sprinkler, nonoverlap part.                 NOT WASTED
         Log.wtf("*  Intersecting Sprinkler, But Only 1 Region: --------", "" + overlappingButOnly1SprinklerRegion);
         //INFO Amount of intersecting sprinkler, overlap part.
         Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
-        Log.wtf("*      TOTAL AMOUNT WASTED: -------", "" + ((double) (area) / (non + counter) + "\n"));
+        Log.wtf("*      TOTAL AMOUNT WASTED: -------", ((double) (area) / (non + counter + overlappingButOnly1SprinklerRegion) + "\n"));
         //TODO Calculate polygon area.
-        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + counter) / (bmp.getWidth() * bmp.getHeight())) + "\n");
+        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (bmp.getWidth() * bmp.getHeight())) + "\n");
+        Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
     }
 
     private int[] calculateWastage(boolean two) {
-        double firstX, firstY, firstR, secondX, secondY, secondR;
+        double firstX = 0, firstY = 0, firstR = 0, secondX = 0, secondY = 0, secondR = 0;
         boolean firstUsed = false;
         double totalArea = 0;
         for (int i = 0; i < dv.sprinkx.size(); i++) {
@@ -1032,7 +1060,21 @@ public class MainActivity extends AppCompatActivity {
         double intersectionArea = 0;
         //DONE Calculate total sprinkler coverage area.
         //TODO DO calculation to calculate intersection area.
+        Double r = firstR;
+        Double R = secondR;
+        Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+        if (R < r) {
+            // swap
+            r = secondR;
+            R = firstR;
+        }
+        Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+        Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+        Double part3 = 0.5 * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
 
+        intersectionArea = part1 + part2 - part3;
+
+        Log.wtf("** INFORMATION: ", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
 
         return new int[]{(int) intersectionArea, (int) totalArea};
 
