@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="20sp"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/title"
+            android:textSize="34sp"
+            android:textAlignment="center"
+            android:layout_centerHorizontal="true"
+            android:textStyle="bold"
+            android:textColor="#307E11"
+            />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="5sp"
+            android:layout_below="@id/title"
+            android:id="@+id/bar"
+            android:layout_marginTop="3sp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="You have just "
+            android:id="@+id/message"
+            android:layout_below="@+id/bar"
+            android:layout_marginTop="5sp"
+            />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/message"
+            android:textAlignment="center"
+            android:ems="5"
+            android:layout_marginBottom="12sp"
+            android:hint="ft"
+            android:inputType="number"
+            android:id="@+id/length"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text = "Undo"
+                android:textAllCaps="false"
+                android:id="@+id/undo"
+                android:textAlignment="center"
+                android:textColor="#fff"
+                android:background="#33743C"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text = "Done"
+                android:textAllCaps="false"
+                android:id="@+id/done"
+                android:textAlignment="center"
+                android:textColor="#33743C"
+                android:background="#fff"
+                />
+
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

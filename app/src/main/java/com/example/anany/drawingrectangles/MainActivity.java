@@ -1,5 +1,7 @@
 package com.example.anany.drawingrectangles;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,6 +18,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -23,7 +27,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -44,12 +51,13 @@ public class MainActivity extends AppCompatActivity {
 
     Button button, btnUndo;
     RelativeLayout rlDvHolder;
-    DrawingView dv;
+    static DrawingView dv;
     TextView display;
     TextView real;
     Button polygon;
     SeekBar radius;
     RelativeLayout background;
+    Context context;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +90,73 @@ public class MainActivity extends AppCompatActivity {
         radius.getProgressDrawable().setColorFilter(Color.parseColor("#70c48c"), PorterDuff.Mode.SRC_IN);
         radius.getThumb().setColorFilter(Color.parseColor("#3abd66"), PorterDuff.Mode.SRC_IN);
         //polygon.setVisibility(View.INVISIBLE);
+    }
+    //README this function asks user for length of side after user has plotted 1 side.
+    private static void askForLength(boolean plot) {
+        final Dialog dialog = new Dialog(new MainActivity().getApplicationContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.specify_length);
+
+        TextView text = (TextView) dialog.findViewById(R.id.message);
+
+        if (plot)
+            text.setText("You just drew one side of the land area. Please specify the approximate " +
+                    "length of that first side in feet.");
+        else
+            text.setText("You just chose to draw a circular area of land. " +
+                    "Please specify its radius in feet.");
+
+        final EditText input = dialog.findViewById(R.id.length);
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                input.setText(editable.toString() + "ft");
+            }
+        };
+        input.addTextChangedListener(textWatcher);
+
+        Button undo = (Button) dialog.findViewById(R.id.undo);
+        undo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                dialog.cancel();
+                //README INFO: In order to call dv.undo() below, dv was made static.
+                // If any issues arise, try making dv not static.
+                dv.undo();
+            }
+        });
+
+        Button done = (Button) dialog.findViewById(R.id.done);
+        done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String sInput = input.getText().toString();
+                if (sInput != null) {
+                    int num = Integer.parseInt(sInput);
+                    if(num > 0){
+                        dv.length = num;
+                    }else{
+                        makeToast("Please specify a length greater than 0 feet.");
+                    }
+                }else{
+                    makeToast("Please specify the side length in feet.");
+                }
+            }
+        });
+
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.show();
     }
 
     public Bitmap takeScreenShot(View view) {
@@ -169,18 +244,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO Deal with making a polygon.
-                if(dv.xlist.size() > 2){
+                if (dv.xlist.size() > 2) {
                     //dv.currentMode = DrawingView.Mode.POLYGON;
                     //ArrayList<Integer> newX = new ArrayList<>();
                     //ArrayList<Integer> newY = new ArrayList<>();
                     int tL = 1000, bR = 0;
                     int tLy = 1000, bRy = 0;
-                    for(int i  = 0; i < dv.xlist.size();i++){
-                        if(dv.xlist.get(i) < tL)  tL = dv.xlist.get(i);
-                        if(dv.ylist.get(i) < tLy)  tLy = dv.ylist.get(i);
+                    for (int i = 0; i < dv.xlist.size(); i++) {
+                        if (dv.xlist.get(i) < tL) tL = dv.xlist.get(i);
+                        if (dv.ylist.get(i) < tLy) tLy = dv.ylist.get(i);
 
-                        if(dv.xlist.get(i) > bR)   bR = dv.xlist.get(i);
-                        if(dv.ylist.get(i) > bRy)  bRy =  dv.ylist.get(i);
+                        if (dv.xlist.get(i) > bR) bR = dv.xlist.get(i);
+                        if (dv.ylist.get(i) > bRy) bRy = dv.ylist.get(i);
                     }
                     dv.resetTouchPoints();
 
@@ -297,6 +372,8 @@ public class MainActivity extends AppCompatActivity {
         private float mX, mY;
         public boolean wasCircle = false;
         int screenW, screenH;
+        public int length = 0;
+        public double ratio = 1;
 
         public DrawingView(Context c, TextView display, int height, int width) {
             super(c);
@@ -394,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
            canvas.drawPath(path, paint);*/
             mCanvas = canvas;
 
-            //README I think when you call invalidate() it calls onDraw again. Check it out by putting
+            //INFO I think when you call invalidate() it calls onDraw again. Check it out by putting
             // your custom draw function for the line here. Test it out.
             //drawCustomLine(mCanvas, downx, downy, upx, upy);
             switch (currentMode) {
@@ -428,6 +505,12 @@ public class MainActivity extends AppCompatActivity {
                     showDots(canvas);
                     Log.wtf("*DOTPLOT", "DOT Plot being called");
                     drawLine(canvas);
+                    if (xlist.size() == 2) {
+                        //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
+                        //NOTES Make it non-dimissible, but provide an Undo and a done button. for undo,
+                        //  call dv.undo();
+                        MainActivity.askForLength(true);
+                    }
                     break;
                 case RESET:
                     //Need to reset the canvas
@@ -448,6 +531,8 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case drawc:
                     //makeToast("In draw c");
+                    //README This is for drawing the circle region.
+                    MainActivity.askForLength(false);
                     wasCircle = true;
                     if (radius == -5) {
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
@@ -484,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
             int x = (int) event.getX();
             int y = (int) event.getY();
             //makeToast("TAPPED");
-            //INFO Uncomment below if you are trying to do drawCustomLine()
+            //README Uncomment below if you are trying to do drawCustomLine()
            /*switch (event.getAction()) {
                case MotionEvent.ACTION_DOWN:
                    makeToast("Finger Down: " + x + " " + y);
@@ -542,7 +627,11 @@ public class MainActivity extends AppCompatActivity {
                 if (!duplicate) {
                     sprinkx.add((int) x);
                     sprinky.add((int) y);
-                    sprinkr.add((int) Math.pow(sradius / 9, 2));
+                    //OLD code below just does it based on number of pixels.
+                    //  On higher ppi phones, sprinkler appears very small.
+                    sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 9, 2)));
+
+                    //sprinkr.add((int) Math.pow(sradius / 9, 2));
                     invalidate();
                 }
             }
@@ -640,7 +729,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         enum Mode {RECORDING, DRAWING, PLOT, SPRINKLER, RESET, DOTPLOT, drawc, resetc, splot, sreset, POLYGON}
-        enum PastMode{DRAW, CIRCLE};
+
+        enum PastMode {DRAW, CIRCLE}
+
+        ;
 
         public double polygonArea() {
             // Initialze area
@@ -708,9 +800,17 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.sprinklers:
                 //polygon.setText("");
-                polygon.setVisibility(View.INVISIBLE);
-                radius.setVisibility(View.VISIBLE);
-                dv.currentMode = DrawingView.Mode.splot;
+                if (dv.xlist.size() == 0) {
+                    makeToast("You must first plot the area of land.");
+                } else {
+                    polygon.setVisibility(View.INVISIBLE);
+                    radius.setVisibility(View.VISIBLE);
+                    dv.currentMode = DrawingView.Mode.splot;
+                }
+                return true;
+
+            case R.id.length:
+                askForLength(dv.pastMode == DrawingView.PastMode.DRAW);
                 return true;
 
             case R.id.calculate:
@@ -767,12 +867,12 @@ public class MainActivity extends AppCompatActivity {
         singleP.clear();
         //Log.wtf("*Still getting circles", " Still GETTING CIRCLES");
 
-        if(dv.sprinkx.size() == 1){
-            singleX.add( (double) dv.sprinkx.get(0));
+        if (dv.sprinkx.size() == 1) {
+            singleX.add((double) dv.sprinkx.get(0));
             singleY.add((double) dv.sprinky.get(0));
             singleR.add((double) dv.sprinkr.get(0));
             singleP.add(0);
-        }else {
+        } else {
             for (int i = 0; i < dv.sprinkx.size(); i++) {
                 double x = dv.sprinkx.get(i);
                 double y = dv.sprinky.get(i);
@@ -784,7 +884,7 @@ public class MainActivity extends AppCompatActivity {
                     double tempY = dv.sprinky.get(j);
                     double tempR = dv.sprinkr.get(j);
 
-                    if(j != i) {
+                    if (j != i) {
                         double distance = Math.sqrt(Math.pow(tempX - x, 2) + Math.pow(tempY - y, 2));
                         if (distance <= tempR + r) {
                             good = false;
@@ -882,8 +982,8 @@ public class MainActivity extends AppCompatActivity {
         int tracker = 0;
         int non = 0, counter = 0;
 
-        makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
-        Log.wtf("* Sprinkler INFO: ", "SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
+        makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
+        Log.wtf("* Sprinkler INFO: ", "SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
         if (singleR.size() == dv.sprinkx.size()) {
             //Do nothing.
         } else if (singleR.size() + 2 == dv.sprinkx.size()) {
@@ -894,19 +994,19 @@ public class MainActivity extends AppCompatActivity {
             //counter += temp[1] - area;
             counter = temp[1];
 
-            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
+            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             Log.wtf("*  Calculations 2", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else if (singleR.size() + 3 == dv.sprinkx.size()) {
             //Just double the intersection area of any 2 circles.
             int temp[] = calculateWastage(false);
             area += temp[0] * 2;
             //INFO Increase the area of non-individual sprinklers.
-            counter+= temp[1];
+            counter += temp[1];
             //counter += temp[1] - area;
-            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
+            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             Log.wtf("*  Calculations 3", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else {
-            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: "+ dv.sprinkx.size());
+            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             for (int y = 0; y < bmp.getHeight(); y++) {
                 for (int x = 0; x < bmp.getWidth(); x++) {
                     int pixel = bmp.getPixel(x, y);
@@ -941,26 +1041,22 @@ public class MainActivity extends AppCompatActivity {
                         //TRY Checking (for pos 2 and maybe pos 3) if it is within a range of colors using compareTo
                         //  Do not just use discrete values. Check in a range to make sure.
 
-                        if (("4b".compareTo(pix) < 0 && "51".compareTo(pix) > 0) )
+                        if (("4b".compareTo(pix) < 0 && "51".compareTo(pix) > 0))
                             overlappingButOnly1SprinklerRegion++;
                         else if ("51".compareTo(pix) < 0 && "52".compareTo(pix) > 0) {
                             area += 4;
-                            counter+=4;
-                        }
-                        else if ("54".compareTo(pix) < 0 && "57".compareTo(pix) > 0) {
+                            counter += 4;
+                        } else if ("54".compareTo(pix) < 0 && "57".compareTo(pix) > 0) {
                             overlappingButOnly1SprinklerRegion++;
-                        }
-                        else if ("52".compareTo(pix) < 0 && "54".compareTo(pix) > 0) {
+                        } else if ("52".compareTo(pix) < 0 && "54".compareTo(pix) > 0) {
                             area += 3;
-                            counter+=3;
-                        }
-                        else if ("57".compareTo(pix) < 0 && "61".compareTo(pix) > 0) {
+                            counter += 3;
+                        } else if ("57".compareTo(pix) < 0 && "61".compareTo(pix) > 0) {
                             area += 2;
-                            counter+=2;
-                        }
-                        else if ("61".compareTo(pix) < 0 && "65".compareTo(pix) > 0) {
+                            counter += 2;
+                        } else if ("61".compareTo(pix) < 0 && "65".compareTo(pix) > 0) {
                             area += 5;
-                            counter+=5;
+                            counter += 5;
                         }
 
                     /*if (pos2.contains(pix))
@@ -1026,12 +1122,16 @@ public class MainActivity extends AppCompatActivity {
         int sum = 0;
         //OLD Code for calculating non-wasted water. INACCURATE
         if (dv.sprinkx.size() < 4) {
-        }else if(dv.sprinkx.size() < 8)
+        } else if (dv.sprinkx.size() < 8)
             counter *= 1.85;
-        else if(dv.sprinkx.size()<15)
-            counter*= 3;
+        else if (dv.sprinkx.size() < 12)
+            counter *= 3.3;
+        else if (dv.sprinkx.size() < 17)
+            counter *= 4.6;
+        else if (dv.sprinkx.size() < 25)
+            counter *= 6;
         else
-            counter *= 5;
+            counter *= 8;
 
         for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
@@ -1067,7 +1167,7 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*  Intersecting Sprinkler, But Only 1 Region: --------", "" + overlappingButOnly1SprinklerRegion);
         //INFO Amount of intersecting sprinkler, overlap part.
         Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
-        Log.wtf("*      TOTAL AMOUNT WASTED: -------", ((double) (area) / (non + counter + overlappingButOnly1SprinklerRegion) + "\n"));
+        Log.wtf("*      TOTAL AMOUNT WASTED: -------", (((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion)) + "\n"));
         //TODO Calculate polygon area.
         Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (dv.polygonArea())) + "\n");
         Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
@@ -1109,6 +1209,7 @@ public class MainActivity extends AppCompatActivity {
         double intersectionArea = 0;
         //DONE Calculate total sprinkler coverage area.
         //TODO DO calculation to calculate intersection area.
+
         Double r = firstR;
         Double R = secondR;
         Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
@@ -1119,10 +1220,17 @@ public class MainActivity extends AppCompatActivity {
         }
         Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
         Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
-        Double part3 = 0.5 * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+        Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
 
         intersectionArea = part1 + part2 - part3;
+        Log.wtf("***SPRINKLER LIST: ", r + " " + R + " " + d + " " + part1 + " " + part2 + " " + part3);
+        if (!(intersectionArea > 0))
+            intersectionArea = Math.PI * Math.pow(Math.min(secondR, firstR), 2);
 
+        if (two) {
+            totalArea = Math.PI * Math.pow(secondR, 2) + Math.PI * Math.pow(firstR, 2);
+        }
+        //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
         Log.wtf("** INFORMATION: ", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
 
         return new int[]{(int) intersectionArea, (int) totalArea};
