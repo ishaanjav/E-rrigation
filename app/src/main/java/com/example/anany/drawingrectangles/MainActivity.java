@@ -1575,9 +1575,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (dv.sprinkx.size() < 8)
             counter *= 1.85;
         else if (dv.sprinkx.size() < 12)
-            counter *= 3.3;
+            counter *= 3.2;
         else if (dv.sprinkx.size() < 17)
-            counter *= 4.6;
+            counter *= 3.9;
         else if (dv.sprinkx.size() < 25)
             counter *= 6;
         else
@@ -1678,8 +1678,9 @@ public class MainActivity extends AppCompatActivity {
 
         intersectionArea = part1 + part2 - part3;
         Log.wtf("***SPRINKLER LIST: ", r + " " + R + " " + d + " " + part1 + " " + part2 + " " + part3);
-        if (!(intersectionArea > 0))
+        if (!(intersectionArea > 0)) {
             intersectionArea = Math.PI * Math.pow(Math.min(secondR, firstR), 2);
+        }
 
         if (two) {
             totalArea = Math.PI * Math.pow(secondR, 2) + Math.PI * Math.pow(firstR, 2);
