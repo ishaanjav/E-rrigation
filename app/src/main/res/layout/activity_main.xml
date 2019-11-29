@@ -61,6 +61,7 @@
             android:textColor="#000"
             android:textStyle="bold"
             android:layout_marginLeft="0sp"
+            android:id="@+id/ft"
             android:text="ft"
             android:layout_above="@id/real"
             android:layout_marginBottom="5sp"

@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     public static Context context;
     public EditText length;
     static RelativeLayout container;
+    public TextView textview, ft;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.button);
         background = findViewById(R.id.layout);
         radius = findViewById(R.id.seekBar);
+        textview = background.findViewById(R.id.textView);
+        ft = background.findViewById(R.id.ft);
 
         //README INFO to get a Textview object in Canvas without any errors, you have to use
         //  relativelayout that it is in then .findViewById();
@@ -105,12 +108,20 @@ public class MainActivity extends AppCompatActivity {
         //askForLength(true, 2);
     }
 
+    public boolean leaveAlone = false;
+    boolean done = false;
+    int timesR = 0;
+
     public void lengthUpdater() {
         length.addTextChangedListener(new TextWatcher() {
             String previous = "";
 
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (dv.xlist.size() > 2)
+                    length.setEnabled(false);
+                else
+                    length.setEnabled(true);
                 previous = charSequence.toString();
             }
 
@@ -122,11 +133,18 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 //Log.wtf("* Inside: ", "inside here " + dv.xlist.size());
                 String r = length.getText().toString();
-                if(r == null){
-
-                }else if (r.length()>0 && previous.length() > 0 && dv.xlist.size()>1){
-                    makeToast("To change the length, please reset the plot");
-                    length.setText(previous);
+                if (dv.currentMode != DrawingView.Mode.drawc && dv.currentMode != DrawingView.Mode.resetc) {
+                    if (r == null) {
+                        timesR = 0;
+                    } else if (previous.length() > 0 && dv.xlist.size() > 2 && !leaveAlone) {
+                        makeToast("To change the length, please reset the plot");
+                        /*if (done) {
+                            length.setText(previous);
+                            done = false;
+                        }
+                        if (timesR == 0)
+                            done = true;*/
+                        //FIXME, leavealone needs to be true. It is stalling here.
                     /*removeAllLengths();
                     //TODO Redo all stuff textview lengths
                     int numVal = Integer.parseInt(r);
@@ -145,44 +163,67 @@ public class MainActivity extends AppCompatActivity {
                         //createAllTextViews();
                         Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
                     }*/
-                }else if (dv.xlist.size() > 1) {
-                    Log.wtf("* Inside: ", "inside here deeper");
+                    } else if (dv.xlist.size() > 1) {
+                        timesR = 0;
+                        Log.wtf("* Inside: ", "inside here deeper");
+                        String temp = length.getText().toString();
+                        if (temp == null) {
+                            makeToast("Please enter the side length.");
+                        } else if (temp.isEmpty() || temp.length() == 0) {
+                            makeToast("You must enter the side length in feet");
+                        } else {
+                            int numVal = Integer.parseInt(temp);
+                            if (numVal < 2) {
+                                makeToast("Please make your side length larger");
+                            } else {
+                                //TODO Have to also set the value of dv.ratio to get
+                                // the ratio between their length and pixel length;
+                                dv.length = numVal;
+                                if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                                    dv.ratio = dv.radius / numVal;
+                                } else {
+                                    dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                            Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                                    Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                            Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                                }
+                                Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
+                            }
+                        }
+                    } else if (length.getText().toString().equals("") || length.getText().toString().equals(previous)) {
+
+                    } else {
+                        length.setText("");
+                        //leaveAlone = true;
+                        makeToast("First, you must plot the first side.");
+                    }
+                } else {
+                    timesR = 0;
                     String temp = length.getText().toString();
                     if (temp == null) {
-                        makeToast("Please enter the side length/radius.");
+                        makeToast("Please enter the radius in feet.");
                     } else if (temp.isEmpty() || temp.length() == 0) {
-                        makeToast("You must enter the side length/radius in feet");
+                        makeToast("You must enter the radius in feet");
                     } else {
                         int numVal = Integer.parseInt(temp);
                         if (numVal < 2) {
-                            makeToast("Please make your side length larger");
+                            makeToast("Please make your radius larger");
                         } else {
                             //TODO Have to also set the value of dv.ratio to get
                             // the ratio between their length and pixel length;
                             dv.length = numVal;
-                            if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
-                                dv.ratio = dv.radius / numVal;
-                            } else {
-                                dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
-                                        Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
-                                Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
-                                        Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
-                            }
-                            Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
+                            dv.ratio = dv.radius / numVal;
                         }
                     }
-                } else if (length.getText().toString().equals("") || length.getText().toString().equals(previous)) {
-
-                } else {
-                    length.setText("");
-                    makeToast("First, you must plot the first side.");
                 }
+                leaveAlone = false;
             }
         });
     }
 
     private void createAllTextViews() {
-        for(int i = 0; i < dv.xlist.size()-1;i++) {
+        dv.idCounter++;
+        for (int i = 0; i < dv.xlist.size() - 1; i++) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
                     ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
             params.leftMargin = (dv.xlist.get(i) + dv.xlist.get(i + 1)) / 2;
@@ -190,21 +231,18 @@ public class MainActivity extends AppCompatActivity {
 
             TextView textView = new TextView(context);
             textView.setText("" + (int) (Math.hypot(Math.abs(dv.xlist.get(i) - dv.xlist.get(i + 1)),
-                    Math.abs(dv.ylist.get(i) - dv.ylist.get(dv.posCount + 1))) * dv.ratio));
+                    Math.abs(dv.ylist.get(i) - dv.ylist.get(i + 1))) * saveRadius));
             textView.setId(dv.idCounter);
             textView.setLayoutParams(params);
             makeToast("Making the text");
             rlDvHolder.addView(textView);
+            dv.idCounter++;
 
             //DONE HAVE to deal with adding textview from last to first. and removing from previous touch.
 
             //Log.wtf("* Location: ", dv.xlist.get(posCount) + " " + xlist.get(posCount + 1)
             //       + " " + dv.ylist.get(posCount) + " " + dv.ylist.get(posCount + 1));
 
-            Log.wtf("*  Length INFO", "Ratio: " + dv.ratio + "  Length: " + length);
-            if (dv.specialCounter != Integer.MAX_VALUE) {
-                rlDvHolder.findViewById(dv.specialCounter + 1).setVisibility(View.GONE);
-            }
         }
 
         RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams
@@ -216,13 +254,12 @@ public class MainActivity extends AppCompatActivity {
 
         TextView last = new TextView(context);
         last.setText("" + (int) (Math.hypot(Math.abs(dv.xlist.get(dv.xlist.size() - 1) - dv.xlist.get(0)),
-                Math.abs(dv.ylist.get(dv.ylist.size() - 1) - dv.ylist.get(0))) * dv.ratio));
+                Math.abs(dv.ylist.get(dv.ylist.size() - 1) - dv.ylist.get(0))) * saveRadius));
         last.setId(dv.specialCounter);
         last.setLayoutParams(params2);
         makeToast("Making the last text");
         rlDvHolder.addView(last);
 
-        dv.idCounter++;
         //dv.posCount++;
         dv.specialCounter--;
     }
@@ -244,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
                 //TODO Have to also set the value of dv.ratio to get
                 // the ratio between their length and pixel length;
                 dv.length = numVal;
-                if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
                     dv.ratio = dv.radius / numVal;
                 } else {
                     dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
@@ -424,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
                 //INFO this is when the user lets go of the slider
                 //makeToast("Invalidating");
                 dv.sradius = seekBar.getProgress();
-                makeToast("Updating sradius: " + dv.sradius);
+                //makeToast("Updating sradius: " + dv.sradius);
             }
 
             @Override
@@ -446,12 +483,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    double saveRadius = 0;
+
     private void setButtonClick() {
         polygon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //TODO Deal with making a polygon.
-                if (dv.xlist.size() > 2) {
+                if (dv.xlist.size() > 2 && !rectangle) {
+                    rectangle = true;
                     //dv.currentMode = DrawingView.Mode.POLYGON;
                     //ArrayList<Integer> newX = new ArrayList<>();
                     //ArrayList<Integer> newY = new ArrayList<>();
@@ -483,6 +523,8 @@ public class MainActivity extends AppCompatActivity {
                     dv.ys.add(tLy);
                     dv.ys.add(bRy);
                     dv.ys.add(bRy);
+
+                    removeAllLengths(false);
                     dv.invalidate();
                 }
             }
@@ -546,16 +588,24 @@ public class MainActivity extends AppCompatActivity {
                     if (dv.xlist.size() == 0) {
                         removeAllLengths();
                     }
+                    if (dv.xlist.size() < 3)
+                        length.setEnabled(true);
 
                     //INFO REMOVE THE LATEST TEXTVIEW
-                    if (dv.idCounter != 0) {
-                        TextView t = (TextView) rlDvHolder.findViewById(--dv.idCounter);
+                    /*if (dv.idCounter != 0) {
+                        dv.idCounter--;
+                        TextView t = (TextView) rlDvHolder.findViewById(dv.idCounter);
 
                         t.setVisibility(View.GONE);
                     }
                     //INFO Remove the connection between last point and first point
-                    if (dv.specialCounter != Integer.MAX_VALUE)
+                    if (dv.specialCounter != Integer.MAX_VALUE) {
+                        dv.specialCounter++;
                         rlDvHolder.findViewById(++dv.specialCounter).setVisibility(View.GONE);
+                    }*/
+                    removeAllLengths(true);
+
+                    Log.wtf("* Text ID Info:", dv.idCounter + " " + dv.specialCounter);
                 } else {
                     dv.removeLastSprinkler();
                 }
@@ -565,13 +615,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void removeAllLengths() {
+
         for (int i = 0; i < dv.idCounter; i++)
             rlDvHolder.findViewById(i).setVisibility(View.GONE);
         for (int i = Integer.MAX_VALUE; i > dv.specialCounter; i--)
             rlDvHolder.findViewById(i).setVisibility(View.GONE);
+        saveRadius = dv.ratio;
         dv.ratio = 1;
+
+        makeToast("HERE");
         dv.length = 0;
+        leaveAlone = true;
         length.setText("");
+        length.setEnabled(true);
+    }
+
+    public void removeAllLengths(boolean t) {
+        for (int i = 0; i < dv.idCounter; i++)
+            rlDvHolder.findViewById(i).setVisibility(View.GONE);
+        for (int i = Integer.MAX_VALUE; i > dv.specialCounter; i--)
+            rlDvHolder.findViewById(i).setVisibility(View.GONE);
     }
 
     public static class DrawingView extends View {
@@ -1076,6 +1139,8 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    boolean rectangle = false;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         makeToast("Polygon area: " + dv.polygonArea());
@@ -1091,6 +1156,10 @@ public class MainActivity extends AppCompatActivity {
                     dv.wasCircle = false;
                     dv.resetSprinklers();
                     dv.resetTouchPoints();
+                    ft.setVisibility(View.VISIBLE);
+                    textview.setVisibility(View.VISIBLE);
+                    length.setVisibility(View.VISIBLE);
+                    removeAllLengths();
                     dv.invalidate();
                 } else {
                     //INFO Currently on polygon. Switch to circle.
@@ -1098,7 +1167,11 @@ public class MainActivity extends AppCompatActivity {
                     dv.wasCircle = true;
                     item.setTitle("Draw Shapes");
                     dv.resetTouchPoints();
+                    ft.setVisibility(View.VISIBLE);
+                    textview.setVisibility(View.VISIBLE);
+                    length.setVisibility(View.VISIBLE);
                     dv.resetSprinklers();
+                    removeAllLengths();
                     polygon.setVisibility(View.INVISIBLE);
                     radius.setVisibility(View.VISIBLE);
                     dv.invalidate();
@@ -1108,20 +1181,20 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.sprinklers:
                 //polygon.setText("");
-                if (dv.xlist.size() < 3) {
+                if (dv.xlist.size() < 3 && dv.currentMode != DrawingView.Mode.drawc && dv.currentMode != DrawingView.Mode.resetc) {
                     makeToast("You must first plot the area of land.");
                 } else if (!handleSideLength()) {
                     //INFO They have not entered a side length/radius
                 } else {
+                    ft.setVisibility(View.INVISIBLE);
+                    textview.setVisibility(View.INVISIBLE);
+                    length.setVisibility(View.INVISIBLE);
                     polygon.setVisibility(View.INVISIBLE);
                     radius.setVisibility(View.VISIBLE);
                     dv.currentMode = DrawingView.Mode.splot;
                 }
                 return true;
 
-            case R.id.length:
-                askForLength(dv.pastMode == DrawingView.PastMode.DRAW);
-                return true;
 
             case R.id.calculate:
                 Bitmap bmp = takeScreenShot(dv);
