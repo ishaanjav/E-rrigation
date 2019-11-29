@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         //polygon.setVisibility(View.INVISIBLE);
         context = getApplicationContext();
         //askForLength(true, 2);
+
     }
 
     public boolean leaveAlone = false;
@@ -297,11 +298,26 @@ public class MainActivity extends AppCompatActivity {
 
     //README this function asks user for length of side after user has plotted 1 side.
     private void askForLength(boolean plot, int a) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getApplicationContext());
+        /*new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Delete entry")
+                .setMessage("Are you sure you want to delete this entry?")
+
+                // Specifying a listener allows you to take an action before dismissing the dialog.
+                // The dialog is automatically dismissed when a dialog button is clicked.
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Continue with delete operation
+                    }
+                })
+
+                // A null listener allows the button to dismiss the dialog and take no further action.
+                .setNegativeButton(android.R.string.no, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();*/
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
         LayoutInflater inflater = getLayoutInflater();
         final View dialogCoordinate = inflater.inflate(R.layout.specify_length, null);
         dialogBuilder.setCancelable(false);
-        dialogBuilder.setView(background);
 
         dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
@@ -310,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
         });
         AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.show();
+
         /*AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
         builder1.setMessage("Write your message here.");
         builder1.setCancelable(true);
@@ -798,7 +815,7 @@ public class MainActivity extends AppCompatActivity {
                 case sreset:
                     currentMode = Mode.splot;
                     resetSprinklers();
-                    makeToast("Resetting sprinklers.");
+                    //makeToast("Resetting sprinklers.");
                     break;
                 case DOTPLOT:
                     showDots(canvas);
@@ -817,7 +834,7 @@ public class MainActivity extends AppCompatActivity {
                     currentMode = Mode.DOTPLOT;
                     resetTouchPoints();
                     resetSprinklers();
-                    makeToast("Resetting");
+                    //makeToast("Resetting");
                     //TODO Try uncommenting and commenting out below line to see if it works after reset button
                     //linePaint.setColor(Color.WHITE);
                     Log.wtf("*RESET RESET RESET RESET RESET", "Reset was called. Reset screen.");
@@ -827,7 +844,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case resetc:
                     currentMode = Mode.drawc;
-                    makeToast("Reset c. Mode is draw c");
+                    //makeToast("Reset c. Mode is draw c");
                     break;
                 case drawc:
                     //makeToast("In draw c");
@@ -1229,6 +1246,8 @@ public class MainActivity extends AppCompatActivity {
                 //README Make Bitmap smaller.
                 bmp = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 1), (int) (bmp.getHeight() * 1), true);
                 iterateThroughPixels(bmp);
+                askForLength(true, 3);
+
                 //File file = takeScreenShot2();
                 //iterateThroughPixels(file);
                 return true;
@@ -1331,6 +1350,12 @@ public class MainActivity extends AppCompatActivity {
         add("54c6ff");
         add("54c7ff");
     }};
+    //FUTURE FIles
+    //INFO Maybe have a feature where for the results it displays the bad sprinkler placements by making them pop out.
+    //  For example, when iterating through bitmap pixels, if the sprinkler is fine, then you edit the color and make it
+    //  greyed out, otherwise you leave it the same, that way they can see that those placements were bad.
+
+
 
     //FUTURE FILES Idea for accurately calculating area:
     //  Have an ArrayList of ArrayList<OBJECT> where OBJECT contains a position (int), x (int), y (int)
