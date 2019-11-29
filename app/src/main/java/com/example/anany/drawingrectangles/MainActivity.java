@@ -29,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -52,16 +53,16 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     Button button, btnUndo;
-    RelativeLayout rlDvHolder;
+    static RelativeLayout rlDvHolder;
     static DrawingView dv;
     TextView display;
     TextView real;
     Button polygon;
     SeekBar radius;
-    RelativeLayout background;
+    static RelativeLayout background;
     public static Context context;
-    EditText length;
-    RelativeLayout container;
+    public EditText length;
+    static RelativeLayout container;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
-container = findViewById(R.id.container);
         dv = new DrawingView(getApplicationContext(), display, height, width);
 
         setContentView(R.layout.activity_main);
@@ -84,14 +84,17 @@ container = findViewById(R.id.container);
         background = findViewById(R.id.layout);
         radius = findViewById(R.id.seekBar);
 
+        //README INFO to get a Textview object in Canvas without any errors, you have to use
+        //  relativelayout that it is in then .findViewById();
         length = background.findViewById(R.id.length);
-        String temp = length.getText().toString();
-
+        //handleSideLength();
 
         btnUndo = findViewById(R.id.btnUndo);
         setButtonClick();
         setRadiusBar();
         dv.sradius = radius.getProgress();
+        container = background.findViewById(R.id.container);
+        lengthUpdater();
 
         //radius.setVisibility(View.VISIBLE);
         //real.setVisibility(View.VISIBLE);
@@ -101,10 +104,164 @@ container = findViewById(R.id.container);
         context = getApplicationContext();
         //askForLength(true, 2);
     }
+
+    public void lengthUpdater() {
+        length.addTextChangedListener(new TextWatcher() {
+            String previous = "";
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                previous = charSequence.toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                //Log.wtf("* Inside: ", "inside here " + dv.xlist.size());
+                String r = length.getText().toString();
+                if(r == null){
+
+                }else if (r.length()>0 && previous.length() > 0 && dv.xlist.size()>1){
+                    makeToast("To change the length, please reset the plot");
+                    length.setText(previous);
+                    /*removeAllLengths();
+                    //TODO Redo all stuff textview lengths
+                    int numVal = Integer.parseInt(r);
+                    if (numVal < 2) {
+                        makeToast("Please make your side length larger");
+                    } else {
+                        dv.length = numVal;
+                        if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                            dv.ratio = dv.radius / numVal;
+                        } else {
+                            dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                    Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                            Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                    Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                        }
+                        //createAllTextViews();
+                        Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
+                    }*/
+                }else if (dv.xlist.size() > 1) {
+                    Log.wtf("* Inside: ", "inside here deeper");
+                    String temp = length.getText().toString();
+                    if (temp == null) {
+                        makeToast("Please enter the side length/radius.");
+                    } else if (temp.isEmpty() || temp.length() == 0) {
+                        makeToast("You must enter the side length/radius in feet");
+                    } else {
+                        int numVal = Integer.parseInt(temp);
+                        if (numVal < 2) {
+                            makeToast("Please make your side length larger");
+                        } else {
+                            //TODO Have to also set the value of dv.ratio to get
+                            // the ratio between their length and pixel length;
+                            dv.length = numVal;
+                            if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                                dv.ratio = dv.radius / numVal;
+                            } else {
+                                dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                        Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                                Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                        Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                            }
+                            Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
+                        }
+                    }
+                } else if (length.getText().toString().equals("") || length.getText().toString().equals(previous)) {
+
+                } else {
+                    length.setText("");
+                    makeToast("First, you must plot the first side.");
+                }
+            }
+        });
+    }
+
+    private void createAllTextViews() {
+        for(int i = 0; i < dv.xlist.size()-1;i++) {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                    ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.leftMargin = (dv.xlist.get(i) + dv.xlist.get(i + 1)) / 2;
+            params.topMargin = (dv.ylist.get(i) + dv.ylist.get(i + 1)) / 2;
+
+            TextView textView = new TextView(context);
+            textView.setText("" + (int) (Math.hypot(Math.abs(dv.xlist.get(i) - dv.xlist.get(i + 1)),
+                    Math.abs(dv.ylist.get(i) - dv.ylist.get(dv.posCount + 1))) * dv.ratio));
+            textView.setId(dv.idCounter);
+            textView.setLayoutParams(params);
+            makeToast("Making the text");
+            rlDvHolder.addView(textView);
+
+            //DONE HAVE to deal with adding textview from last to first. and removing from previous touch.
+
+            //Log.wtf("* Location: ", dv.xlist.get(posCount) + " " + xlist.get(posCount + 1)
+            //       + " " + dv.ylist.get(posCount) + " " + dv.ylist.get(posCount + 1));
+
+            Log.wtf("*  Length INFO", "Ratio: " + dv.ratio + "  Length: " + length);
+            if (dv.specialCounter != Integer.MAX_VALUE) {
+                rlDvHolder.findViewById(dv.specialCounter + 1).setVisibility(View.GONE);
+            }
+        }
+
+        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams
+                ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+        int xlast = dv.xlist.get(dv.xlist.size() - 1) + dv.xlist.get(0);
+        int ylast = dv.ylist.get(dv.ylist.size() - 1) + dv.ylist.get(0);
+        params2.leftMargin = (xlast) / 2;
+        params2.topMargin = (ylast) / 2;
+
+        TextView last = new TextView(context);
+        last.setText("" + (int) (Math.hypot(Math.abs(dv.xlist.get(dv.xlist.size() - 1) - dv.xlist.get(0)),
+                Math.abs(dv.ylist.get(dv.ylist.size() - 1) - dv.ylist.get(0))) * dv.ratio));
+        last.setId(dv.specialCounter);
+        last.setLayoutParams(params2);
+        makeToast("Making the last text");
+        rlDvHolder.addView(last);
+
+        dv.idCounter++;
+        //dv.posCount++;
+        dv.specialCounter--;
+    }
+
+    public boolean handleSideLength() {
+        String temp = length.getText().toString();
+        if (temp == null) {
+            makeToast("Please enter the side length/radius.");
+            return false;
+        } else if (temp.isEmpty() || temp.length() == 0) {
+            makeToast("You must enter the side length/radius in feet");
+            return false;
+        } else {
+            int numVal = Integer.parseInt(temp);
+            if (numVal < 2) {
+                makeToast("Please make your side length larger");
+                return false;
+            } else {
+                //TODO Have to also set the value of dv.ratio to get
+                // the ratio between their length and pixel length;
+                dv.length = numVal;
+                if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                    dv.ratio = dv.radius / numVal;
+                } else {
+                    dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                            Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                    Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                            Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                }
+                return true;
+            }
+        }
+
+    }
+
     //README this function asks user for length of side after user has plotted 1 side.
-    private void askForLength(boolean plot, int a){
+    private void askForLength(boolean plot, int a) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getApplicationContext());
-        LayoutInflater inflater =  getLayoutInflater();
+        LayoutInflater inflater = getLayoutInflater();
         final View dialogCoordinate = inflater.inflate(R.layout.specify_length, null);
         dialogBuilder.setCancelable(false);
         dialogBuilder.setView(background);
@@ -139,6 +296,7 @@ container = findViewById(R.id.container);
         AlertDialog alert11 = builder1.create();
         alert11.show();*/
     }
+
     private static void askForLength(boolean plot) {
         /*final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -278,8 +436,10 @@ container = findViewById(R.id.container);
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
                 dv.sradius = progress;
-                if (dv.currentMode == DrawingView.Mode.drawc)
+                if (dv.currentMode == DrawingView.Mode.drawc) {
+                    makeToast("ATTENTION! Enter the length of the circle's radius in feet.");
                     dv.radius = progress;
+                }
 
                 dv.invalidate();
             }
@@ -339,18 +499,21 @@ container = findViewById(R.id.container);
                         break;
                     case drawc:
                         dv.currentMode = DrawingView.Mode.resetc;
+                        removeAllLengths();
                         dv.pastMode = DrawingView.PastMode.CIRCLE;
                         dv.invalidate();
                         break;
                     case DOTPLOT:
                         dv.currentMode = DrawingView.Mode.RESET;
                         dv.pastMode = DrawingView.PastMode.DRAW;
+                        removeAllLengths();
                         dv.invalidate();
                         break;
                     case PLOT:
                         //Current mode is drawing.
                         dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.currentMode = DrawingView.Mode.RESET;
+                        removeAllLengths();
                         dv.resetTouchPoints();
                         //dv.invalidate();
                         break;
@@ -359,11 +522,13 @@ container = findViewById(R.id.container);
                         //dv.currentMode = DrawingView.Mode.RECORDING;
                         //dv.currentMode = DrawingView.Mode.DOTPLOT;
                         dv.pastMode = DrawingView.PastMode.DRAW;
+                        removeAllLengths();
                         dv.invalidate();
                         button.setText("Draw Line");
                         break;
                     case RECORDING:
                         dv.currentMode = DrawingView.Mode.DRAWING;
+                        removeAllLengths();
                         dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.invalidate();
                         button.setText("Reset");
@@ -375,14 +540,38 @@ container = findViewById(R.id.container);
         btnUndo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (dv.currentMode != DrawingView.Mode.splot)
+                if (dv.currentMode != DrawingView.Mode.splot) {
                     dv.undo();
-                else {
+
+                    if (dv.xlist.size() == 0) {
+                        removeAllLengths();
+                    }
+
+                    //INFO REMOVE THE LATEST TEXTVIEW
+                    if (dv.idCounter != 0) {
+                        TextView t = (TextView) rlDvHolder.findViewById(--dv.idCounter);
+
+                        t.setVisibility(View.GONE);
+                    }
+                    //INFO Remove the connection between last point and first point
+                    if (dv.specialCounter != Integer.MAX_VALUE)
+                        rlDvHolder.findViewById(++dv.specialCounter).setVisibility(View.GONE);
+                } else {
                     dv.removeLastSprinkler();
                 }
 
             }
         });
+    }
+
+    public void removeAllLengths() {
+        for (int i = 0; i < dv.idCounter; i++)
+            rlDvHolder.findViewById(i).setVisibility(View.GONE);
+        for (int i = Integer.MAX_VALUE; i > dv.specialCounter; i--)
+            rlDvHolder.findViewById(i).setVisibility(View.GONE);
+        dv.ratio = 1;
+        dv.length = 0;
+        length.setText("");
     }
 
     public static class DrawingView extends View {
@@ -550,12 +739,13 @@ container = findViewById(R.id.container);
                     break;
                 case DOTPLOT:
                     showDots(canvas);
-                    Log.wtf("*DOTPLOT", "DOT Plot being called");
+                    //Log.wtf("*DOTPLOT", "DOT Plot being called");
                     drawLine(canvas);
                     if (xlist.size() == 2) {
                         //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
                         //NOTES Make it non-dimissible, but provide an Undo and a done button. for undo,
                         //  call dv.undo();
+                        makeToast("ATTENTION! Enter the length of this first side in feet.");
                         //MainActivity.askForLength(true);
                     }
                     break;
@@ -657,12 +847,16 @@ container = findViewById(R.id.container);
                     Log.d("Duplicate", "Avoiding it");
                 } else {
                     if (xlist.size() <= 12) {
-                        xlist.add((int) x);
-                        ylist.add((int) y);
-                        //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
-                        // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
-                        // That's why try writing your customDrawLine() code in onDraw().
-                        invalidate();
+                        if (xlist.size() > 1 && length == 0) {
+                            makeToast("Please specify the length of the first side you drew.");
+                        } else {
+                            xlist.add((int) x);
+                            ylist.add((int) y);
+                            //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
+                            // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
+                            // That's why try writing your customDrawLine() code in onDraw().
+                            invalidate();
+                        }
                     } else {
                         makeToast("You have exceeded the limit on the number of sides.");
                     }
@@ -708,8 +902,73 @@ container = findViewById(R.id.container);
             }
         }
 
+        int idCounter = 0;
+        int posCount = 0;
+
+        int specialCounter = Integer.MAX_VALUE;
+
         private void drawLine(Canvas canvas) {
-            if (xlist.size() > 1) {
+            if (xlist.size() > 2) {
+                posCount = xlist.size() - 2;
+                if (xlist.size() == 3) {
+                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                            ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params.leftMargin = (xlist.get(0) + xlist.get(1)) / 2;
+                    params.topMargin = (ylist.get(0) + ylist.get(1)) / 2;
+
+                    TextView textView = new TextView(context);
+                    textView.setText("" + (int) (Math.hypot(Math.abs(xlist.get(0) - xlist.get(1)),
+                            Math.abs(ylist.get(0) - ylist.get(1))) * ratio));
+                    textView.setId(idCounter);
+                    textView.setLayoutParams(params);
+                    makeToast("Making the text");
+                    rlDvHolder.addView(textView);
+                    idCounter++;
+                }
+
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                        ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.leftMargin = (xlist.get(posCount) + xlist.get(posCount + 1)) / 2;
+                params.topMargin = (ylist.get(posCount) + ylist.get(posCount + 1)) / 2;
+
+                TextView textView = new TextView(context);
+                textView.setText("" + (int) (Math.hypot(Math.abs(xlist.get(posCount) - xlist.get(posCount + 1)),
+                        Math.abs(ylist.get(posCount) - ylist.get(posCount + 1))) * ratio));
+                textView.setId(idCounter);
+                textView.setLayoutParams(params);
+                makeToast("Making the text");
+                rlDvHolder.addView(textView);
+
+                //DONE HAVE to deal with adding textview from last to first. and removing from previous touch.
+
+                //Log.wtf("* Location: ", xlist.get(posCount) + " " + xlist.get(posCount + 1)
+                //       + " " + ylist.get(posCount) + " " + ylist.get(posCount + 1));
+
+                Log.wtf("*  Length INFO", "Ratio: " + ratio + "  Length: " + length);
+                if (specialCounter != Integer.MAX_VALUE) {
+                    rlDvHolder.findViewById(dv.specialCounter + 1).setVisibility(View.GONE);
+                }
+
+
+                RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams
+                        ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                int xlast = xlist.get(xlist.size() - 1) + xlist.get(0);
+                int ylast = ylist.get(ylist.size() - 1) + ylist.get(0);
+                params2.leftMargin = (xlast) / 2;
+                params2.topMargin = (ylast) / 2;
+
+                TextView last = new TextView(context);
+                last.setText("" + (int) (Math.hypot(Math.abs(xlist.get(xlist.size() - 1) - xlist.get(0)),
+                        Math.abs(ylist.get(ylist.size() - 1) - ylist.get(0))) * ratio));
+                last.setId(specialCounter);
+                last.setLayoutParams(params2);
+                makeToast("Making the last text");
+                rlDvHolder.addView(last);
+
+                idCounter++;
+                posCount++;
+                specialCounter--;
+
                 for (int i = 0; i < xlist.size() - 1; i++) {
                     canvas.drawLine(xlist.get(i), ylist.get(i), xlist.get(i + 1), ylist.get(i + 1), linePaint);
                 }
@@ -729,6 +988,8 @@ container = findViewById(R.id.container);
                 String s = Double.toString(df);
                 //makeToast("Display is good: " + (display == null));
                 //display.setText(s);
+            } else if (xlist.size() == 2) {
+                canvas.drawLine(xlist.get(0), ylist.get(0), xlist.get(1), ylist.get(1), linePaint);
             }
         }
 
@@ -761,7 +1022,7 @@ container = findViewById(R.id.container);
         }
 
         private void showDots(Canvas canvas) {
-            Log.wtf("*Showing dots", "X List size: " + xlist.size());
+            //Log.wtf("*Showing dots", "X List size: " + xlist.size());
             if (xlist.size() > 0) {
                 for (int i = 0; i < xlist.size(); i++) {
                     canvas.drawCircle(xlist.get(i), ylist.get(i), 9.0f, circlePaint);
@@ -847,8 +1108,10 @@ container = findViewById(R.id.container);
 
             case R.id.sprinklers:
                 //polygon.setText("");
-                if (dv.xlist.size() == 0) {
+                if (dv.xlist.size() < 3) {
                     makeToast("You must first plot the area of land.");
+                } else if (!handleSideLength()) {
+                    //INFO They have not entered a side length/radius
                 } else {
                     polygon.setVisibility(View.INVISIBLE);
                     radius.setVisibility(View.VISIBLE);

@@ -13,11 +13,6 @@
         android:title="Plot Sprinklers"
         />
     <item
-        android:id="@+id/length"
-        app:showAsAction="never"
-        android:title="Set First Side Length"
-        />
-    <item
         android:id="@+id/calculate"
         app:showAsAction="never"
         android:title="Calculate Wastage"
