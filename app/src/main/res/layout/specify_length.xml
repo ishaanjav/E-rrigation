@@ -52,7 +52,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="horizontal"
-            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/message"
             android:layout_height="wrap_content">
 
             <Button

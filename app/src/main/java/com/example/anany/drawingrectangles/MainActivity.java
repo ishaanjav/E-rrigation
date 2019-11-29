@@ -18,6 +18,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -294,6 +295,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    AlertDialog.Builder loading;
+    AlertDialog created;
+
+    public void showLoading() {
+        loading = new AlertDialog.Builder(MainActivity.this);
+        LayoutInflater inflater = getLayoutInflater();
+        final View dialogCoordinate = inflater.inflate(R.layout.loading, null);
+        loading.setCancelable(false);
+        loading.setView(dialogCoordinate);
+
+        created = loading.create();
+        created.show();
+        makeToast("show loading called");
+        Log.wtf("* Alert Dialog", "Showing Loading. showLoading() called");
+    }
+
+    public void hideLoading() {
+        created.hide();
+        created.cancel();
     }
 
     //README this function asks user for length of side after user has plotted 1 side.
@@ -1214,7 +1236,17 @@ public class MainActivity extends AppCompatActivity {
 
 
             case R.id.calculate:
-                Bitmap bmp = takeScreenShot(dv);
+                //INFO The purpose of this is to display the loading Alert Dialog.
+                Bitmap tr = takeScreenShot(dv);
+                showLoading();
+
+                //INFO Wait a bit so that the Dialog is showing, then do the calculations.
+                Handler h = new Handler();
+                final Bitmap[] bmp = {tr};
+                h.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Bitmap bmp = takeScreenShot(dv);
                /*try (FileOutputStream out = new FileOutputStream("test.png")) {
                    bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
                } catch (Exception e) {
@@ -1229,27 +1261,31 @@ public class MainActivity extends AppCompatActivity {
                opener.setDataAndType(Uri.parse("/test.png"), "image/*");
                startActivity(opener);*/
 
-                //DONE Before counting pixel colors, try compressing PNG to 50% quality or less
-                //  that way there are fewer colors for sprinkler.
-                //TODO When calculating area of overlapping regions, actually calculate proper
-                //  areas of 1 sprinkler and 2 sprinklers with formula.
-                //  for the rest, then you can use pixels
 
-                //takeScreenShot2();
-                //makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
-                for (int i = 0; i < dv.sprinkx.size(); i++) {
-                    Log.wtf("*  Sprinkler Location ", "X: " + dv.sprinkx.get(i) + "  Y: " + dv.sprinky.get(i) + "  R: " + dv.sprinkr.get(i));
-                }
-                //Log.wtf("*BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
-                getIndividualCircles();
-                //Log.wtf("*Done getting circles", " DONE GETTING CIRCLES");
-                //README Make Bitmap smaller.
-                bmp = Bitmap.createScaledBitmap(bmp, (int) (bmp.getWidth() * 1), (int) (bmp.getHeight() * 1), true);
-                iterateThroughPixels(bmp);
-                askForLength(true, 3);
+                        //DONE Before counting pixel colors, try compressing PNG to 50% quality or less
+                        //  that way there are fewer colors for sprinkler.
+                        //TODO When calculating area of overlapping regions, actually calculate proper
+                        //  areas of 1 sprinkler and 2 sprinklers with formula.
+                        //  for the rest, then you can use pixels
 
-                //File file = takeScreenShot2();
-                //iterateThroughPixels(file);
+                        //takeScreenShot2();
+                        //makeToast("Bitmap Info: " + bmp.getWidth() + " " + bmp.getHeight());
+                        for (int i = 0; i < dv.sprinkx.size(); i++) {
+                            Log.wtf("*  Sprinkler Location ", "X: " + dv.sprinkx.get(i) + "  Y: " + dv.sprinky.get(i) + "  R: " + dv.sprinkr.get(i));
+                        }
+                        //Log.wtf("*BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
+                        getIndividualCircles();
+                        //Log.wtf("*Done getting circles", " DONE GETTING CIRCLES");
+                        //README Make Bitmap smaller.
+                        bmp[0] = Bitmap.createScaledBitmap(bmp[0], (int) (bmp[0].getWidth() * 1), (int) (bmp[0].getHeight() * 1), true);
+                        iterateThroughPixels(bmp[0]);
+                        //askForLength(true, 3);
+
+                        //File file = takeScreenShot2();
+                        //iterateThroughPixels(file);
+                    }
+                }, 300);
+
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -1350,11 +1386,17 @@ public class MainActivity extends AppCompatActivity {
         add("54c6ff");
         add("54c7ff");
     }};
+    //FUTURE FILES
+    //INFO As of 11/29/19 for some reason the AlertDialog is finally working now. So what you can do is make an AlertDialog
+    //  when they place down 2 sprinklers and then ask them to enter in the length of that side.
+    //  This approach is much nicer than having an always-present EditText.
+    //  Use the Alert Dialog to ask for the side length.
+
+
     //FUTURE FIles
     //INFO Maybe have a feature where for the results it displays the bad sprinkler placements by making them pop out.
     //  For example, when iterating through bitmap pixels, if the sprinkler is fine, then you edit the color and make it
     //  greyed out, otherwise you leave it the same, that way they can see that those placements were bad.
-
 
 
     //FUTURE FILES Idea for accurately calculating area:
@@ -1564,6 +1606,10 @@ public class MainActivity extends AppCompatActivity {
         if (counter2 % 5 == 0)
             output += "\n";
     }*/
+
+        hideLoading();
+        makeToast("Got everything");
+
         String output = "hi";
         Log.wtf("*   Iterating Through Pixels ----", logger);
         //Log.wtf("*  Not accepted ----", "O: " + output);
