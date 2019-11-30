@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         context = getApplicationContext();
         //askForLength(true, 2);
 
-        handleResults(3, 3, 3, 3, 100);
+        //handleResults(3, 3, 3, 3, 100);
     }
 
     public boolean leaveAlone = false;
@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                     Math.abs(dv.ylist.get(i) - dv.ylist.get(i + 1))) * saveRadius));
             textView.setId(dv.idCounter);
             textView.setLayoutParams(params);
-            makeToast("Making the text");
+            //makeToast("Making the text");
             rlDvHolder.addView(textView);
             dv.idCounter++;
 
@@ -502,6 +502,13 @@ public class MainActivity extends AppCompatActivity {
                 //INFO this is when the user lets go of the slider
                 //makeToast("Invalidating");
                 dv.sradius = seekBar.getProgress();
+                int max = seekBar.getMax();
+                int min = seekBar.getMin();
+                int setToI = (int) ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 9, 2));
+                //double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 9, 2));
+                makeToast("Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet.");
+                Log.wtf("* Sprinkler Radius Info: ", "Pixel radius (setTo): " + setToI + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+                        + "Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet");
                 //makeToast("Updating sradius: " + dv.sradius);
             }
 
@@ -1025,7 +1032,7 @@ public class MainActivity extends AppCompatActivity {
                             Math.abs(ylist.get(0) - ylist.get(1))) * ratio));
                     textView.setId(idCounter);
                     textView.setLayoutParams(params);
-                    makeToast("Making the text");
+                    //makeToast("Making the text");
                     rlDvHolder.addView(textView);
                     idCounter++;
                 }
@@ -1040,7 +1047,7 @@ public class MainActivity extends AppCompatActivity {
                         Math.abs(ylist.get(posCount) - ylist.get(posCount + 1))) * ratio));
                 textView.setId(idCounter);
                 textView.setLayoutParams(params);
-                makeToast("Making the text");
+                //makeToast("Making the text");
                 rlDvHolder.addView(textView);
 
                 //DONE HAVE to deal with adding textview from last to first. and removing from previous touch.
@@ -1066,7 +1073,7 @@ public class MainActivity extends AppCompatActivity {
                         Math.abs(ylist.get(ylist.size() - 1) - ylist.get(0))) * ratio));
                 last.setId(specialCounter);
                 last.setLayoutParams(params2);
-                makeToast("Making the last text");
+                //makeToast("Making the last text");
                 rlDvHolder.addView(last);
 
                 idCounter++;
@@ -1593,9 +1600,9 @@ public class MainActivity extends AppCompatActivity {
         else if (dv.sprinkx.size() < 17)
             counter *= 3.9;
         else if (dv.sprinkx.size() < 25)
-            counter *= 6;
+            counter *= 7.5;
         else
-            counter *= 8;
+            counter *= 9.5;
 
         for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
@@ -1660,19 +1667,19 @@ public class MainActivity extends AppCompatActivity {
         Button next = (Button) dialog.findViewById(R.id.continueBtn);
         //results.setVisibility(View.VISIBLE);
 
-        final EditText numSprink = (EditText) results.findViewById(R.id.sNum);
-        final  TextView nonOverlapT = dialog.findViewById(R.id.noA);
-        final  TextView overlapA = dialog.findViewById(R.id.oA);
-        final  TextView totalA = dialog.findViewById(R.id.tA);
+        final TextView numSprink = results.findViewById(R.id.sNum);
+        final TextView nonOverlapT = dialog.findViewById(R.id.noA);
+        final TextView overlapA = dialog.findViewById(R.id.oA);
+        final TextView totalA = dialog.findViewById(R.id.tA);
         final TextView landCovered = dialog.findViewById(R.id.lcA);
-        final  TextView totalLandA = dialog.findViewById(R.id.tlA);
-        final  TextView percentCoveredA = dialog.findViewById(R.id.pcA);
-        final    TextView numIntersect = dialog.findViewById(R.id.plc);
-        final  TextView wasted = dialog.findViewById(R.id.ww);
-        final  TextView totalWaterOutput = dialog.findViewById(R.id.two);
-        final  TextView percentWasted = dialog.findViewById(R.id.pww);
-        final  TextView perMonth = dialog.findViewById(R.id.permonth);
-        final  TextView perYear = dialog.findViewById(R.id.peryear);
+        final TextView totalLandA = dialog.findViewById(R.id.tlA);
+        final TextView percentCoveredA = dialog.findViewById(R.id.pcA);
+        final TextView numIntersect = dialog.findViewById(R.id.plc);
+        final TextView wasted = dialog.findViewById(R.id.ww);
+        final TextView totalWaterOutput = dialog.findViewById(R.id.two);
+        final TextView percentWasted = dialog.findViewById(R.id.pww);
+        final TextView perMonth = dialog.findViewById(R.id.permonth);
+        final TextView perYear = dialog.findViewById(R.id.peryear);
 
         next.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1715,30 +1722,37 @@ public class MainActivity extends AppCompatActivity {
                     });
 
 
-                    //TODO Just do the calculations to display the actual stuff.
+                    //DONE Just do the calculations to display the actual stuff.
 
-
-                    numSprink.setText("a");
-                    dv.ratio = 1/3;
-                    dv.sprinkr.add(0, 15);
-                    nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + "gal/wk");
-                    overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + "gal/wk");
-                    totalA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + "gal/wk");
                     double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
+                    //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
+                    double percentWastage = ((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion));
 
-                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + "sq. ft");
-                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + "sq. ft");
+                    numSprink.setText(dv.sprinkx.size() + "");
+                    Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
+                    numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
+                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
                     percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
+                    percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
+                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    wasted.setText(String.format("%1$,.2f",
+                            duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
 
-                    numIntersect.setText(""+(dv.sprinkx.size() - singleX.size()));
-                    wasted.setText(duration * pixToGallon(area, waterUsed) * duration + "gal/wk");
-                    totalWaterOutput.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + "gal/wk");
-                    double percentWastage = area / non + counter + overlappingButOnly1SprinklerRegion;
 
-                    percentWasted.setText(String.format("%1$,.1f", percentWastage) + "%");
+                    nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
+                    //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
+                    overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
+                    //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
 
-                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * percentWastage) + "gal");
-                    perMonth.setText(String.format("%1$,.0f", 52 * duration * waterUsed * percentWastage) + "gal");
+        //TODO Shift left and shift right
+
+                    //wasted.setText(String.format("%1$,.1f", duration * pixToGallon(area, waterUsed)) + " gal/wk");
+                    //totalWaterOutput.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + " gal/wk");
+
                 }
 
             }

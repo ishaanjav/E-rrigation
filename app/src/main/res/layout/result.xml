@@ -160,19 +160,20 @@
                 android:id="@+id/sprinklers"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="5sp"
                 android:textSize="17sp"
                 android:text="# of Sprinklers:" />
 
-            <EditText
+            <TextView
                 android:id="@+id/sNum"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:textColor="#000"
+                android:layout_marginRight="12sp"
                 android:enabled="false"
                 android:textStyle="bold" />
 
@@ -182,19 +183,20 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sNum"
                 android:textSize="17sp"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="5sp"
                 android:text="Water Output of Non-overlapping Sprinklers:" />
 
             <TextView
                 android:id="@+id/noA"
                 android:layout_width="wrap_content"
+                android:textColor="#000"
                 android:layout_height="wrap_content"
                 android:text="="
                 android:layout_below="@+id/sNum"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="15sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="28sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -203,19 +205,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/nonoverlap"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="3sp"
+                android:layout_marginRight="10sp"
                 android:text="Water Output of Overlapping Sprinklers:" />
 
             <TextView
+                android:textColor="#000"
                 android:id="@+id/oA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/nonoverlap"
                 android:text="="
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="15sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="26sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -224,19 +228,20 @@
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
                 android:layout_below="@+id/overlap"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="3sp"
                 android:text="Total Water Output:" />
 
             <TextView
                 android:id="@+id/tA"
+                android:textColor="#000"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="="
                 android:layout_below="@+id/overlap"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="6sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
 
@@ -246,19 +251,20 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tA"
                 android:textSize="17sp"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="20sp"
-                android:text="Amount of Land Covered:" />
+                android:text="Land Area Covered:" />
 
             <TextView
+                android:textColor="#000"
                 android:id="@+id/lcA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tA"
                 android:layout_alignParentRight="true"
                 android:text="="
-                android:layout_marginTop="20sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="23sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
 
@@ -268,7 +274,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
                 android:layout_below="@+id/lcA"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="5sp"
                 android:text="Total Land Area: " />
 
@@ -277,10 +283,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/lcA"
+                android:textColor="#000"
                 android:text="="
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="8sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -289,7 +296,7 @@
                 android:textSize="17sp"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tlA"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="5sp"
                 android:text="Percentage of Land Covered: " />
 
@@ -298,10 +305,11 @@
                 android:layout_width="wrap_content"
                 android:text="="
                 android:layout_height="wrap_content"
+                android:textColor="#000"
                 android:layout_below="@+id/tlA"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="8sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
 
@@ -324,7 +332,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
                 android:layout_below="@+id/wastageStatistics"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="4dp"
                 android:text="# of Intersecting Sprinklers: " />
 
@@ -333,20 +341,23 @@
                 android:layout_width="wrap_content"
                 android:text="="
                 android:layout_height="wrap_content"
+                android:textColor="#000"
                 android:layout_below="@+id/wastageStatistics"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="7sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:textSize="17sp"
                 android:layout_height="wrap_content"
+                android:textColor="#5D815D"
+                android:textStyle="bold"
                 android:layout_below="@+id/plc"
-                android:layout_marginLeft="25sp"
-                android:layout_marginTop="5sp"
-                android:text="Water Wasted: " />
+                android:layout_marginLeft="21sp"
+                android:layout_marginTop="3sp"
+                android:text="*Water Wasted: " />
 
             <TextView
                 android:id="@+id/ww"
@@ -354,9 +365,10 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/plc"
                 android:text="="
+                android:textColor="#000"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="6sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -364,7 +376,7 @@
                 android:textSize="17sp"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/ww"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="5sp"
                 android:text="Total Water Output: " />
 
@@ -373,20 +385,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="="
+                android:textColor="#000"
                 android:layout_below="@+id/ww"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="8sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/two"
-                android:textSize="17sp"
-                android:layout_marginLeft="25sp"
-                android:layout_marginTop="5sp"
-                android:text="Percentage of Water Wasted: " />
+                android:textColor="#5D815D"
+                android:textStyle="bold"      android:textSize="17sp"
+                android:layout_marginLeft="21sp"
+                android:layout_marginTop="4sp"
+                android:text="*Percentage of Water Wasted: " />
 
             <TextView
                 android:id="@+id/pww"
@@ -395,18 +409,20 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/two"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:textColor="#000"
+                android:layout_marginTop="7sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
-                android:layout_below="@+id/pww"
-                android:layout_marginLeft="25sp"
+                android:textColor="#5D815D"
+                android:textStyle="bold"    android:layout_below="@+id/pww"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="20sp"
-                android:text="Water Wasted Per Month: " />
+                android:text="*Water Wasted Per Month: " />
 
             <TextView
                 android:id="@+id/permonth"
@@ -414,9 +430,10 @@
                 android:layout_height="wrap_content"
                 android:text="="
                 android:layout_below="@+id/pww"
+                android:textColor="#000"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="20sp"
-                android:layout_marginRight="20sp"
+                android:layout_marginTop="23sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -424,19 +441,21 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/permonth"
                 android:textSize="17sp"
-                android:layout_marginLeft="25sp"
+                android:layout_marginLeft="21sp"
                 android:layout_marginTop="5sp"
-                android:text="Water Wasted Per Year: " />
+                android:textColor="#5D815D"
+                android:textStyle="bold"   android:text="*Water Wasted Per Year: " />
 
             <TextView
                 android:id="@+id/peryear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/permonth"
-                android:text="="
+                android:text="iuyi"
                 android:layout_alignParentRight="true"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="20sp"
+                android:textColor="#000"
+                android:layout_marginTop="9sp"
+                android:layout_marginRight="12sp"
                 android:textStyle="bold" />
 
 
@@ -449,7 +468,7 @@
                 android:id="@+id/done"
                 android:layout_below="@+id/peryear"
                 android:layout_marginTop="15sp"
-                android:background="#2E7C1E"
+                android:background="#4A973A"
                 android:textColor="#fff"
                 />
 
