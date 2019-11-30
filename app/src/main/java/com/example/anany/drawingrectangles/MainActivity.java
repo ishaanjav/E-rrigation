@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
                 Math.abs(dv.ylist.get(dv.ylist.size() - 1) - dv.ylist.get(0))) * saveRadius));
         last.setId(dv.specialCounter);
         last.setLayoutParams(params2);
-        makeToast("Making the last text");
+        //makeToast("Making the last text");
         rlDvHolder.addView(last);
 
         //dv.posCount++;
@@ -663,7 +663,7 @@ public class MainActivity extends AppCompatActivity {
         saveRadius = dv.ratio;
         dv.ratio = 1;
 
-        makeToast("HERE");
+        //makeToast("HERE");
         dv.length = 0;
         leaveAlone = true;
         length.setText("");
@@ -1183,7 +1183,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        makeToast("Polygon area: " + dv.polygonArea());
+        //makeToast("Polygon area: " + dv.polygonArea());
         switch (item.getItemId()) {
             case R.id.circle:
                 //TODO Have to draw circle.
@@ -1645,7 +1645,66 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleResults() {
-        AlertDialog.Builder loading;
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.result);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        Button continueBtn = (Button) dialog.findViewById(R.id.continueBtn);
+        final RelativeLayout results = (RelativeLayout) dialog.findViewById(R.id.realresults);
+        final RelativeLayout toHide = dialog.findViewById(R.id.questions);
+        final EditText waterUsedE = dialog.findViewById(R.id.waterused);
+        final EditText durationE = dialog.findViewById(R.id.duration);
+        Button next = (Button) dialog.findViewById(R.id.continueBtn);
+        //results.setVisibility(View.VISIBLE);
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String wU = waterUsedE.getText().toString();
+                boolean fgood = false;
+                boolean sgood = false;
+                if(wU != null){
+                    if(wU.length() > 0){
+                        double waterUsed = Double.parseDouble(wU);
+                        fgood = true;
+                    }
+                }
+
+                String d = durationE.getText().toString();
+                if(d != null){
+                    if(d.length() > 0){
+                        double duration = Double.parseDouble(d);
+                        sgood = true;
+                    }
+                }
+                Log.wtf("*  Progress", fgood + " " + sgood);
+
+                if(!(fgood&&sgood))
+                    makeToast("Please fill in the information.");
+                else{
+                    //DONE IT is good to contineu ahead.
+                    toHide.setVisibility(View.INVISIBLE);
+                    results.setVisibility(View.VISIBLE);
+
+                    Button done = dialog.findViewById(R.id.done);
+                    done.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                            dialog.cancel();
+                        }
+                    });
+                    //TODO Display the stuff
+
+                }
+
+            }
+        });
+
+        dialog.show();
+        /*AlertDialog.Builder loading;
         AlertDialog created;
         Log.wtf("*  Progress", "In handle results");
 
@@ -1663,7 +1722,9 @@ public class MainActivity extends AppCompatActivity {
         final EditText waterUsedE = created.findViewById(R.id.waterused);
         final EditText durationE = created.findViewById(R.id.duration);
         Button next = (Button) created.findViewById(R.id.continueBtn);
-        results.setVisibility(View.VISIBLE);
+        results.setVisibility(View.VISIBLE);*/
+
+
         /*next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
