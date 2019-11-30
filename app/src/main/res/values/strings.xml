@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">E-rrigation</string>
+    <string name="general"><u>General Statistics</u></string>
+    <string name="wastage"><u>Wastage Statistics</u></string>
 </resources>

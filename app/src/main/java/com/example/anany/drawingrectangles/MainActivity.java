@@ -14,6 +14,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
@@ -1386,7 +1387,19 @@ public class MainActivity extends AppCompatActivity {
         add("54c6ff");
         add("54c7ff");
     }};
-    //FUTURE FILES
+
+    //FUTURE FILES - Calculating area outside of polygon
+    //INFO 11/29/19 to calculate the amount of water outside the polgyon, use a technique called ray-casting
+    // Basically, before iterating through pixels, create an ArrayList for the equation of each polygon side,
+    // storing m and b as well as both pairs of coordinates.
+    //  Then, when iterating through pixel, if is not white, then get the y coordinate. Then, for each line side,
+    // use the equation to calculate the x given the y. If the x is in between the xs of the line's coordinates
+    // add 1 to a counter variable.
+    // In the end, if counter % 2 == 0, then that means it is not in the polygon because it is even,
+    // If odd, that means it is located inside the polygon.
+    // Use that to add to the area variable to count that as also being wasted water.
+
+    //FUTURE FILES - AlertDialog for getting side length
     //INFO As of 11/29/19 for some reason the AlertDialog is finally working now. So what you can do is make an AlertDialog
     //  when they place down 2 sprinklers and then ask them to enter in the length of that side.
     //  This approach is much nicer than having an always-present EditText.
@@ -1625,6 +1638,66 @@ public class MainActivity extends AppCompatActivity {
         //TODO Calculate polygon area.
         Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (dv.polygonArea())) + "\n");
         Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
+
+        //TODO Display the results in an AlertDialog.
+
+        handleResults();
+    }
+
+    private void handleResults() {
+        AlertDialog.Builder loading;
+        AlertDialog created;
+        Log.wtf("*  Progress", "In handle results");
+
+        loading = new AlertDialog.Builder(context);
+        LayoutInflater inflater = getLayoutInflater();
+        final View dialogCoordinate = inflater.inflate(R.layout.result, null);
+        loading.setCancelable(false);
+        loading.setView(dialogCoordinate);
+        created = loading.create();
+        created.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        created.show();
+
+        RelativeLayout results = (RelativeLayout) created.findViewById(R.id.realresults);
+        final RelativeLayout toHide = created.findViewById(R.id.questions);
+        final EditText waterUsedE = created.findViewById(R.id.waterused);
+        final EditText durationE = created.findViewById(R.id.duration);
+        Button next = (Button) created.findViewById(R.id.continueBtn);
+        results.setVisibility(View.VISIBLE);
+        /*next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String wU = waterUsedE.getText().toString();
+                boolean fgood = false;
+                boolean sgood = false;
+                if(wU != null){
+                    if(wU.length() > 0){
+                        double waterUsed = Double.parseDouble(wU);
+                        fgood = true;
+                    }
+                }
+
+                String d = durationE.getText().toString();
+                if(d != null){
+                    if(d.length() > 0){
+                        double duration = Double.parseDouble(d);
+                        sgood = true;
+                    }
+                }
+                Log.wtf("*  Progress", fgood + " " + sgood);
+
+                if(!(fgood&&sgood))
+                    makeToast("Please fill in the information.");
+                else{
+                    //TODO IT is good to contineu ahead.
+                    toHide.setVisibility(View.INVISIBLE);
+                    results.setVisibility(View.VISIBLE);
+                }
+
+            }
+        });*/
+
+
     }
 
     private int[] calculateWastage(boolean two) {
