@@ -264,7 +264,7 @@
                 android:layout_below="@+id/lcA"
                 android:layout_marginLeft="25sp"
                 android:layout_marginTop="5sp"
-                android:text="Total Land Covered: " />
+                android:text="Total Land Area: " />
 
             <TextView
                 android:id="@+id/tlA"
@@ -432,6 +432,7 @@
                 android:textSize="24sp"
                 android:textAllCaps="true"
                 android:text="Done"
+                android:id="@+id/done"
                 android:layout_below="@+id/peryear"
                 android:layout_marginTop="15sp"
                 android:background="#2E7C1E"

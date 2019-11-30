@@ -1696,7 +1696,22 @@ public class MainActivity extends AppCompatActivity {
                             dialog.cancel();
                         }
                     });
-                    //TODO Display the stuff
+                    TextView numSprink = dialog.findViewById(R.id.sNum);
+                    TextView nonOverlapT = dialog.findViewById(R.id.noA);
+                    TextView overlapA = dialog.findViewById(R.id.oA);
+                    TextView totalA = dialog.findViewById(R.id.tA);
+                    TextView landCovered = dialog.findViewById(R.id.lcA);
+                    TextView totalLandA = dialog.findViewById(R.id.tlA);
+                    TextView percentCoveredA = dialog.findViewById(R.id.pcA);
+                    TextView numIntersect = dialog.findViewById(R.id.plc);
+                    TextView wasted = dialog.findViewById(R.id.ww);
+                    TextView totalWaterOutput = dialog.findViewById(R.id.two);
+                    TextView percentWasted = dialog.findViewById(R.id.pww);
+                    TextView perMonth = dialog.findViewById(R.id.permonth);
+                    TextView perYear = dialog.findViewById(R.id.peryear);
+
+                    //TODO Just do the calculations to display the actual stuff.
+
 
                 }
 
