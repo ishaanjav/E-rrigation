@@ -165,13 +165,15 @@
                 android:textSize="17sp"
                 android:text="# of Sprinklers:" />
 
-            <TextView
+            <EditText
                 android:id="@+id/sNum"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
                 android:layout_marginRight="20sp"
+                android:enabled="false"
                 android:textStyle="bold" />
 
             <TextView
@@ -188,6 +190,7 @@
                 android:id="@+id/noA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="="
                 android:layout_below="@+id/sNum"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="15sp"
@@ -209,6 +212,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/nonoverlap"
+                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="15sp"
                 android:layout_marginRight="20sp"
@@ -228,6 +232,7 @@
                 android:id="@+id/tA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="="
                 android:layout_below="@+id/overlap"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
@@ -251,6 +256,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tA"
                 android:layout_alignParentRight="true"
+                android:text="="
                 android:layout_marginTop="20sp"
                 android:layout_marginRight="20sp"
                 android:textStyle="bold" />
@@ -271,6 +277,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/lcA"
+                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
                 android:layout_marginRight="20sp"
@@ -289,6 +296,7 @@
             <TextView
                 android:id="@+id/pcA"
                 android:layout_width="wrap_content"
+                android:text="="
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tlA"
                 android:layout_alignParentRight="true"
@@ -318,11 +326,12 @@
                 android:layout_below="@+id/wastageStatistics"
                 android:layout_marginLeft="25sp"
                 android:layout_marginTop="4dp"
-                android:text="# of Intersecting Circles: " />
+                android:text="# of Intersecting Sprinklers: " />
 
             <TextView
                 android:id="@+id/plc"
                 android:layout_width="wrap_content"
+                android:text="="
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/wastageStatistics"
                 android:layout_alignParentRight="true"
@@ -344,6 +353,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/plc"
+                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
                 android:layout_marginRight="20sp"
@@ -362,6 +372,7 @@
                 android:id="@+id/two"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="="
                 android:layout_below="@+id/ww"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
@@ -380,6 +391,7 @@
             <TextView
                 android:id="@+id/pww"
                 android:layout_width="wrap_content"
+                android:text="="
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/two"
                 android:layout_alignParentRight="true"
@@ -400,6 +412,7 @@
                 android:id="@+id/permonth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="="
                 android:layout_below="@+id/pww"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="20sp"
@@ -420,6 +433,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/permonth"
+                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
                 android:layout_marginRight="20sp"

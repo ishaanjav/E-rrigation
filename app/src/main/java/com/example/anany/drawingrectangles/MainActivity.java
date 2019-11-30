@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
         context = getApplicationContext();
         //askForLength(true, 2);
 
+        handleResults(3, 3, 3, 3, 100);
     }
 
     public boolean leaveAlone = false;
@@ -1641,10 +1642,10 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO Display the results in an AlertDialog.
 
-        handleResults();
+        handleResults(non, counter, overlappingButOnly1SprinklerRegion, area, dv.polygonArea());
     }
 
-    private void handleResults() {
+    private void handleResults(final int non, final int counter, final int overlappingButOnly1SprinklerRegion, final int area, final double v) {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
@@ -1659,31 +1660,47 @@ public class MainActivity extends AppCompatActivity {
         Button next = (Button) dialog.findViewById(R.id.continueBtn);
         //results.setVisibility(View.VISIBLE);
 
+        final EditText numSprink = (EditText) results.findViewById(R.id.sNum);
+        final  TextView nonOverlapT = dialog.findViewById(R.id.noA);
+        final  TextView overlapA = dialog.findViewById(R.id.oA);
+        final  TextView totalA = dialog.findViewById(R.id.tA);
+        final TextView landCovered = dialog.findViewById(R.id.lcA);
+        final  TextView totalLandA = dialog.findViewById(R.id.tlA);
+        final  TextView percentCoveredA = dialog.findViewById(R.id.pcA);
+        final    TextView numIntersect = dialog.findViewById(R.id.plc);
+        final  TextView wasted = dialog.findViewById(R.id.ww);
+        final  TextView totalWaterOutput = dialog.findViewById(R.id.two);
+        final  TextView percentWasted = dialog.findViewById(R.id.pww);
+        final  TextView perMonth = dialog.findViewById(R.id.permonth);
+        final  TextView perYear = dialog.findViewById(R.id.peryear);
+
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String wU = waterUsedE.getText().toString();
                 boolean fgood = false;
                 boolean sgood = false;
-                if(wU != null){
-                    if(wU.length() > 0){
-                        double waterUsed = Double.parseDouble(wU);
+                double waterUsed = 0;
+                double duration = 0;
+                if (wU != null) {
+                    if (wU.length() > 0) {
+                        waterUsed = Double.parseDouble(wU);
                         fgood = true;
                     }
                 }
 
                 String d = durationE.getText().toString();
-                if(d != null){
-                    if(d.length() > 0){
-                        double duration = Double.parseDouble(d);
+                if (d != null) {
+                    if (d.length() > 0) {
+                        duration = Double.parseDouble(d);
                         sgood = true;
                     }
                 }
                 Log.wtf("*  Progress", fgood + " " + sgood);
 
-                if(!(fgood&&sgood))
+                if (!(fgood && sgood))
                     makeToast("Please fill in the information.");
-                else{
+                else {
                     //DONE IT is good to contineu ahead.
                     toHide.setVisibility(View.INVISIBLE);
                     results.setVisibility(View.VISIBLE);
@@ -1696,84 +1713,47 @@ public class MainActivity extends AppCompatActivity {
                             dialog.cancel();
                         }
                     });
-                    TextView numSprink = dialog.findViewById(R.id.sNum);
-                    TextView nonOverlapT = dialog.findViewById(R.id.noA);
-                    TextView overlapA = dialog.findViewById(R.id.oA);
-                    TextView totalA = dialog.findViewById(R.id.tA);
-                    TextView landCovered = dialog.findViewById(R.id.lcA);
-                    TextView totalLandA = dialog.findViewById(R.id.tlA);
-                    TextView percentCoveredA = dialog.findViewById(R.id.pcA);
-                    TextView numIntersect = dialog.findViewById(R.id.plc);
-                    TextView wasted = dialog.findViewById(R.id.ww);
-                    TextView totalWaterOutput = dialog.findViewById(R.id.two);
-                    TextView percentWasted = dialog.findViewById(R.id.pww);
-                    TextView perMonth = dialog.findViewById(R.id.permonth);
-                    TextView perYear = dialog.findViewById(R.id.peryear);
+
 
                     //TODO Just do the calculations to display the actual stuff.
 
 
+                    numSprink.setText("a");
+                    dv.ratio = 1/3;
+                    dv.sprinkr.add(0, 15);
+                    nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + "gal/wk");
+                    overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + "gal/wk");
+                    totalA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + "gal/wk");
+                    double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
+
+                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + "sq. ft");
+                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + "sq. ft");
+                    percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
+
+                    numIntersect.setText(""+(dv.sprinkx.size() - singleX.size()));
+                    wasted.setText(duration * pixToGallon(area, waterUsed) * duration + "gal/wk");
+                    totalWaterOutput.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + "gal/wk");
+                    double percentWastage = area / non + counter + overlappingButOnly1SprinklerRegion;
+
+                    percentWasted.setText(String.format("%1$,.1f", percentWastage) + "%");
+
+                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * percentWastage) + "gal");
+                    perMonth.setText(String.format("%1$,.0f", 52 * duration * waterUsed * percentWastage) + "gal");
                 }
 
             }
         });
 
         dialog.show();
-        /*AlertDialog.Builder loading;
-        AlertDialog created;
-        Log.wtf("*  Progress", "In handle results");
+    }
 
-        loading = new AlertDialog.Builder(context);
-        LayoutInflater inflater = getLayoutInflater();
-        final View dialogCoordinate = inflater.inflate(R.layout.result, null);
-        loading.setCancelable(false);
-        loading.setView(dialogCoordinate);
-        created = loading.create();
-        created.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        created.show();
+    public double pixToGallon(double pixels, double gpm) {
+        double r = dv.ratio;
+        double squarefeet = pixels * (Math.pow(r, 2));
+        double waterPerFootPerMinute = gpm / (Math.pow(2 * r, 2) * Math.PI);
+        //double waterPerFootPerMinute = gpm / (Math.pow(dv.sprinkr.get(0) * r, 2) * Math.PI);
 
-        RelativeLayout results = (RelativeLayout) created.findViewById(R.id.realresults);
-        final RelativeLayout toHide = created.findViewById(R.id.questions);
-        final EditText waterUsedE = created.findViewById(R.id.waterused);
-        final EditText durationE = created.findViewById(R.id.duration);
-        Button next = (Button) created.findViewById(R.id.continueBtn);
-        results.setVisibility(View.VISIBLE);*/
-
-
-        /*next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String wU = waterUsedE.getText().toString();
-                boolean fgood = false;
-                boolean sgood = false;
-                if(wU != null){
-                    if(wU.length() > 0){
-                        double waterUsed = Double.parseDouble(wU);
-                        fgood = true;
-                    }
-                }
-
-                String d = durationE.getText().toString();
-                if(d != null){
-                    if(d.length() > 0){
-                        double duration = Double.parseDouble(d);
-                        sgood = true;
-                    }
-                }
-                Log.wtf("*  Progress", fgood + " " + sgood);
-
-                if(!(fgood&&sgood))
-                    makeToast("Please fill in the information.");
-                else{
-                    //TODO IT is good to contineu ahead.
-                    toHide.setVisibility(View.INVISIBLE);
-                    results.setVisibility(View.VISIBLE);
-                }
-
-            }
-        });*/
-
-
+        return squarefeet * waterPerFootPerMinute;
     }
 
     private int[] calculateWastage(boolean two) {
