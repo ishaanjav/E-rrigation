@@ -1065,16 +1065,17 @@ public class CleanMainActivity extends AppCompatActivity {
 
         String logger = "Result: ";
         if (dv.sprinkx.size() < 4) {
+            counter *= 1.32f;
         } else if (dv.sprinkx.size() < 8)
-            counter *= 1.85;
+            counter *= 1.9f;
         else if (dv.sprinkx.size() < 12)
-            counter *= 3.2;
+            counter *= 3.3f;
         else if (dv.sprinkx.size() < 17)
-            counter *= 3.9;
+            counter *= 4.15f;
         else if (dv.sprinkx.size() < 25)
-            counter *= 7.5;
+            counter *= 7.6f;
         else
-            counter *= 9.5;
+            counter *= 9.8f;
 
         for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
