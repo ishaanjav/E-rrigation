@@ -527,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 if (dv.currentMode == DrawingView.Mode.drawc) {
-                    makeToast("ATTENTION! Enter the length of the circle's radius in feet.");
+                    makeToast("ATTENTION!\nEnter the length of the circle's radius in feet.");
                     dv.radius = progress;
                 }
 
@@ -585,7 +585,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makeToast("MODE: " + dv.currentMode);
+                //makeToast("MODE: " + dv.currentMode);
                 switch (dv.currentMode) {
                     case splot:
                         //TODO Reset the sprinkler points.
@@ -861,7 +861,7 @@ public class MainActivity extends AppCompatActivity {
                         //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
                         //NOTES Make it non-dimissible, but provide an Undo and a done button. for undo,
                         //  call dv.undo();
-                        makeToast("ATTENTION! Enter the length of this first side in feet.");
+                        makeToast("ATTENTION!\nEnter the length of this first side in feet.");
                         //MainActivity.askForLength(true);
                     }
                     break;
@@ -1465,7 +1465,7 @@ public class MainActivity extends AppCompatActivity {
         int non = 0, counter = 0;
         Log.wtf("* Sprinkler INFO: ", "SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
 
-        makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
+        //makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
         Log.wtf("*  Calculations 2", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         if (singleR.size() == dv.sprinkx.size()) {
             //Do nothing.
@@ -1477,7 +1477,7 @@ public class MainActivity extends AppCompatActivity {
             //counter += temp[1] - area;
             counter = temp[1];
 
-            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
+            //makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             Log.wtf("*  Calculations 2", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else if (singleR.size() + 3 == dv.sprinkx.size()) {
             //Just double the intersection area of any 2 circles.
@@ -1486,7 +1486,7 @@ public class MainActivity extends AppCompatActivity {
             //INFO Increase the area of non-individual sprinklers.
             counter += temp[1];
             //counter += temp[1] - area;
-            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
+           // makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             Log.wtf("*  Calculations 3", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else {
             makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
@@ -1612,7 +1612,7 @@ public class MainActivity extends AppCompatActivity {
         else if (dv.sprinkx.size() < 12)
             counter *= 3.2;
         else if (dv.sprinkx.size() < 17)
-            counter *= 4.9;
+            counter *= 4.15;
         else if (dv.sprinkx.size() < 25)
             counter *= 7.5;
         else
@@ -1633,7 +1633,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         hideLoading();
-        makeToast("Got everything");
+      //  makeToast("Got everything");
 
 
         Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
