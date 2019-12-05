@@ -52,7 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class DataCollection extends AppCompatActivity {
 
     Button button, btnUndo;
     static RelativeLayout rlDvHolder;
@@ -303,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
     AlertDialog created;
 
     public void showLoading() {
-        loading = new AlertDialog.Builder(MainActivity.this);
+        loading = new AlertDialog.Builder(DataCollection.this);
         LayoutInflater inflater = getLayoutInflater();
         final View dialogCoordinate = inflater.inflate(R.layout.loading, null);
         loading.setCancelable(false);
@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
 
         created = loading.create();
         created.show();
-        //makeToast("show loading called");
+        makeToast("show loading called");
         Log.wtf("* Alert Dialog", "Showing Loading. showLoading() called");
     }
 
@@ -338,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.no, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();*/
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(DataCollection.this);
         LayoutInflater inflater = getLayoutInflater();
         final View dialogCoordinate = inflater.inflate(R.layout.specify_length, null);
         dialogBuilder.setCancelable(false);
@@ -502,13 +502,13 @@ public class MainActivity extends AppCompatActivity {
                 //INFO this is when the user lets go of the slider
                 //makeToast("Invalidating");
                 dv.sradius = seekBar.getProgress();
-                int max = seekBar.getMax();
+                /*int max = seekBar.getMax();
                 int min = seekBar.getMin();
-                int setToI = (int) ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 7.4f, 2));
-                double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 7.4f, 2));
-                makeToast("Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet.");
-                //makeToast("Radius: " + (String.format("%1$,.1f", (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24))) + " feet.");
-                // dv.sradius = (int) (40f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 18);
+                int setToI = (int) ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 9, 2));
+                //double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 9, 2));
+                makeToast("Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet.");*/
+                makeToast("Radius: " + (String.format("%1$,.1f", (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24))) + " feet.");
+                dv.sradius = (int) (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24);
                 /*Log.wtf("* Sprinkler Radius Info: ", "Pixel radius (setTo): " + setToI + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
                         + "Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet");*/
                 //makeToast("Updating sradius: " + dv.sradius);
@@ -522,8 +522,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                dv.sradius = progress;
-                //dv.sradius = (int) (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24);
+                //dv.sradius = progress;
+                dv.sradius = (int) (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24);
 
 
                 if (dv.currentMode == DrawingView.Mode.drawc) {
@@ -986,10 +986,8 @@ public class MainActivity extends AppCompatActivity {
                     sprinky.add((int) y);
                     //OLD code below just does it based on number of pixels.
                     //  On higher ppi phones, sprinkle  r appears very small.
-                    //INFO For 3 lines, changed sradius/9 to /4.
-                    sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 7.4f, 2)));
-                    //sprinkr.add((int) ((double) (sradius/dv.ratio)));
-                    Log.wtf("* IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
+                    //sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 9, 2)));
+                    sprinkr.add((int) ((double) (sradius/dv.ratio)));
                     //sprinkr.add((int) Math.pow(sradius / 9, 2));
                     invalidate();
                 }
@@ -1403,10 +1401,6 @@ public class MainActivity extends AppCompatActivity {
         add("54c7ff");
     }};
 
-    //FUTURE FILES - Improve the sprinkler radius
-    //INFO Sprinkler radius is very small compared to the side.
-    // Make it so that it is Math.max of something that way it is larger. Maximum should always be at least 15 feet.
-
     //FUTURE FILES - Calculating area outside of polygon
     //INFO 11/29/19 to calculate the amount of water outside the polgyon, use a technique called ray-casting
     // Basically, before iterating through pixels, create an ArrayList for the equation of each polygon side,
@@ -1463,11 +1457,19 @@ public class MainActivity extends AppCompatActivity {
         int overlappingButOnly1SprinklerRegion = 0;
         int tracker = 0;
         int non = 0, counter = 0;
+
+        makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
         Log.wtf("* Sprinkler INFO: ", "SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
+
+        int[] temp = calculateWastage(true);
+        area += temp[0] * (dv.sprinky.size()-singleR.size()-1);
+        //INFO Increase the area of non-individual sprinklers.
+        //counter += temp[1] - area;
+        counter = temp[1];
 
         makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
         Log.wtf("*  Calculations 2", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
-        if (singleR.size() == dv.sprinkx.size()) {
+        /*if (singleR.size() == dv.sprinkx.size()) {
             //Do nothing.
         } else if (singleR.size() + 2 == dv.sprinkx.size()) {
 //Calculate the intersection area of 2 circles.
@@ -1542,49 +1544,48 @@ public class MainActivity extends AppCompatActivity {
                             counter += 5;
                         }
 
-                        //NOTE Keep this commented out below.
-                        /*if (pos2.contains(pix))
-                            area += 1;
-                        else if (pos3.contains(pix))
-                            area += 2;
-                        else if (pos4.contains(pix))
-                            area += 3;
-                        else if (pos5.contains(pix))
-                            area += 4;
-                        else {
-                            //INFO It was none of the above. This means that 25% 2 sprinklers, 25% 3 sprinklers, 50% 6+.
-                            //FIXME Change above weights since it overstimates.
-                            //TRY Checking if pix is in a certain range of colors by using compareTo (that way it doesn't get whites)
-                            // , then add water wastage amount using new weights.
-                            //NOTES
-                            //  maybe ignore things starting with 4d-53 and treat it like it was in only one sprinkler.
-                            //  Maybe just go up to 60 as max or something.
-                            //  Then come up with 2/3 other intervals. Give the smallest ones weights of 2 and 3, with 2 being bigger.
-                            //  Then in else case, just have it be 6;
-                            if (!pix.equals("000000") && !pix.equals("369646")) {
-                                tracker++;
+                    *//*if (pos2.contains(pix))
+                        area += 1;
+                    else if (pos3.contains(pix))
+                        area += 2;
+                    else if (pos4.contains(pix))
+                        area += 3;
+                    else if (pos5.contains(pix))
+                        area += 4;
+                    else {
+                        //INFO It was none of the above. This means that 25% 2 sprinklers, 25% 3 sprinklers, 50% 6+.
+                        //FIXME Change above weights since it overstimates.
+                        //TRY Checking if pix is in a certain range of colors by using compareTo (that way it doesn't get whites)
+                        // , then add water wastage amount using new weights.
+                        //NOTES
+                        //  maybe ignore things starting with 4d-53 and treat it like it was in only one sprinkler.
+                        //  Maybe just go up to 60 as max or something.
+                        //  Then come up with 2/3 other intervals. Give the smallest ones weights of 2 and 3, with 2 being bigger.
+                        //  Then in else case, just have it be 6;
+                        if (!pix.equals("000000") && !pix.equals("369646")) {
+                            tracker++;
 
-                                if ("4b".compareTo(pix) < 0 && "48".compareTo(pix) > 0)
-                                    overlappingButOnly1SprinklerRegion++;
-                                else if ("49a".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
-                                    area += 4;
-                                if ("4b".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
-                                    area += 4;
-                                else if ("54c5ff".compareTo(pix) < 0 && "54c8".compareTo(pix) > 0)
-                                    area += 5;
-                                else if ("6".compareTo(pix) < 0)
-                                    area += 6;
-                                else
-                                    area += 0;
+                           *//**//* if ("4b".compareTo(pix) < 0 && "48".compareTo(pix) > 0)
+                                overlappingButOnly1SprinklerRegion++;
+                            else if ("49a".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
+                                area += 4;*//**//*
+                           if ("4b".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
+                                area += 4;
+                            else if ("54c5ff".compareTo(pix) < 0 && "54c8".compareTo(pix) > 0)
+                                area += 5;
+                            else if ("6".compareTo(pix) < 0)
+                                area += 6;
+                            else
+                                area+=0;
 
-                                //OLD code to try to count whether 6 sprinklers are overlapping.
-                                *//**//**//*if (tracker % 4 == 1) area += 1;
+                            //OLD code to try to count whether 6 sprinklers are overlapping.
+                            *//**//*if (tracker % 4 == 1) area += 1;
                             else if (tracker % 4 == 2) area += 2;
-                                else area += 6;*//**//**//*
-                            }
+                            else area += 6;*//**//*
+                        }
 
 
-                        }*/
+                }*//*
                         hm.put(pix, hm.getOrDefault(pix, 0) + 1);
                     } else {
                         //INFO If !good: pixel is inside sprinkler.
@@ -1595,7 +1596,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-        }
+        }*/
         if (dv.sprinkx.size() == singleX.size())
             area = 0;
 
@@ -1606,40 +1607,51 @@ public class MainActivity extends AppCompatActivity {
         int sum = 0;
         //OLD Code for calculating non-wasted water. INACCURATE
         //TODO CHeck if below is impacting the exact formula.
-        if (dv.sprinkx.size() < 4) {
+        /*if (dv.sprinkx.size() < 4) {
         } else if (dv.sprinkx.size() < 8)
             counter *= 1.85;
         else if (dv.sprinkx.size() < 12)
             counter *= 3.2;
         else if (dv.sprinkx.size() < 17)
-            counter *= 4.9;
+            counter *= 3.9;
         else if (dv.sprinkx.size() < 25)
             counter *= 7.5;
         else
-            counter *= 9.6;
+            counter *= 9.5;*/
 
-        for (Map.Entry<String, Integer> entry : hm.entrySet()) {
+        /*for (Map.Entry<String, Integer> entry : hm.entrySet()) {
             logger += "\n" + entry.toString();
             if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
                 //README This statement is making sure that counter is a sprinkler.
                 if ("42".compareTo(entry.getKey()) < 0 && "65".compareTo(entry.getKey()) > 0)
                     counter += entry.getValue();
             }
-        }
+        }*/
         //Log.wtf("*ITERATION STATUS:", "Done tallying");
 
         for (double m : singleR)
             non += Math.pow(m, 2) * Math.PI;
 
+        //Log.wtf("*ITERATION STATUS:", "Done calculating non");
+
+    /*String output = "";
+    int counter2 = 0;
+    for (String a : notGood) {
+        output += a + "  ";
+        counter2++;
+        if (counter2 % 5 == 0)
+            output += "\n";
+    }*/
 
         hideLoading();
         makeToast("Got everything");
 
-
+        String output = "hi";
+        Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
         Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
-//        Log.wtf("*   Pixels -  METHOD ----", logger);
-//        Log.wtf("*  Not accepted ----", "O: " + output);
-
+        Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
+        Log.wtf("*   FORMULA METHOD ----", logger);
+        //Log.wtf("*  Not accepted ----", "O: " + output);
         //INFO Area of individual sprinklers calculated with formula.           NOT WASTED
         Log.wtf("*  Non overlap Sprinkler Area: ----", "" + non);
         //INFO Counter is the area of each sprinkler that overlaps. FULL AREA - multicounts overlapping
@@ -1652,19 +1664,182 @@ public class MainActivity extends AppCompatActivity {
         //DONE Calculate polygon area.
         Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (dv.polygonArea())) + "\n");
         Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
+        Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
+        Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
 
-        handleResults(non, counter, overlappingButOnly1SprinklerRegion, area, dv.polygonArea());
+
+        //README This is for data collection - pixel-counting method
+        non = 0;
+        overlappingButOnly1SprinklerRegion = 0;
+        counter = 0;
+        area = 0;
+        for (int y = 0; y < bmp.getHeight(); y++) {
+            for (int x = 0; x < bmp.getWidth(); x++) {
+                int pixel = bmp.getPixel(x, y);
+
+                int redValue = Color.red(pixel);
+                int blueValue = Color.blue(pixel);
+                int greenValue = Color.green(pixel);
+
+                String red = "", blue = "", green = "";
+                //red += (redValue < 10) ? ("0" + redValue) : (redValue);
+                //blue += (blueValue < 10) ? ("0" + redValue) : (redValue);
+                //green += (greenValue < 10) ? ("0" + redValue) : (redValue);
+
+
+                String pix = red + "," + blue + "," + green;
+                pix = redValue + "," + blueValue + "," + greenValue;
+                pix = convertTo16(redValue) + convertTo16(greenValue) + convertTo16(blueValue);
+
+                boolean good = true;
+
+                for (int i = 0; i < singleR.size(); i++) {
+                    double distance = Math.sqrt(Math.pow(x - singleX.get(i), 2) + Math.pow(y - singleY.get(i), 2));
+                    if ((int) distance <= singleR.get(i)) {
+                        good = false;
+                        break;
+                    }
+                }
+
+                //INFO if good: pixel is not in sprinkler which means it is in an overlapping region or no sprinkler.
+                if (good) {
+                    //TODO Since pixel is not in the sprinkler, you have to do the pixel count stuff.
+                    //TRY Checking (for pos 2 and maybe pos 3) if it is within a range of colors using compareTo
+                    //  Do not just use discrete values. Check in a range to make sure.
+
+                    if (("4b".compareTo(pix) < 0 && "51".compareTo(pix) > 0))
+                        overlappingButOnly1SprinklerRegion++;
+                    else if ("51".compareTo(pix) < 0 && "52".compareTo(pix) > 0) {
+                        area += 4;
+                        counter += 4;
+                    } else if ("54".compareTo(pix) < 0 && "57".compareTo(pix) > 0) {
+                        overlappingButOnly1SprinklerRegion++;
+                    } else if ("52".compareTo(pix) < 0 && "54".compareTo(pix) > 0) {
+                        area += 3;
+                        counter += 3;
+                    } else if ("57".compareTo(pix) < 0 && "61".compareTo(pix) > 0) {
+                        area += 2;
+                        counter += 2;
+                    } else if ("61".compareTo(pix) < 0 && "65".compareTo(pix) > 0) {
+                        area += 5;
+                        counter += 5;
+                    }
+
+                    /*if (pos2.contains(pix))
+                        area += 1;
+                    else if (pos3.contains(pix))
+                        area += 2;
+                    else if (pos4.contains(pix))
+                        area += 3;
+                    else if (pos5.contains(pix))
+                        area += 4;
+                    else {
+                        //INFO It was none of the above. This means that 25% 2 sprinklers, 25% 3 sprinklers, 50% 6+.
+                        //FIXME Change above weights since it overstimates.
+                        //TRY Checking if pix is in a certain range of colors by using compareTo (that way it doesn't get whites)
+                        // , then add water wastage amount using new weights.
+                        //NOTES
+                        //  maybe ignore things starting with 4d-53 and treat it like it was in only one sprinkler.
+                        //  Maybe just go up to 60 as max or something.
+                        //  Then come up with 2/3 other intervals. Give the smallest ones weights of 2 and 3, with 2 being bigger.
+                        //  Then in else case, just have it be 6;
+                        if (!pix.equals("000000") && !pix.equals("369646")) {
+                            tracker++;
+
+                           *//* if ("4b".compareTo(pix) < 0 && "48".compareTo(pix) > 0)
+                                overlappingButOnly1SprinklerRegion++;
+                            else if ("49a".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
+                                area += 4;*//*
+                           if ("4b".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
+                                area += 4;
+                            else if ("54c5ff".compareTo(pix) < 0 && "54c8".compareTo(pix) > 0)
+                                area += 5;
+                            else if ("6".compareTo(pix) < 0)
+                                area += 6;
+                            else
+                                area+=0;
+
+                            //OLD code to try to count whether 6 sprinklers are overlapping.
+                            *//*if (tracker % 4 == 1) area += 1;
+                            else if (tracker % 4 == 2) area += 2;
+                            else area += 6;*//*
+                        }
+
+
+                }*/
+                    hm.put(pix, hm.getOrDefault(pix, 0) + 1);
+                } else {
+                    //INFO If !good: pixel is inside sprinkler.
+                    //  Area already calculated in non.
+                    //notGood.add(pix + ":---  " + x + " " + y);
+                }
+                //hm.put(pix, hm.getOrDefault(pix, 0) + 1);
+
+            }
+        }
+        for (Map.Entry<String, Integer> entry : hm.entrySet()) {
+            logger += "\n" + entry.toString();
+            if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
+                //README This statement is making sure that counter is a sprinkler.
+                if ("42".compareTo(entry.getKey()) < 0 && "65".compareTo(entry.getKey()) > 0)
+                    counter += entry.getValue();
+            }
+        }
+        for (double m : singleR)
+            non += Math.pow(m, 2) * Math.PI;
+        if (dv.sprinkx.size() < 4) {
+            counter *= 1.32f;
+        } else if (dv.sprinkx.size() < 8)
+            counter *= 1.9f;
+        else if (dv.sprinkx.size() < 12)
+            counter *= 3.3f;
+        else if (dv.sprinkx.size() < 17)
+            counter *= 4.15f;
+        else if (dv.sprinkx.size() < 25)
+            counter *= 7.6f;
+        else
+            counter *= 9.8f;
+
+        Log.wtf("*   Pixel Counting METHOD ----", "r");
+        //Log.wtf("*  Not accepted ----", "O: " + output);
+        //INFO Area of individual sprinklers calculated with formula.           NOT WASTED
+        Log.wtf("*  Non overlap Sprinkler Area: ----", "" + non);
+        //INFO Counter is the area of each sprinkler that overlaps. FULL AREA - multicounts overlapping
+        Log.wtf("*  Everything Besides Individual (not non): --------", "" + counter);
+        //INFO Area of intersecting sprinkler, nonoverlap part.                 NOT WASTED
+        Log.wtf("*  Intersecting Sprinkler, But Only 1 Region: --------", "" + overlappingButOnly1SprinklerRegion);
+        //INFO Amount of intersecting sprinkler, overlap part.
+        Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
+        Log.wtf("*      TOTAL AMOUNT WASTED: -------", (((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion)) + "\n"));
+        //DONE Calculate polygon area.
+        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (dv.polygonArea())) + "\n");
+        Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
+        Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
+        Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
+
+        //TODO Uncomment below.
+        //handleResults(non, counter, overlappingButOnly1SprinklerRegion, area, dv.polygonArea());
+
+        Log.wtf("*   By hand calculated method: ", "Looping now");
+        for(int i = 0; i < dv.sprinkx.size();i ++){
+            if(singleX.contains(dv.sprinkx.get(i)) && singleY.contains(dv.sprinky.get(i)) && singleR.contains(dv.sprinkr.get(i))){
+                //README This is basically if the sprinkler is individual.
+                Log.wtf("*   Inidividual Sprinkler:", dv.sprinkx + " " + dv.sprinky + " " + dv.sprinkr);
+            }else{
+                Log.wtf("*   Overlapping Sprinklers:", dv.sprinkx + " " + dv.sprinky + " " + dv.sprinkr);
+            }
+        }
+
     }
 
     private void handleResults(final int non, final int counter, final int overlappingButOnly1SprinklerRegion, final int area, final double v) {
-        final Dialog dialog = new Dialog(MainActivity.this);
+        final Dialog dialog = new Dialog(DataCollection.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.result);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         Button continueBtn = (Button) dialog.findViewById(R.id.continueBtn);
-        Button backBtn = (Button) dialog.findViewById(R.id.backBtn);
         final RelativeLayout results = (RelativeLayout) dialog.findViewById(R.id.realresults);
         final RelativeLayout toHide = dialog.findViewById(R.id.questions);
         final EditText waterUsedE = dialog.findViewById(R.id.waterused);
@@ -1685,14 +1860,6 @@ public class MainActivity extends AppCompatActivity {
         final TextView percentWasted = dialog.findViewById(R.id.pww);
         final TextView perMonth = dialog.findViewById(R.id.permonth);
         final TextView perYear = dialog.findViewById(R.id.peryear);
-
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.cancel();
-                dialog.dismiss();
-            }
-        });
 
         next.setOnClickListener(new View.OnClickListener() {
             @Override
