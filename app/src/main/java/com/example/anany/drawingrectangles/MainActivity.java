@@ -184,7 +184,10 @@ public class MainActivity extends AppCompatActivity {
                                 // the ratio between their length and pixel length;
                                 dv.length = numVal;
                                 if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
-                                    dv.ratio = dv.radius / numVal;
+                                    //dv.ratio = dv.radius / numVal;
+                                    dv.ratio = dv.radius / (dv.radius * (dv.screenW / 200));
+                                    Log.wtf("**Ratio, ", "Ratio is: " + dv.ratio);
+
                                 } else {
                                     dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
                                             Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
@@ -494,6 +497,8 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    int messageCount = 0;
+
     private void setRadiusBar() {
         radius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -504,9 +509,26 @@ public class MainActivity extends AppCompatActivity {
                 dv.sradius = seekBar.getProgress();
                 int max = seekBar.getMax();
                 int min = seekBar.getMin();
-                int setToI = (int) ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 7.4f, 2));
-                double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 7.4f, 2));
-                makeToast("Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet.");
+                double sprinklerRadius = seekBar.getProgress() * (dv.screenW / 200);
+                float bigCircleRadius = dv.setCircleRadiusTo;
+                float bigCircleFeet = dv.length;
+                Log.wtf("*Seek bar info:", "max: " + max + "  min: " + min + "  current: " + seekBar.getProgress());
+                int setToI = (int) ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2)) - 50;
+                double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2));
+                double scale = (double) bigCircleRadius / (bigCircleFeet - 2);
+                double t = seekBar.getProgress()/100 * scale;
+                double newProgress = scale * dv.sradius;
+
+                if (dv.currentMode != DrawingView.Mode.drawc) {
+
+                    Log.wtf("**IMPORTANT INFO :", bigCircleRadius + " " + sprinklerRadius
+                    + " " + dv.sradius + " " + dv.radius);
+                    //makeToast("Radius: " + (String.format("%1$,.1f", (sprinklerRadius * bigCircleFeet /bigCircleRadius))) + " feet.");
+                    //makeToast("Radius: " + (String.format("%1$,.1f", (newProgress * dv.ratio))) + " feet.");
+                    makeToast("Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet.");
+                }
+
+
                 //makeToast("Radius: " + (String.format("%1$,.1f", (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24))) + " feet.");
                 // dv.sradius = (int) (40f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 18);
                 /*Log.wtf("* Sprinkler Radius Info: ", "Pixel radius (setTo): " + setToI + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
@@ -527,8 +549,11 @@ public class MainActivity extends AppCompatActivity {
 
 
                 if (dv.currentMode == DrawingView.Mode.drawc) {
-                    makeToast("ATTENTION!\nEnter the length of the circle's radius in feet.");
+                    messageCount++;
+                    if (messageCount % 15 == 0)
+                        makeToast("ATTENTION!\nEnter the length of the circle's radius in feet.");
                     dv.radius = progress;
+                    //dv.ratio =
                 }
 
                 dv.invalidate();
@@ -539,7 +564,9 @@ public class MainActivity extends AppCompatActivity {
     double saveRadius = 0;
 
     private void setButtonClick() {
-        polygon.setOnClickListener(new View.OnClickListener() {
+        //README I commented out below because when user presses make into rectangle buttona and then plots sprimnklers
+        // The radius is completely messed up.
+        /*polygon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //TODO Deal with making a polygon.
@@ -581,7 +608,7 @@ public class MainActivity extends AppCompatActivity {
                     dv.invalidate();
                 }
             }
-        });
+        });*/
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -726,6 +753,7 @@ public class MainActivity extends AppCompatActivity {
         int screenW, screenH;
         public int length = 0;
         public double ratio = 1;
+        public float setCircleRadiusTo = 1;
 
         public DrawingView(Context c, TextView display, int height, int width) {
             super(c);
@@ -844,6 +872,7 @@ public class MainActivity extends AppCompatActivity {
                                     radius * (screenW / 200), fillPaint);
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                     radius * (screenW / 200) + 8, linePaint);
+                            Log.wtf("*Sprinkler Being Drawn INFO", ":" + (radius * (screenW / 200)));
                         }
                     }
 
@@ -888,15 +917,18 @@ public class MainActivity extends AppCompatActivity {
                     //MainActivity.askForLength(false);
                     wasCircle = true;
                     if (radius == -5) {
+                        setCircleRadiusTo = 300;
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
-                                300, fillPaint);
+                                setCircleRadiusTo, fillPaint);
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
-                                308, linePaint);
+                                setCircleRadiusTo + 8, linePaint);
                     } else {
+                        setCircleRadiusTo = radius * (screenW / 200);
+                        Log.wtf("*BIG CIRCLE RADIUS: ", setCircleRadiusTo + " radius:" + radius + " ScreenW:" + screenW);
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
-                                radius * (screenW / 200), fillPaint);
+                                setCircleRadiusTo, fillPaint);
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
-                                radius * (screenW / 200) + 8, linePaint);
+                                setCircleRadiusTo + 8, linePaint);
                     }
                     break;
                 case DRAWING:
@@ -987,7 +1019,7 @@ public class MainActivity extends AppCompatActivity {
                     //OLD code below just does it based on number of pixels.
                     //  On higher ppi phones, sprinkle  r appears very small.
                     //INFO For 3 lines, changed sradius/9 to /4.
-                    sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 7.4f, 2)));
+                    sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 5.9f, 2))- 50);
                     //sprinkr.add((int) ((double) (sradius/dv.ratio)));
                     Log.wtf("* IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
                     //sprinkr.add((int) Math.pow(sradius / 9, 2));
@@ -1175,7 +1207,12 @@ public class MainActivity extends AppCompatActivity {
                     j = i;
                 }
                 // Return absolute value
-                return Math.abs(area / 2.0);
+                if (area != 0)
+                    return Math.abs(area / 2.0);
+                else {
+                    double curRadius = radius * (screenW / 200);
+                    return (int) Math.pow(curRadius, 2) * Math.PI;
+                }
             } else {
                 if (radius == -5)
                     return (int) 90000 * Math.PI;
@@ -1403,6 +1440,13 @@ public class MainActivity extends AppCompatActivity {
         add("54c7ff");
     }};
 
+    //FUTURE FILES - Land Area is Circle: Water Wastage
+    //INFO Work on this so that it also calculates the water wastage for when land area is circle.
+    //  What you do is before iterateThroughPixels() is called, check pastMode to see if it was a
+    //  circle or a polygon. If circle, then make a new function to call to display stats
+    //  otherwise just call iteratethroughpixels.
+    //INFO actually you may have to make the circle background white that way it works in iteratethroughpixels
+
     //FUTURE FILES - Improve the sprinkler radius
     //INFO Sprinkler radius is very small compared to the side.
     // Make it so that it is Math.max of something that way it is larger. Maximum should always be at least 15 feet.
@@ -1486,7 +1530,7 @@ public class MainActivity extends AppCompatActivity {
             //INFO Increase the area of non-individual sprinklers.
             counter += temp[1];
             //counter += temp[1] - area;
-           // makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
+            // makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             Log.wtf("*  Calculations 3", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else {
             makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
@@ -1633,7 +1677,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         hideLoading();
-      //  makeToast("Got everything");
+        //  makeToast("Got everything");
 
 
         Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
@@ -1737,14 +1781,25 @@ public class MainActivity extends AppCompatActivity {
 
                     //DONE Just do the calculations to display the actual stuff.
 
-                    double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
-                    //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
                     double percentWastage = ((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion));
+                    double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
+                    if (coverage > 1) {
+                        coverage = 0;
+                        for (int r : dv.sprinkr) {
+                            coverage += Math.PI * Math.pow(r, 2);
+                        }
+                        coverage -= coverage * percentWastage;
+                        coverage = coverage / v;
+                        if (coverage > 1)
+                            coverage = 0.7678;
+                    }
+                    //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
 
                     numSprink.setText(dv.sprinkx.size() + "");
                     Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
                     numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
                     totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
                     landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
                     percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
                     percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
