@@ -2,4 +2,12 @@
     <string name="app_name">E-rrigation</string>
     <string name="general"><u>General Statistics</u></string>
     <string name="wastage"><u>Wastage Statistics</u></string>
+
+    <string-array name="soil_types">
+        <item>I don\'t know</item>
+        <item>Silt</item>
+        <item>Sandy</item>
+        <item>Clay</item>
+        <item>Loam</item>
+    </string-array>
 </resources>

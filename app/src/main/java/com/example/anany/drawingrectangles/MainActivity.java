@@ -39,6 +39,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -516,13 +517,13 @@ public class MainActivity extends AppCompatActivity {
                 int setToI = (int) ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2)) - 50;
                 double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2));
                 double scale = (double) bigCircleRadius / (bigCircleFeet - 2);
-                double t = seekBar.getProgress()/100 * scale;
+                double t = seekBar.getProgress() / 100 * scale;
                 double newProgress = scale * dv.sradius;
 
                 if (dv.currentMode != DrawingView.Mode.drawc) {
 
                     Log.wtf("**IMPORTANT INFO :", bigCircleRadius + " " + sprinklerRadius
-                    + " " + dv.sradius + " " + dv.radius);
+                            + " " + dv.sradius + " " + dv.radius);
                     //makeToast("Radius: " + (String.format("%1$,.1f", (sprinklerRadius * bigCircleFeet /bigCircleRadius))) + " feet.");
                     //makeToast("Radius: " + (String.format("%1$,.1f", (newProgress * dv.ratio))) + " feet.");
                     makeToast("Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet.");
@@ -1019,7 +1020,7 @@ public class MainActivity extends AppCompatActivity {
                     //OLD code below just does it based on number of pixels.
                     //  On higher ppi phones, sprinkle  r appears very small.
                     //INFO For 3 lines, changed sradius/9 to /4.
-                    sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 5.9f, 2))- 50);
+                    sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 5.9f, 2)) - 50);
                     //sprinkr.add((int) ((double) (sradius/dv.ratio)));
                     Log.wtf("* IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
                     //sprinkr.add((int) Math.pow(sradius / 9, 2));
@@ -1449,7 +1450,9 @@ public class MainActivity extends AppCompatActivity {
 
     //FUTURE FILES - Improve the sprinkler radius
     //INFO Sprinkler radius is very small compared to the side.
-    // Make it so that it is Math.max of something that way it is larger. Maximum should always be at least 15 feet.
+    // Make it so that it is Math.max of something that way it is larger. Maximum should always be at least 20 feet.
+    // README
+    //  min = 2, max >= 15-20 (Based on largest side length)
 
     //FUTURE FILES - Calculating area outside of polygon
     //INFO 11/29/19 to calculate the amount of water outside the polgyon, use a technique called ray-casting
@@ -1714,6 +1717,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText waterUsedE = dialog.findViewById(R.id.waterused);
         final EditText durationE = dialog.findViewById(R.id.duration);
         Button next = (Button) dialog.findViewById(R.id.continueBtn);
+        final Spinner soilType = dialog.findViewById(R.id.soilType);
         //results.setVisibility(View.VISIBLE);
 
         final TextView numSprink = results.findViewById(R.id.sNum);
@@ -1769,6 +1773,7 @@ public class MainActivity extends AppCompatActivity {
                     toHide.setVisibility(View.INVISIBLE);
                     results.setVisibility(View.VISIBLE);
 
+                    Button goBack = dialog.findViewById(R.id.goBack);
                     Button done = dialog.findViewById(R.id.done);
                     done.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -1778,6 +1783,13 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
+                    goBack.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            toHide.setVisibility(View.VISIBLE);
+                            results.setVisibility(View.INVISIBLE);
+                        }
+                    });
 
                     //DONE Just do the calculations to display the actual stuff.
 
@@ -1794,6 +1806,16 @@ public class MainActivity extends AppCompatActivity {
                             coverage = 0.7678;
                     }
                     //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
+
+                    //README Accounting for soil type
+                    String choice = soilType.getSelectedItem().toString();
+                    if (choice.equals("Sandy")) {
+                        percentWastage *= 0.95f;
+                    } else if (choice.equals("Loam")) {
+                        percentWastage *= 0.9f;
+                    } else if (choice.equals("Clay")) {
+                        percentWastage *= 1.15f;
+                    }
 
                     numSprink.setText(dv.sprinkx.size() + "");
                     Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);

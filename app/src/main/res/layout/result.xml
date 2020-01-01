@@ -23,9 +23,10 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="6sp"
                 android:fontFamily="@font/ralewaysemibold"
-                android:text="Results"
-                android:textSize="33sp"
                 android:paddingBottom="4sp"
+                android:text="Results"
+                android:textColor="#000"
+                android:textSize="33sp"
                 android:textStyle="bold" />
 
         </RelativeLayout>
@@ -35,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/titleContainer"
-            android:layout_marginLeft="15sp"
+            android:layout_marginLeft="6sp"
             android:layout_marginTop="10sp"
             android:fontFamily="@font/ralewayregular"
             android:text="@string/general"
@@ -44,132 +45,149 @@
             android:textStyle="bold" />
 
         <RelativeLayout
-            android:layout_width="match_parent"
             android:id="@+id/questions"
-            android:layout_below="@+id/generalstatisticstitle"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/generalstatisticstitle">
 
             <TextView
+                android:id="@+id/messageT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/messageT"
-                android:textColor="#000"
+                android:layout_marginLeft = "21sp"
                 android:layout_marginTop="1sp"
-                android:layout_marginLeft="30sp"
-                android:textSize="17sp"
+                android:layout_marginRight="10sp"
                 android:text="Before your results are displayed, please enter the following information."
-                />
+                android:textColor="#000"
+                android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/amtText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/messageT"
+                android:layout_marginRight="10sp"
+                android:layout_marginLeft = "21sp"
                 android:layout_marginTop="23sp"
-                android:id="@+id/amtText"
-                android:textSize="17sp"
-                android:layout_marginLeft="30sp"
                 android:text="Amount of water used per sprinkler per minute:"
-                />
+                android:textSize="17sp" />
 
             <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="4"
-                android:layout_marginTop="-6sp"
-                android:textColor="#000"
-                android:layout_below="@+id/amtText"
-                android:layout_marginLeft="30sp"
-                android:hint=""
                 android:id="@+id/waterused"
-                android:inputType="numberDecimal"
-                />
-            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="gpm"
-                android:layout_marginTop="7sp"
-                android:textSize="16sp"
-                android:textColor="#000"
-                android:layout_marginLeft="2sp"
-                android:layout_toRightOf="@id/waterused"
-                android:layout_below="@id/amtText"
-                />
+                android:layout_below="@+id/amtText"
+                android:layout_marginLeft = "21sp"
+                android:layout_marginTop="-6sp"
+                android:ems="4"
+                android:hint=""
+                android:inputType="numberDecimal"
+                android:textColor="#000" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/waterused"
-                android:layout_marginTop="25sp"
+                android:layout_below="@id/amtText"
+                android:layout_marginLeft="2sp"
+                android:layout_marginTop="7sp"
+                android:layout_toRightOf="@id/waterused"
+                android:text="gpm"
+                android:textColor="#000"
+                android:textSize="16sp" />
+
+            <TextView
                 android:id="@+id/durText"
-                android:textSize="17sp"
-                android:layout_marginLeft="30sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10sp"
+                android:layout_below="@+id/waterused"
+                android:layout_marginLeft = "21sp"
+                android:layout_marginTop="25sp"
                 android:text="# of minutes sprinklers in use per week:"
-                />
+                android:textSize="17sp" />
 
             <EditText
+                android:id="@+id/duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ems="4"
-                android:layout_marginTop="-7sp"
-                android:textColor="#000"
                 android:layout_below="@+id/durText"
-                android:layout_marginLeft="30sp"
+                android:layout_marginLeft = "21sp"
+                android:layout_marginTop="-7sp"
+                android:ems="4"
                 android:hint=""
-                android:id="@+id/duration"
                 android:inputType="number"
-                />
+                android:textColor="#000" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="minutes"
-                android:layout_marginTop="9sp"
-                android:textSize="16sp"
-                android:textColor="#000"
-                android:layout_marginLeft="2sp"
-                android:layout_toRightOf="@id/waterused"
                 android:layout_below="@id/durText"
-                />
+                android:layout_marginLeft="2sp"
+                android:layout_marginTop="9sp"
+                android:layout_toRightOf="@id/waterused"
+                android:text="minutes"
+                android:textColor="#000"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/soilTypeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/duration"
+                android:layout_marginLeft = "21sp"
+                android:layout_marginTop="25sp"
+                android:text="Soil Type: "
+                android:textSize="17sp" />
+
+            <Spinner
+                android:id="@+id/soilType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/duration"
+                android:layout_marginLeft="6sp"
+                android:layout_marginTop="26sp"
+                android:layout_toRightOf="@+id/soilTypeText"
+                android:entries="@array/soil_types" />
+
 
             <Button
+                android:id="@+id/continueBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/duration"
-                android:layout_marginTop="40sp"
+                android:layout_below="@+id/soilTypeText"
                 android:layout_centerHorizontal="true"
-                android:textSize="23sp"
-                android:text="Continue"
+                android:layout_marginTop="50sp"
                 android:paddingLeft="35sp"
                 android:paddingTop="7sp"
-                android:id="@+id/continueBtn"
-                android:paddingBottom="7sp"
                 android:paddingRight="35sp"
-                android:textColor="#347918"
+                android:paddingBottom="7sp"
+                android:text="Continue"
                 android:textAllCaps="false"
-                />
+                android:textColor="#347918"
+                android:textSize="23sp" />
 
             <Button
+                android:id="@+id/backBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/continueBtn"
-                android:layout_marginTop="25sp"
                 android:layout_centerHorizontal="true"
-                android:textSize="23sp"
-                android:text="Back"
+                android:layout_marginTop="15sp"
                 android:paddingLeft="35sp"
                 android:paddingTop="7sp"
-                android:id="@+id/backBtn"
-                android:paddingBottom="7sp"
                 android:paddingRight="35sp"
-                android:textColor="#347918"
+                android:paddingBottom="7sp"
+                android:text="Back"
                 android:textAllCaps="false"
-                />
+                android:textColor="#347918"
+                android:textSize="23sp" />
 
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/realresults"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/realresults"
             android:layout_below="@+id/generalstatisticstitle"
             android:visibility="invisible">
 
@@ -177,21 +195,21 @@
                 android:id="@+id/sprinklers"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="5sp"
-                android:textSize="17sp"
-                android:text="# of Sprinklers:" />
+                android:text="# of Sprinklers:"
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/sNum"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
-                android:textColor="#000"
                 android:layout_marginRight="12sp"
                 android:enabled="false"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
@@ -199,66 +217,66 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/sNum"
-                android:textSize="17sp"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="5sp"
-                android:text="Water Output of Non-overlapping Sprinklers:" />
+                android:text="Water Output of Non-overlapping Sprinklers:"
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/noA"
                 android:layout_width="wrap_content"
-                android:textColor="#000"
                 android:layout_height="wrap_content"
-                android:text="="
                 android:layout_below="@+id/sNum"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="28sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/overlap"
-                android:textSize="17sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/nonoverlap"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="3sp"
                 android:layout_marginRight="10sp"
-                android:text="Water Output of Overlapping Sprinklers:" />
+                android:text="Water Output of Overlapping Sprinklers:"
+                android:textSize="17sp" />
 
             <TextView
-                android:textColor="#000"
                 android:id="@+id/oA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/nonoverlap"
-                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="26sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/totaloutput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="17sp"
                 android:layout_below="@+id/overlap"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="3sp"
-                android:text="Total Water Output:" />
+                android:text="Total Water Output:"
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/tA"
-                android:textColor="#000"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="="
                 android:layout_below="@+id/overlap"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="6sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
 
@@ -267,21 +285,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tA"
-                android:textSize="17sp"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="20sp"
-                android:text="Land Area Covered:" />
+                android:text="Land Area Covered:"
+                android:textSize="17sp" />
 
             <TextView
-                android:textColor="#000"
                 android:id="@+id/lcA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tA"
                 android:layout_alignParentRight="true"
-                android:text="="
                 android:layout_marginTop="23sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
 
@@ -289,44 +307,44 @@
                 android:id="@+id/totalland"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="17sp"
                 android:layout_below="@+id/lcA"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="5sp"
-                android:text="Total Land Area: " />
+                android:text="Total Land Area: "
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/tlA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/lcA"
-                android:textColor="#000"
-                android:text="="
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="8sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/percentcovered"
                 android:layout_width="wrap_content"
-                android:textSize="17sp"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tlA"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="5sp"
-                android:text="Percentage of Land Covered: " />
+                android:text="Percentage of Land Covered: "
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/pcA"
                 android:layout_width="wrap_content"
-                android:text="="
                 android:layout_height="wrap_content"
-                android:textColor="#000"
                 android:layout_below="@+id/tlA"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="8sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
 
@@ -335,7 +353,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/pcA"
-                android:layout_marginLeft="15sp"
+                android:layout_marginLeft="6sp"
                 android:layout_marginTop="25sp"
                 android:fontFamily="@font/ralewayregular"
                 android:text="@string/wastage"
@@ -347,147 +365,167 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="17sp"
                 android:layout_below="@+id/wastageStatistics"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="4dp"
-                android:text="# of Intersecting Sprinklers: " />
+                android:text="# of Intersecting Sprinklers: "
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/plc"
                 android:layout_width="wrap_content"
-                android:text="="
                 android:layout_height="wrap_content"
-                android:textColor="#000"
                 android:layout_below="@+id/wastageStatistics"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="7sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
-                android:textSize="17sp"
                 android:layout_height="wrap_content"
-                android:textColor="#5D815D"
-                android:textStyle="bold"
                 android:layout_below="@+id/plc"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="3sp"
-                android:text="*Water Wasted: " />
+                android:text="*Water Wasted: "
+                android:textColor="#5D815D"
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/ww"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/plc"
-                android:text="="
-                android:textColor="#000"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="6sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
-                android:textSize="17sp"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/ww"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="5sp"
-                android:text="Total Water Output: " />
+                android:text="Total Water Output: "
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/two"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="="
-                android:textColor="#000"
                 android:layout_below="@+id/ww"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="8sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/two"
-                android:textColor="#5D815D"
-                android:textStyle="bold"      android:textSize="17sp"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="4sp"
-                android:text="*Percentage of Water Wasted: " />
+                android:text="*Percentage of Water Wasted: "
+                android:textColor="#5D815D"
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/pww"
                 android:layout_width="wrap_content"
-                android:text="="
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/two"
                 android:layout_alignParentRight="true"
-                android:textColor="#000"
                 android:layout_marginTop="7sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="17sp"
-                android:textColor="#5D815D"
-                android:textStyle="bold"    android:layout_below="@+id/pww"
-                android:layout_marginLeft="21sp"
+                android:layout_below="@+id/pww"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="20sp"
-                android:text="*Water Wasted Per Month: " />
+                android:text="*Water Wasted Per Month: "
+                android:textColor="#5D815D"
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/permonth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="="
                 android:layout_below="@+id/pww"
-                android:textColor="#000"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="23sp"
                 android:layout_marginRight="12sp"
+                android:text="="
+                android:textColor="#000"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/permonth"
-                android:textSize="17sp"
-                android:layout_marginLeft="21sp"
+                android:layout_marginLeft="12sp"
                 android:layout_marginTop="5sp"
+                android:text="*Water Wasted Per Year: "
                 android:textColor="#5D815D"
-                android:textStyle="bold"   android:text="*Water Wasted Per Year: " />
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/peryear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/permonth"
-                android:text="iuyi"
                 android:layout_alignParentRight="true"
-                android:textColor="#000"
                 android:layout_marginTop="9sp"
                 android:layout_marginRight="12sp"
+                android:text="iuyi"
+                android:textColor="#000"
                 android:textStyle="bold" />
 
 
-            <Button
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textAllCaps="true"
-                android:text="Done"
-                android:id="@+id/done"
                 android:layout_below="@+id/peryear"
-                android:layout_marginTop="15sp"
-                android:background="#4A973A"
-                android:textColor="#fff"
-                />
+                android:orientation="horizontal"
+                android:layout_marginTop="15sp">
+
+                <Button
+                    android:id="@+id/goBack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#010500"
+                    android:text="Back"
+                    android:layout_weight="1"
+                    android:textAllCaps="true"
+                    android:textColor="#fff"
+                    android:textSize="24sp" />
+
+                <Button
+                    android:id="@+id/done"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#4A973A"
+                    android:text="Done"
+                    android:layout_weight="1"
+                    android:textAllCaps="true"
+                    android:textColor="#fff"
+                    android:textSize="24sp" />
+            </LinearLayout>
 
         </RelativeLayout>
     </RelativeLayout>
