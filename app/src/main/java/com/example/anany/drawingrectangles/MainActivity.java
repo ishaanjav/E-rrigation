@@ -14,6 +14,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -557,6 +558,8 @@ public class MainActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
                 dv.sradius = progress;
+                if (dv.sprinkr.size() > 0)
+                    dv.sprinkr.set(dv.sprinkr.size() - 1, (int) ((double) ((double) dv.screenW / 1000) * Math.pow(progress / 5.9f, 2)) - 50);
                 //dv.sradius = (int) (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24);
 
 
@@ -729,24 +732,48 @@ public class MainActivity extends AppCompatActivity {
             rlDvHolder.findViewById(i).setVisibility(View.GONE);
     }
 
+
     public void angleAndRotateClicks() {
         left1.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                dv.angle = Math.max((dv.angle - 15) % 360, 0);
+                dv.angle = Math.max((dv.angle - 30) % 360, 0);
                 if (dv.angle == 0)
                     dv.angle = 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+
+
+                double rotateDisplay = dv.rotate;
+                if (rotateDisplay > 180)
+                    rotateDisplay -= 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+
+                if (dv.sprinkx.size() > 0) {
+                    dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
+                    dv.angleList.set(dv.sprinkx.size() - 1, dv.angle);
+                    dv.invalidate();
+                    //dv.plotSprinklers2(dv.mCanvas);
+                }
                 return false;
             }
         });
         right1.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                dv.angle = Math.max((dv.angle + 15) % 360, 0);
+                dv.angle = Math.max((dv.angle + 30) % 360, 0);
                 if (dv.angle == 0)
                     dv.angle = 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+
+                double rotateDisplay = dv.rotate;
+                if (rotateDisplay > 180)
+                    rotateDisplay -= 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+
+                if (dv.sprinkx.size() > 0) {
+                    dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
+                    dv.angleList.set(dv.sprinkx.size() - 1, dv.angle);
+                    dv.invalidate();
+                    //dv.plotSprinklers2(dv.mCanvas);
+                }
                 return false;
             }
         });
@@ -754,10 +781,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (dv.angle != 360)
-                    dv.rotate = (dv.rotate - 30) % 360;
+                    dv.rotate = (dv.rotate - 15) % 360;
+                else
+                    makeToast("Change the sprinkler angle before rotating it.");
+
                 if (dv.rotate < 0)
                     dv.rotate += 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+
+                double rotateDisplay = dv.rotate;
+                if (rotateDisplay > 180)
+                    rotateDisplay -= 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+
+                if (dv.sprinkx.size() > 0) {
+                    dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
+                    dv.angleList.set(dv.sprinkx.size() - 1, dv.angle);
+                    dv.invalidate();
+                    //dv.plotSprinklers2(dv.mCanvas);
+                }
                 return false;
             }
         });
@@ -765,8 +806,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (dv.angle != 360)
-                    dv.rotate = (dv.rotate + 30) % 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+                    dv.rotate = (dv.rotate + 15) % 360;
+                else
+                    makeToast("Change the sprinkler angle before rotating it.");
+
+                double rotateDisplay = dv.rotate;
+                if (rotateDisplay > 180)
+                    rotateDisplay -= 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+
+                if (dv.sprinkx.size() > 0) {
+                    dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
+                    dv.angleList.set(dv.sprinkx.size() - 1, dv.angle);
+                    dv.invalidate();
+                    //dv.plotSprinklers2(dv.mCanvas);
+                }
                 return false;
             }
         });
@@ -783,6 +837,10 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> sprinkx = new ArrayList<>();
         List<Integer> sprinky = new ArrayList<>();
         List<Integer> sprinkr = new ArrayList<>();
+        List<Boolean> changeAngle = new ArrayList<>();
+        List<Boolean> changeRotation = new ArrayList<>();
+        List<Integer> angleList = new ArrayList<>();
+        List<Integer> rotationList = new ArrayList<>();
         List<Integer> xs = new ArrayList<>();
         List<Integer> ys = new ArrayList<>();
         //TODO Comment out below if you want to use a dotplot
@@ -792,6 +850,7 @@ public class MainActivity extends AppCompatActivity {
         Context context;
         Paint linePaint;
         Canvas cd;
+        public int attentionCounter = -1;
         private Bitmap mBitmap;
         private Canvas mCanvas;
         private Path mPath;
@@ -861,6 +920,8 @@ public class MainActivity extends AppCompatActivity {
             sprinkx = new ArrayList<>();
             sprinky = new ArrayList<>();
             sprinkr = new ArrayList<>();
+            rotationList = new ArrayList<>();
+            angleList = new ArrayList<>();
             invalidate();
         }
 
@@ -913,7 +974,7 @@ public class MainActivity extends AppCompatActivity {
             //drawCustomLine(mCanvas, downx, downy, upx, upy);
             switch (currentMode) {
                 case splot:
-                    plotSprinklers(canvas);
+                    plotSprinklers2(canvas);
                     //makeToast("Plotting sprinklers");
                     //mmakeToast("Was Circle? : " + wasCircle);
                     if (!wasCircle)
@@ -932,8 +993,8 @@ public class MainActivity extends AppCompatActivity {
                             Log.wtf("*Sprinkler Being Drawn INFO", ":" + (radius * (screenW / 200)));
                         }
                     }
-                    angle = 360;
-                    rotate = 0;
+                    /*angle = 360;
+                    rotate = 0;*/
 
                     break;
                 case sreset:
@@ -949,7 +1010,9 @@ public class MainActivity extends AppCompatActivity {
                         //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
                         //NOTES Make it non-dimissible, but provide an Undo and a done button. for undo,
                         //  call dv.undo();
-                        makeToast("ATTENTION!\nEnter the length of this first side in feet.");
+                        attentionCounter++;
+                        if (attentionCounter % 5 == 0)
+                            makeToast("ATTENTION!\nEnter the length of this first side in feet.");
                         //MainActivity.askForLength(true);
                     }
                     break;
@@ -1075,12 +1138,17 @@ public class MainActivity extends AppCompatActivity {
                 if (!duplicate) {
                     sprinkx.add((int) x);
                     sprinky.add((int) y);
+                    rotationList.add(rotate);
+                    angleList.add(angle);
+                    changeRotation.add(rotate != 0);
+                    changeAngle.add(angle != 360);
                     //OLD code below just does it based on number of pixels.
                     //  On higher ppi phones, sprinkle  r appears very small.
                     //INFO For 3 lines, changed sradius/9 to /4.
                     sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 5.9f, 2)) - 50);
                     //sprinkr.add((int) ((double) (sradius/dv.ratio)));
-                    Log.wtf("* IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
+                    //Log.wtf("*- IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
+                    Log.wtf("*- IMPORTANT: ", "Change Rotation Size: " + changeRotation.size() + "  rotation-" + rotate + "  angle-" + angle);
                     //sprinkr.add((int) Math.pow(sradius / 9, 2));
                     invalidate();
                 }
@@ -1202,14 +1270,48 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        private void plotSprinklers2(Canvas canvas) {
+
+            if (sprinkx.size() > 0) {
+                //String logger = "";
+                /*for (int i = 0; i < rotationList.size(); i++) {
+                    logger += "Rotate: " + rotationList.get(i) + "  Angle: " + angleList.get(i) + " " + sprinkx.get(i)
+                            + " " + sprinky.get(i) + " " + sprinkr.get(i) + " " + "\n";
+                }*/
+                //Log.wtf("*-Lists", logger);
+                for (int i = 0; i < sprinkx.size() - 1; i++) {
+                    //Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
+                    // canvas.drawCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
+                    int m = i;
+                    float radius = sprinkr.get(m);
+                    canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
+                                    sprinky.get(m) + radius), (rotationList.get(i)) % 360 - 90,
+                            /*(rotationList.get(i))%360 + */angleList.get(i), true, sprinklerC);
+                }
+                int m = sprinkx.size() - 1;
+                float radius = sprinkr.get(m);
+
+                canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
+                                sprinky.get(m) + radius), (rotate) % 360 - 90,
+                        /*(rotationList.get(i))%360 + */angle, true, sprinklerC);
+                Log.wtf("*-Status:", "Plot Sprinkler2 ");
+
+            }
+        }
 
         private void plotSprinklers(Canvas canvas) {
             //Log.wtf("*Plotting Sprinklers", "Number of Sprinklers: " + sprinkx.size());
             if (sprinkx.size() > 0) {
                 for (int i = 0; i < sprinkx.size(); i++) {
                     //Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
-                    canvas.drawCircle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
+                    // canvas.drawCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
+                    int m = i;
+                    float radius = sprinkr.get(m);
+                    canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
+                                    sprinky.get(m) + radius), (rotationList.get(i)) % 360 - 90,
+                            /*(rotationList.get(i))%360 + */angleList.get(i), true, sprinklerC);
                 }
+
             }
         }
 
