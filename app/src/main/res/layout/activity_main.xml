@@ -22,7 +22,7 @@
     <RelativeLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="140sp"
+        android:layout_height="145sp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/container_bgd"
         android:padding="5sp">
@@ -32,8 +32,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@id/real"
-            android:layout_marginBottom="8sp"
-            android:textSize="17sp"
+            android:layout_marginBottom="16sp"
+            android:textSize="18sp"
             android:layout_marginLeft="11sp"
             android:textColor="#000"
             android:text="Length of the first side/radius:"
@@ -47,7 +47,7 @@
             android:layout_marginLeft="5sp"
             android:ems="3"
             android:layout_above="@+id/real"
-            android:layout_marginBottom="-4sp"
+            android:layout_marginBottom="3sp"
             android:hint=""
             android:textSize="19sp"
             android:inputType="number"
@@ -63,8 +63,81 @@
             android:id="@+id/ft"
             android:text="ft"
             android:layout_above="@id/real"
-            android:layout_marginBottom="5sp"
+            android:layout_marginBottom="12sp"
             android:layout_toRightOf="@+id/length"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adjust Angle:"
+            android:textSize="19sp"
+            android:id="@+id/adjustAngleText"
+            android:textColor="#000"
+            android:visibility="invisible"
+            android:layout_above="@id/real"
+            android:layout_marginLeft="4sp"
+            android:layout_marginBottom="13sp"
+            />
+
+        <ImageView
+            android:layout_width="32sp"
+            android:layout_height="32sp"
+            android:id="@+id/leftAngle1"
+            android:layout_above="@id/real"
+            android:visibility="invisible"
+            android:layout_marginLeft="6sp"
+            android:layout_toRightOf="@id/adjustAngleText"
+            android:layout_marginBottom="13sp"
+            android:src="@drawable/leftarrow"
+            />
+        <ImageView
+            android:layout_width="32sp"
+            android:layout_height="32sp"
+            android:visibility="invisible"
+            android:id="@+id/rightAngle1"
+            android:layout_above="@id/real"
+            android:src="@drawable/rightarrow"
+            android:layout_marginLeft="12sp"
+            android:layout_toRightOf="@id/leftAngle1"
+            android:layout_marginBottom="13sp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rotate:"
+            android:id="@+id/rotateSprinklerText"
+            android:textSize="19sp"
+            android:visibility="invisible"
+            android:textColor="#000"
+            android:layout_above="@id/real"
+            android:layout_toRightOf="@id/rightAngle1"
+            android:layout_marginLeft="14sp"
+            android:layout_marginBottom="13sp"
+            />
+
+        <ImageView
+            android:layout_width="32sp"
+            android:layout_height="32sp"
+            android:src="@drawable/leftarrow"
+            android:id="@+id/leftAngle2"
+            android:layout_above="@id/real"
+            android:visibility="invisible"
+            android:layout_marginLeft="6sp"
+            android:layout_toRightOf="@id/rotateSprinklerText"
+            android:layout_marginBottom="13sp"
+            />
+        <ImageView
+            android:layout_width="32sp"
+            android:layout_height="32sp"
+            android:id="@+id/rightAngle2"
+            android:src="@drawable/rightarrow"
+            android:visibility="invisible"
+            android:layout_above="@id/real"
+            android:layout_marginLeft="12sp"
+            android:layout_toRightOf="@id/leftAngle2"
+            android:layout_marginBottom="13sp"
             />
 
 
@@ -74,7 +147,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/seekBar"
             android:layout_marginLeft="30sp"
-            android:layout_marginBottom="-1sp"
+            android:layout_marginBottom="-3sp"
             android:text="Adjust Radius"
             android:textColor="#000"
             android:textSize="20sp"
@@ -93,6 +166,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/llBottomBar"
+            android:layout_marginBottom="-1sp"
             android:max="100"
             android:min="50"
             android:visibility="invisible" />

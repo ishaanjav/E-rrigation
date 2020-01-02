@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
     public EditText length;
     static RelativeLayout container;
     public TextView textview, ft;
+    TextView angleText, rotateText;
+    ImageView left1, left2, right1, right2;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +97,13 @@ public class MainActivity extends AppCompatActivity {
         length = background.findViewById(R.id.length);
         //handleSideLength();
 
+        angleText = background.findViewById(R.id.adjustAngleText);
+        rotateText = background.findViewById(R.id.rotateSprinklerText);
+        left1 = background.findViewById(R.id.leftAngle1);
+        left2 = background.findViewById(R.id.leftAngle2);
+        right1 = background.findViewById(R.id.rightAngle1);
+        right2 = background.findViewById(R.id.rightAngle2);
+
         btnUndo = findViewById(R.id.btnUndo);
         setButtonClick();
         setRadiusBar();
@@ -109,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
         //polygon.setVisibility(View.INVISIBLE);
         context = getApplicationContext();
         //askForLength(true, 2);
+
+        angleAndRotateClicks();
 
         //handleResults(3, 3, 3, 3, 100);
     }
@@ -718,6 +729,49 @@ public class MainActivity extends AppCompatActivity {
             rlDvHolder.findViewById(i).setVisibility(View.GONE);
     }
 
+    public void angleAndRotateClicks() {
+        left1.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dv.angle = Math.max((dv.angle - 15) % 360, 0);
+                if (dv.angle == 0)
+                    dv.angle = 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+                return false;
+            }
+        });
+        right1.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                dv.angle = Math.max((dv.angle + 15) % 360, 0);
+                if (dv.angle == 0)
+                    dv.angle = 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+                return false;
+            }
+        });
+        left2.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (dv.angle != 360)
+                    dv.rotate = (dv.rotate - 30) % 360;
+                if (dv.rotate < 0)
+                    dv.rotate += 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+                return false;
+            }
+        });
+        right2.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (dv.angle != 360)
+                    dv.rotate = (dv.rotate + 30) % 360;
+                makeToast("Angle: " + dv.angle + "  Rotate: " + dv.rotate);
+                return false;
+            }
+        });
+    }
+
     public static class DrawingView extends View {
         private static final float TOUCH_TOLERANCE = 4;
         public int width;
@@ -755,6 +809,8 @@ public class MainActivity extends AppCompatActivity {
         public int length = 0;
         public double ratio = 1;
         public float setCircleRadiusTo = 1;
+        public int angle = 360;
+        public int rotate = 0;
 
         public DrawingView(Context c, TextView display, int height, int width) {
             super(c);
@@ -876,6 +932,8 @@ public class MainActivity extends AppCompatActivity {
                             Log.wtf("*Sprinkler Being Drawn INFO", ":" + (radius * (screenW / 200)));
                         }
                     }
+                    angle = 360;
+                    rotate = 0;
 
                     break;
                 case sreset:
@@ -1252,6 +1310,12 @@ public class MainActivity extends AppCompatActivity {
                     ft.setVisibility(View.VISIBLE);
                     textview.setVisibility(View.VISIBLE);
                     length.setVisibility(View.VISIBLE);
+                    angleText.setVisibility(View.INVISIBLE);
+                    rotateText.setVisibility(View.INVISIBLE);
+                    left1.setVisibility(View.INVISIBLE);
+                    left2.setVisibility(View.INVISIBLE);
+                    right2.setVisibility(View.INVISIBLE);
+                    right1.setVisibility(View.INVISIBLE);
                     removeAllLengths();
                     dv.invalidate();
                 } else {
@@ -1267,6 +1331,12 @@ public class MainActivity extends AppCompatActivity {
                     removeAllLengths();
                     polygon.setVisibility(View.INVISIBLE);
                     radius.setVisibility(View.VISIBLE);
+                    angleText.setVisibility(View.INVISIBLE);
+                    rotateText.setVisibility(View.INVISIBLE);
+                    left1.setVisibility(View.INVISIBLE);
+                    left2.setVisibility(View.INVISIBLE);
+                    right2.setVisibility(View.INVISIBLE);
+                    right1.setVisibility(View.INVISIBLE);
                     dv.invalidate();
                 }
                 // dv.resetSprinklers();
@@ -1284,6 +1354,12 @@ public class MainActivity extends AppCompatActivity {
                     length.setVisibility(View.INVISIBLE);
                     polygon.setVisibility(View.INVISIBLE);
                     radius.setVisibility(View.VISIBLE);
+                    angleText.setVisibility(View.VISIBLE);
+                    rotateText.setVisibility(View.VISIBLE);
+                    left1.setVisibility(View.VISIBLE);
+                    left2.setVisibility(View.VISIBLE);
+                    right2.setVisibility(View.VISIBLE);
+                    right1.setVisibility(View.VISIBLE);
                     dv.currentMode = DrawingView.Mode.splot;
                 }
                 return true;
