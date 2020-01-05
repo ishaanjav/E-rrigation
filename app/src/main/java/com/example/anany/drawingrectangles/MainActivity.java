@@ -686,6 +686,7 @@ public class MainActivity extends AppCompatActivity {
                     if (dv.xlist.size() < 3)
                         length.setEnabled(true);
 
+
                     //INFO REMOVE THE LATEST TEXTVIEW
                     /*if (dv.idCounter != 0) {
                         dv.idCounter--;
@@ -702,6 +703,13 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.wtf("* Text ID Info:", dv.idCounter + " " + dv.specialCounter);
                 } else {
+                    //README Added below because even when undo button pressed, angle list only grew in size.
+                    //  This may have potentially led to problem where randomly when plotting sprinklers
+                    // sprinkler from 5 taps ago changes angles.
+                    if (dv.angleList.size() > 0) {
+                        dv.angleList.remove(dv.angleList.size() - 1);
+                        dv.rotationList.remove(dv.rotationList.size() - 1);
+                    }
                     dv.removeLastSprinkler();
                 }
 
@@ -1070,6 +1078,8 @@ public class MainActivity extends AppCompatActivity {
         int downx, downy;
         int upx, upy;
 
+        int exceededCount = 0;
+
         @Override
         public boolean onTouchEvent(MotionEvent event) {
 
@@ -1128,7 +1138,9 @@ public class MainActivity extends AppCompatActivity {
                             invalidate();
                         }
                     } else {
-                        makeToast("You have exceeded the limit on the number of sides.");
+                        if (exceededCount % 5 == 0)
+                            makeToast("You have exceeded the limit on the number of sides.");
+                        exceededCount++;
                     }
                 }
             } else if (currentMode == Mode.splot) {
@@ -1149,6 +1161,13 @@ public class MainActivity extends AppCompatActivity {
                     //sprinkr.add((int) ((double) (sradius/dv.ratio)));
                     //Log.wtf("*- IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
                     Log.wtf("*- IMPORTANT: ", "Change Rotation Size: " + changeRotation.size() + "  rotation-" + rotate + "  angle-" + angle);
+                    String logger = "";
+                    if (dv.angleList.size() > 0) {
+                        for (int i = 0; i < angleList.size(); i++) {
+                            logger += "\n*- Angle - " + angleList.get(i) + "  Rotation - " + rotationList.get(i);
+                        }
+                    }
+                    Log.wtf("Angle and Rotation Lists -", "Information: " + logger);
                     //sprinkr.add((int) Math.pow(sradius / 9, 2));
                     invalidate();
                 }
@@ -1292,9 +1311,9 @@ public class MainActivity extends AppCompatActivity {
                 float radius = sprinkr.get(m);
 
                 canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
-                                sprinky.get(m) + radius), (rotate) % 360 - 90,
-                        /*(rotationList.get(i))%360 + */angle, true, sprinklerC);
-                Log.wtf("*-Status:", "Plot Sprinkler2 ");
+                                sprinky.get(m) + radius), (rotationList.get(rotationList.size()-1)) % 360 - 90,
+                        /*(rotationList.get(i))%360 + */angleList.get(angleList.size()-1), true, sprinklerC);
+                //Log.wtf("*-Status:", "Plot Sprinkler2 ");
 
             }
         }
