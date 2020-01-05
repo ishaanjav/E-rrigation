@@ -206,7 +206,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="5sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:enabled="false"
                 android:text="="
                 android:textColor="#000"
@@ -229,7 +229,7 @@
                 android:layout_below="@+id/sNum"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="28sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -252,7 +252,7 @@
                 android:layout_below="@+id/nonoverlap"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="26sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -274,7 +274,7 @@
                 android:layout_below="@+id/overlap"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="6sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -297,7 +297,7 @@
                 android:layout_below="@+id/tA"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="23sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -320,7 +320,7 @@
                 android:layout_below="@+id/lcA"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="8sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -342,7 +342,7 @@
                 android:layout_below="@+id/tlA"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="8sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -378,7 +378,7 @@
                 android:layout_below="@+id/wastageStatistics"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="7sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -401,7 +401,7 @@
                 android:layout_below="@+id/plc"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="6sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -422,7 +422,7 @@
                 android:layout_below="@+id/ww"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="8sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -445,7 +445,7 @@
                 android:layout_below="@+id/two"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="7sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -468,7 +468,7 @@
                 android:layout_below="@+id/pww"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="23sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="="
                 android:textColor="#000"
                 android:textStyle="bold" />
@@ -491,7 +491,7 @@
                 android:layout_below="@+id/permonth"
                 android:layout_alignParentRight="true"
                 android:layout_marginTop="9sp"
-                android:layout_marginRight="12sp"
+                android:layout_marginRight="8sp"
                 android:text="iuyi"
                 android:textColor="#000"
                 android:textStyle="bold" />

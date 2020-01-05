@@ -1281,7 +1281,7 @@ public class MainActivity extends AppCompatActivity {
                 //Log.wtf("*-Lists", logger);
                 for (int i = 0; i < sprinkx.size() - 1; i++) {
                     //Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
-                    // canvas.drawCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
+                    // canvas.dra wCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                     int m = i;
                     float radius = sprinkr.get(m);
                     canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
@@ -1529,6 +1529,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Double> singleY = new ArrayList<>();
     ArrayList<Double> singleR = new ArrayList<>();
     ArrayList<Integer> singleP = new ArrayList<>();
+    ArrayList<Integer> singleAngle = new ArrayList<>();
 
     private void getIndividualCircles() {
         singleX.clear();
@@ -1541,6 +1542,7 @@ public class MainActivity extends AppCompatActivity {
             singleX.add((double) dv.sprinkx.get(0));
             singleY.add((double) dv.sprinky.get(0));
             singleR.add((double) dv.sprinkr.get(0));
+            singleAngle.add(dv.angleList.get(0));
             singleP.add(0);
         } else {
             for (int i = 0; i < dv.sprinkx.size(); i++) {
@@ -1568,6 +1570,7 @@ public class MainActivity extends AppCompatActivity {
                     singleY.add(y);
                     singleR.add(r);
                     singleP.add(i);
+                    singleAngle.add(dv.angleList.get(i));
                 }
 
             }
@@ -1626,7 +1629,7 @@ public class MainActivity extends AppCompatActivity {
     //  otherwise just call iteratethroughpixels.
     //INFO actually you may have to make the circle background white that way it works in iteratethroughpixels
 
-    //FUTURE FILES - Improve the sprinkler radius
+    //Not important - Improve the sprinkler radius
     //INFO Sprinkler radius is very small compared to the side.
     // Make it so that it is Math.max of something that way it is larger. Maximum should always be at least 20 feet.
     // README
@@ -1643,7 +1646,7 @@ public class MainActivity extends AppCompatActivity {
     // If odd, that means it is located inside the polygon.
     // Use that to add to the area variable to count that as also being wasted water.
 
-    //FUTURE FILES - AlertDialog for getting side length
+    //OLD - AlertDialog for getting side length
     //INFO As of 11/29/19 for some reason the AlertDialog is finally working now. So what you can do is make an AlertDialog
     //  when they place down 2 sprinklers and then ask them to enter in the length of that side.
     //  This approach is much nicer than having an always-present EditText.
@@ -1853,8 +1856,14 @@ public class MainActivity extends AppCompatActivity {
         }
         //Log.wtf("*ITERATION STATUS:", "Done tallying");
 
-        for (double m : singleR)
-            non += Math.pow(m, 2) * Math.PI;
+        //INFO Calculate area of nonoverlapping individual circles
+        int posCounter = 0;
+        for (double m : singleR) {
+            //README The last multiplication part was added to account for fact that the circles may not be full 360
+            non += ((double) (Math.pow(m, 2) * Math.PI)) * (double) (dv.angleList.get(posCounter)) / 360f;
+            makeToast(non + " " + dv.angleList.get(posCounter));
+            posCounter++;
+        }
 
 
         hideLoading();
@@ -2040,6 +2049,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int[] calculateWastage(boolean two) {
         double firstX = 0, firstY = 0, firstR = 0, secondX = 0, secondY = 0, secondR = 0;
+        int firstAngle = 360, secondAngle = 360;
         boolean firstUsed = false;
         double totalArea = 0;
         for (int i = 0; i < dv.sprinkx.size(); i++) {
@@ -2049,12 +2059,14 @@ public class MainActivity extends AppCompatActivity {
                     firstX = dv.sprinkx.get(i);
                     firstR = dv.sprinkr.get(i);
                     firstY = dv.sprinky.get(i);
+                    firstAngle = dv.angleList.get(i);
                     firstUsed = true;
                     totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2);
                 } else {
                     secondX = dv.sprinkx.get(i);
                     secondR = dv.sprinkr.get(i);
                     secondY = dv.sprinky.get(i);
+                    secondAngle = dv.angleList.get(i);
                     totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2);
                     if (two) {
                         firstUsed = false;
@@ -2094,8 +2106,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (two) {
-            totalArea = Math.PI * Math.pow(secondR, 2) + Math.PI * Math.pow(firstR, 2);
+            //README Just added something to account for different angle sprinklers
+            totalArea = (Math.PI * Math.pow(secondR, 2)) * ((double) (secondAngle) / 360) + (Math.PI * Math.pow(firstR, 2)) * ((double) (firstAngle) / 360);
         }
+
+        if (firstAngle != 360 || secondAngle != 360) {
+
+        }
+
+
         //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
         Log.wtf("** INFORMATION: ", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
 
