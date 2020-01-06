@@ -1592,7 +1592,7 @@ public class MainActivity extends AppCompatActivity {
                         double x2 = (startX - baX * abScalingFactor2);
                         double y2 = (startY - baY * abScalingFactor2);
                         if(!((x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 <  Math.max(startY, endY))
-                                || (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 >  Math.min(startY, endY) && y1 <  Math.max(startY, endY)))){
+                                || (x2 > Math.min(startX, endX) && x2 < Math.max(startX, endX) && y2 >  Math.min(startY, endY) && y2 <  Math.max(startY, endY)))){
                         /*if ((radius < Math.sqrt(Math.pow(circleX - startX, 2) + Math.pow(circleY - startY, 2))
                                 || radius < Math.sqrt(Math.pow(circleX - endX, 2) + Math.pow(circleY - endY, 2)))
                                 && !((circleX > startX && circleX < endX) && (circleY > startY && circleY < endY))) {*/
@@ -1600,7 +1600,7 @@ public class MainActivity extends AppCompatActivity {
                                 || (circleY < (Math.min(startY, endY) - radius)) || (circleY > (Math.max(startY, endY) + radius))) {*/
                             Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "\n\t\t\\t\tTOO FAR AWAY: -"+
                                     "Bool 1 - " + (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 <  Math.max(startY, endY)) +
-                                            " Bool 2- " + (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 >  Math.min(startY, endY) && y1 <  Math.max(startY, endY))+
+                                            " Bool 2- " + (x2 > Math.min(startX, endX) && x2 < Math.max(startX, endX) && y2 >  Math.min(startY, endY) && y2 <  Math.max(startY, endY))+
                                     /*"Radius bool-" + (radius < Math.sqrt(Math.pow(circleX - startX, 2) + Math.pow(circleY - startY, 2))
                                             || radius < Math.sqrt(Math.pow(circleX - endX, 2) + Math.pow(circleY - endY, 2))) + " " +
                                             "Other 2:" + !((circleX > startX && circleX < endX) && (circleX > startX && circleX < endX))
