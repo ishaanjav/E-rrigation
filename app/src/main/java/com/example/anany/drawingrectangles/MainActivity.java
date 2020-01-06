@@ -49,6 +49,8 @@ import java.io.FileOutputStream;
 import java.lang.reflect.Array;
 import java.nio.Buffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1311,8 +1313,8 @@ public class MainActivity extends AppCompatActivity {
                 float radius = sprinkr.get(m);
 
                 canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
-                                sprinky.get(m) + radius), (rotationList.get(rotationList.size()-1)) % 360 - 90,
-                        /*(rotationList.get(i))%360 + */angleList.get(angleList.size()-1), true, sprinklerC);
+                                sprinky.get(m) + radius), (rotationList.get(rotationList.size() - 1)) % 360 - 90,
+                        /*(rotationList.get(i))%360 + */angleList.get(angleList.size() - 1), true, sprinklerC);
                 //Log.wtf("*-Status:", "Plot Sprinkler2 ");
 
             }
@@ -1491,6 +1493,8 @@ public class MainActivity extends AppCompatActivity {
                 Bitmap tr = takeScreenShot(dv);
                 showLoading();
 
+                calculateSprinklerOverflow();
+
                 //INFO Wait a bit so that the Dialog is showing, then do the calculations.
                 Handler h = new Handler();
                 final Bitmap[] bmp = {tr};
@@ -1540,6 +1544,88 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void calculateSprinklerOverflow() {
+        Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
+        Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
+        for (int t = 0; t < dv.sprinkx.size(); t++) {
+            for (int b = 0; b < dv.xlist.size(); b++) {
+                double startX = dv.xlist.get(b);
+                double startY = dv.ylist.get(b);
+                double endX = dv.xlist.get((b + 1 > dv.xlist.size() - 1 ? 0 : b + 1));
+                double endY = dv.ylist.get((b + 1 > dv.ylist.size() - 1 ? 0 : b + 1));
+                double circleX = dv.sprinkx.get(t);
+                double circleY = dv.sprinky.get(t);
+                double radius = dv.sprinkr.get(t);
+
+                double baX = endX - startX;
+                double baY = endY - startY;
+                double caX = circleX - startX;
+                double caY = circleY - startY;
+
+                double a = baX * baX + baY * baY;
+                double bBy2 = baX * caX + baY * caY;
+                double c = caX * caX + caY * caY - radius * radius;
+
+                double pBy2 = bBy2 / a;
+                double q = c / a;
+
+                double disc = pBy2 * pBy2 - q;
+                if (disc < 0) {
+                    //Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "No overflow??");
+                    // return Collections.emptyList();
+                } else {
+                    // if disc == 0 ... dealt with later
+                    double tmpSqrt = Math.sqrt(disc);
+                    double abScalingFactor1 = -pBy2 + tmpSqrt;
+                    double abScalingFactor2 = -pBy2 - tmpSqrt;
+
+                    /*Point p1 = new Point(pointA.x - baX * abScalingFactor1, pointA.y
+                            - baY * abScalingFactor1);*/
+                    if (disc == 0) { // abScalingFactor1 == abScalingFactor2
+                        Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "1 INTERSECTION - " + " x: " +
+                                (startX - baX * abScalingFactor1) + " y: " + (startY - baY * abScalingFactor1));
+                    } else {
+                        double x1 = (startX - baX * abScalingFactor1);
+                        double y1 = (startY - baY * abScalingFactor1);
+                        double x2 = (startX - baX * abScalingFactor2);
+                        double y2 = (startY - baY * abScalingFactor2);
+                        if(!((x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 <  Math.max(startY, endY))
+                                || (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 >  Math.min(startY, endY) && y1 <  Math.max(startY, endY)))){
+                        /*if ((radius < Math.sqrt(Math.pow(circleX - startX, 2) + Math.pow(circleY - startY, 2))
+                                || radius < Math.sqrt(Math.pow(circleX - endX, 2) + Math.pow(circleY - endY, 2)))
+                                && !((circleX > startX && circleX < endX) && (circleY > startY && circleY < endY))) {*/
+                        /*if ((circleX < (Math.min(startX, endX) - radius)) || (circleX > (Math.max(startX, endX) + radius))
+                                || (circleY < (Math.min(startY, endY) - radius)) || (circleY > (Math.max(startY, endY) + radius))) {*/
+                            Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "\n\t\t\\t\tTOO FAR AWAY: -"+
+                                    "Bool 1 - " + (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 <  Math.max(startY, endY)) +
+                                            " Bool 2- " + (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 >  Math.min(startY, endY) && y1 <  Math.max(startY, endY))+
+                                    /*"Radius bool-" + (radius < Math.sqrt(Math.pow(circleX - startX, 2) + Math.pow(circleY - startY, 2))
+                                            || radius < Math.sqrt(Math.pow(circleX - endX, 2) + Math.pow(circleY - endY, 2))) + " " +
+                                            "Other 2:" + !((circleX > startX && circleX < endX) && (circleX > startX && circleX < endX))
+                                            + (circleX > startX && circleX < endX) + (circleX > startX && circleX < endX) +*/ " \n\n1x: " +
+                                            x1 + " 1y: " + y1
+                                            + " 2x: " +
+                                            x2 + " 2y: " + y2 + " StartX: " + startX +" StartY: " + startY +" EndX: " + endX +
+                                    " EndY: " + endY);
+                        } else {
+                            Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "2 INTERSECTIONs - \n\t\t\t\t\t\t" + " 1x: " +
+                                    x1 + " 1y: " + y1
+                                    + " 2x: " +
+                                    x2 + " 2y: " + y2 + " StartX: " + startX +" StartY: " + startY +" EndX: " + endX +
+                                    " EndY: " + endY);
+                        }
+                        /*Point p2 = new Point(pointA.x - baX * abScalingFactor2, pointA.y
+                                - baY * abScalingFactor2);*/
+                        //return Arrays.asList(p1, p2);
+                    }
+                    Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
+
+                }
+            }
+        }
+
     }
 
     HashMap<String, Integer> hm;
