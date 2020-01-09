@@ -1546,6 +1546,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    ArrayList<OverflowInfo> overflowInfo = new ArrayList<>();
     private void calculateSprinklerOverflow() {
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
@@ -1610,6 +1611,8 @@ public class MainActivity extends AppCompatActivity {
                                             x2 + " 2y: " + y2 + " StartX: " + startX +" StartY: " + startY +" EndX: " + endX +
                                     " EndY: " + endY);
                         } else {
+                            overflowInfo.add(new OverflowInfo(t,b, (b + 1 > dv.xlist.size() - 1 ? 0 : b + 1), startX, startY,
+                                    endX, endY, circleX, circleY, radius, x1, x2, y1, y2));
                             Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "2 INTERSECTIONs - \n\t\t\t\t\t\t" + " 1x: " +
                                     x1 + " 1y: " + y1
                                     + " 2x: " +
@@ -1626,6 +1629,33 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        calculateOverflowWastage();
+
+    }
+
+    public void calculateOverflowWastage(){
+        for(OverflowInfo overflowInfo: overflowInfo){
+            double x1 = overflowInfo.getX1();
+            double x2 = overflowInfo.getX2();
+            double y1 = overflowInfo.getY1();
+            double y2 = overflowInfo.getY2();
+
+            double centerX = overflowInfo.getCircleX();
+            double centerY = overflowInfo.getCircleY();
+
+            double a = x1 * (y2 - centerY);
+            double b = x2 * (centerY - y1);
+            double c = centerX * (y1 - y2);
+            double triangleArea = Math.abs((a+b+c)-2);
+
+            double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX,y1 - centerY)-
+                    Math.atan2(x2- centerX,y2- centerY)));
+
+            double sectorArea = Math.PI * Math.pow(overflowInfo.getRadius(),2) * (angle/360d);
+            makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
+            Log.wtf("*- - Overflow Info", "\tThe angle is - " + angle + "\n\t\t\t\t\t\t\t\t\tTriangle Area - "
+                    + triangleArea + "\n\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea);
+        }
     }
 
     HashMap<String, Integer> hm;
