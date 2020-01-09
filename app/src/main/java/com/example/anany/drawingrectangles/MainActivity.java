@@ -53,8 +53,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -755,7 +757,7 @@ public class MainActivity extends AppCompatActivity {
                 double rotateDisplay = dv.rotate;
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                //makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -1134,6 +1136,13 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             xlist.add((int) x);
                             ylist.add((int) y);
+                            String logger = "";
+                            if (dv.xlist.size() > 0) {
+                                for (int i = 0; i < dv.xlist.size(); i++) {
+                                    logger += "\n*- X - " + dv.xlist.get(i) + "  Y - " + dv.ylist.get(i);
+                                }
+                            }
+                            Log.wtf("*- Polygon coordinates", "Information: " + logger);
                             //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
                             // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
                             // That's why try writing your customDrawLine() code in onDraw().
@@ -1164,12 +1173,12 @@ public class MainActivity extends AppCompatActivity {
                     //Log.wtf("*- IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
                     Log.wtf("*- IMPORTANT: ", "Change Rotation Size: " + changeRotation.size() + "  rotation-" + rotate + "  angle-" + angle);
                     String logger = "";
-                    if (dv.angleList.size() > 0) {
-                        for (int i = 0; i < angleList.size(); i++) {
-                            logger += "\n*- Angle - " + angleList.get(i) + "  Rotation - " + rotationList.get(i);
+                    if (dv.xlist.size() > 0) {
+                        for (int i = 0; i < dv.xlist.size(); i++) {
+                            logger += "\n*- X - " + dv.xlist.get(i) + "  Y - " + dv.ylist.get(i);
                         }
                     }
-                    Log.wtf("Angle and Rotation Lists -", "Information: " + logger);
+                    Log.wtf("*- Polygon coordinates", "Information: " + logger);
                     //sprinkr.add((int) Math.pow(sradius / 9, 2));
                     invalidate();
                 }
@@ -1546,19 +1555,29 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    double overFlowWastage = 0;
     ArrayList<OverflowInfo> overflowInfo = new ArrayList<>();
+    Set<OverflowInfo> completelyOutside = new HashSet<>();
+
     private void calculateSprinklerOverflow() {
+        overFlowWastage = 0;
+        completelyOutside = new HashSet<>();
+        overflowInfo = new ArrayList<>();
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
         for (int t = 0; t < dv.sprinkx.size(); t++) {
+            boolean fullOutside = true;
+            boolean added = false;
+            double circleX = dv.sprinkx.get(t);
+            double circleY = dv.sprinky.get(t);
+            double radius = dv.sprinkr.get(t);
+            boolean outside = outside(circleX, circleY);
             for (int b = 0; b < dv.xlist.size(); b++) {
                 double startX = dv.xlist.get(b);
                 double startY = dv.ylist.get(b);
                 double endX = dv.xlist.get((b + 1 > dv.xlist.size() - 1 ? 0 : b + 1));
                 double endY = dv.ylist.get((b + 1 > dv.ylist.size() - 1 ? 0 : b + 1));
-                double circleX = dv.sprinkx.get(t);
-                double circleY = dv.sprinky.get(t);
-                double radius = dv.sprinkr.get(t);
+
 
                 double baX = endX - startX;
                 double baY = endY - startY;
@@ -1573,7 +1592,16 @@ public class MainActivity extends AppCompatActivity {
                 double q = c / a;
 
                 double disc = pBy2 * pBy2 - q;
+                //README No intersections, but still need to check if it was outside
                 if (disc < 0) {
+                    //README Point is completely outside circle, add to list
+                    if (outside) {
+                        if (!added)
+                            completelyOutside.add(new OverflowInfo(t, 0, 0, 0, 0, 0, 0, 0, 0, radius
+                                    , 0, 0, 0, 0));
+                        added = true;
+                    }
+                    //overFlowWastage += radius * radius * Math.PI * dv.angleList.get(t) / 360d;
                     //Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "No overflow??");
                     // return Collections.emptyList();
                 } else {
@@ -1584,6 +1612,7 @@ public class MainActivity extends AppCompatActivity {
 
                     /*Point p1 = new Point(pointA.x - baX * abScalingFactor1, pointA.y
                             - baY * abScalingFactor1);*/
+                    //README 1 intersection
                     if (disc == 0) { // abScalingFactor1 == abScalingFactor2
                         Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "1 INTERSECTION - " + " x: " +
                                 (startX - baX * abScalingFactor1) + " y: " + (startY - baY * abScalingFactor1));
@@ -1592,31 +1621,35 @@ public class MainActivity extends AppCompatActivity {
                         double y1 = (startY - baY * abScalingFactor1);
                         double x2 = (startX - baX * abScalingFactor2);
                         double y2 = (startY - baY * abScalingFactor2);
-                        if(!((x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 <  Math.max(startY, endY))
-                                || (x2 > Math.min(startX, endX) && x2 < Math.max(startX, endX) && y2 >  Math.min(startY, endY) && y2 <  Math.max(startY, endY)))){
+                        //README False intersection (line not line segment)
+                        if (!((x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 < Math.max(startY, endY))
+                                || (x2 > Math.min(startX, endX) && x2 < Math.max(startX, endX) && y2 > Math.min(startY, endY) && y2 < Math.max(startY, endY)))) {
                         /*if ((radius < Math.sqrt(Math.pow(circleX - startX, 2) + Math.pow(circleY - startY, 2))
                                 || radius < Math.sqrt(Math.pow(circleX - endX, 2) + Math.pow(circleY - endY, 2)))
                                 && !((circleX > startX && circleX < endX) && (circleY > startY && circleY < endY))) {*/
                         /*if ((circleX < (Math.min(startX, endX) - radius)) || (circleX > (Math.max(startX, endX) + radius))
                                 || (circleY < (Math.min(startY, endY) - radius)) || (circleY > (Math.max(startY, endY) + radius))) {*/
-                            Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "\n\t\t\\t\tTOO FAR AWAY: -"+
-                                    "Bool 1 - " + (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 <  Math.max(startY, endY)) +
-                                            " Bool 2- " + (x2 > Math.min(startX, endX) && x2 < Math.max(startX, endX) && y2 >  Math.min(startY, endY) && y2 <  Math.max(startY, endY))+
-                                    /*"Radius bool-" + (radius < Math.sqrt(Math.pow(circleX - startX, 2) + Math.pow(circleY - startY, 2))
+                            /*Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "\n\t\t\\t\tTOO FAR AWAY: -" +
+                                    "Bool 1 - " + (x1 > Math.min(startX, endX) && x1 < Math.max(startX, endX) && y1 > Math.min(startY, endY) && y1 < Math.max(startY, endY)) +
+                                    " Bool 2- " + (x2 > Math.min(startX, endX) && x2 < Math.max(startX, endX) && y2 > Math.min(startY, endY) && y2 < Math.max(startY, endY)) +
+                                    *//*"Radius bool-" + (radius < Math.sqrt(Math.pow(circleX - startX, 2) + Math.pow(circleY - startY, 2))
                                             || radius < Math.sqrt(Math.pow(circleX - endX, 2) + Math.pow(circleY - endY, 2))) + " " +
                                             "Other 2:" + !((circleX > startX && circleX < endX) && (circleX > startX && circleX < endX))
-                                            + (circleX > startX && circleX < endX) + (circleX > startX && circleX < endX) +*/ " \n\n1x: " +
-                                            x1 + " 1y: " + y1
-                                            + " 2x: " +
-                                            x2 + " 2y: " + y2 + " StartX: " + startX +" StartY: " + startY +" EndX: " + endX +
-                                    " EndY: " + endY);
+                                            + (circleX > startX && circleX < endX) + (circleX > startX && circleX < endX) +*//* " \n\n1x: " +
+                                    x1 + " 1y: " + y1
+                                    + " 2x: " +
+                                    x2 + " 2y: " + y2 + " StartX: " + startX + " StartY: " + startY + " EndX: " + endX +
+                                    " EndY: " + endY);*/
                         } else {
-                            overflowInfo.add(new OverflowInfo(t,b, (b + 1 > dv.xlist.size() - 1 ? 0 : b + 1), startX, startY,
+                            //README actual intersection with 2 points
+                            //  circle is not fully outside land.
+                            fullOutside = false;
+                            overflowInfo.add(new OverflowInfo(t, b, (b + 1 > dv.xlist.size() - 1 ? 0 : b + 1), startX, startY,
                                     endX, endY, circleX, circleY, radius, x1, x2, y1, y2));
                             Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "2 INTERSECTIONs - \n\t\t\t\t\t\t" + " 1x: " +
                                     x1 + " 1y: " + y1
                                     + " 2x: " +
-                                    x2 + " 2y: " + y2 + " StartX: " + startX +" StartY: " + startY +" EndX: " + endX +
+                                    x2 + " 2y: " + y2 + " StartX: " + startX + " StartY: " + startY + " EndX: " + endX +
                                     " EndY: " + endY);
                         }
                         /*Point p2 = new Point(pointA.x - baX * abScalingFactor2, pointA.y
@@ -1627,14 +1660,40 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
+
+            //README Circle not fully outside ladn so have to remove from list.
+            //Log.wtf("*- \t#" + (t+1)+ " Bool vars - " , "Full Outside: " + fullOutside + " Added: " + added + " Outside: " + outside);
+            if (!fullOutside) {
+                //README Only if it was added to list, remove that sprinkler.
+                if (added)
+                    completelyOutside.remove(completelyOutside.size() - 1);
+                //makeToast("FUll Outside: " + fullOutside);
+            }
         }
+        for (OverflowInfo completelyOutside : completelyOutside) {
+            overFlowWastage += completelyOutside.getRadius() * completelyOutside.getRadius() *
+                    Math.PI * dv.angleList.get(completelyOutside.getCirclePos()) / 360d;
+        }
+        //Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
 
         calculateOverflowWastage();
 
     }
 
-    public void calculateOverflowWastage(){
-        for(OverflowInfo overflowInfo: overflowInfo){
+    //NOTES
+    // Things that I am calculating:
+    // 1. Completely outside sprinklers - total area  (keep in mind that for list (have to remove element if it intersects with line)
+    // 2. If overflowing sprinkler is outside
+    // 3. Different overflowWastage if circle is outside.
+    //TODO Check if set works with completely outside sprinklers. Have to make sure to add it only once and remove only if added and intersecting.
+    //TODO Check if overFlowWastage for Completely Outside sprinklers works.
+    //TODO Check if outside function is able to determine outside sprinklers.
+    //TODO If outside, do additional calculation to subtract sector area (without triangle) from total circle
+    //TODO Check if angles and everything is working.
+
+    public void calculateOverflowWastage() {
+        Log.wtf("*- - - - - --- --- --- - - --  -- ", "----------_-------------_------------_");
+        for (OverflowInfo overflowInfo : overflowInfo) {
             double x1 = overflowInfo.getX1();
             double x2 = overflowInfo.getX2();
             double y1 = overflowInfo.getY1();
@@ -1646,17 +1705,84 @@ public class MainActivity extends AppCompatActivity {
             double a = x1 * (y2 - centerY);
             double b = x2 * (centerY - y1);
             double c = centerX * (y1 - y2);
-            double triangleArea = Math.abs((a+b+c)-2);
+            double triangleArea = Math.abs((a + b + c) - 2);
 
-            double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX,y1 - centerY)-
-                    Math.atan2(x2- centerX,y2- centerY)));
+            double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX, y1 - centerY) -
+                    Math.atan2(x2 - centerX, y2 - centerY)));
+            double v1x = x1 - centerX;
+            double v1y = y1 - centerY;
 
-            double sectorArea = Math.PI * Math.pow(overflowInfo.getRadius(),2) * (angle/360d);
-            makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
-            Log.wtf("*- - Overflow Info", "\tThe angle is - " + angle + "\n\t\t\t\t\t\t\t\t\tTriangle Area - "
-                    + triangleArea + "\n\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea);
+            //need to normalize:
+            double l1 = Math.sqrt(v1x * v1x + v1y * v1y);
+            v1x /= l1;
+            v1y /= l1;
+
+            double v2x = x2 - centerX;
+            double v2y = y2 - centerY;
+
+            //need to normalize:
+            double l2 = Math.sqrt(v2x * v2x + v2y * v2y);
+            v2x /= l2;
+            v2y /= l2;
+            double rad = Math.acos(v1x * v2x + v1y * v2y);
+            //INFO Changed method of calculating angle.
+            double degrees = Math.toDegrees(rad);
+
+            double sectorArea = Math.PI * Math.pow(overflowInfo.getRadius(), 2) * (angle / 360d);
+
+            boolean outside = outside(centerX, centerY);
+
+            Log.wtf("*- - Overflow Info", "Outside: " + outside);
+            //makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
+            /*Log.wtf("*- - Overflow Info", "\tThe angle is - " + (int) degrees + "\n\t\t\t\t\t\t\t\t\tTriangle Area - "
+                    + triangleArea + "\n\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea + "\n\t\t\t\t\t\t\t  Final Area - " + (sectorArea - triangleArea));
+        */
+            outsideResults(centerX, centerY);
         }
     }
+
+    private boolean outsideResults(double centerX, double centerY) {
+        int counter = 0;
+        for (int b = 0; b < dv.xlist.size(); b++) {
+            double startX = dv.xlist.get(b);
+            double startY = dv.ylist.get(b);
+            double endX = dv.xlist.get((b + 1 > dv.xlist.size() - 1 ? 0 : b + 1));
+            double endY = dv.ylist.get((b + 1 > dv.ylist.size() - 1 ? 0 : b + 1));
+            if (centerY >= Math.min(startY, endY) && centerY <= Math.max(startY, endY)) {
+                double inverseSlope = (startX - endX) / (startY - endY);
+                double expectedX = (inverseSlope * (startY - centerY)) + startX;
+                if (centerX < expectedX) {
+                    Log.wtf("*- #" + b + " Outside Results - ", ",\n\t\t\t\t\t\t\t\t\t\tStart X: " + startX + " Start Y: " + startY
+                            + "\n\t\t\t\t\t\t\t\t\t\tEnd X: " + endX + " End Y: " + endY + "\n\t\t\t\t\t\t\t\t\t\tCenter X: " + centerX + " Center Y: " + centerY
+                            + "\n\t\t\t\t\t\t\t\t\t\tInverse Slope - " + (double)((int)inverseSlope*100)/100d + " Expected X - " + (int)expectedX + " Start-Center: " + (startY - centerY));
+                    counter++;
+                }
+            }
+        }
+        return counter % 2 == 0;
+
+    }
+
+    //INFO Possible problem could be with formula below. (inverseSlope * otherstuff). Or could be (startY -centerY) is opposite.
+    //README Function determines if sprinkler center is outside, not full sprinkler.
+    private boolean outside(double centerX, double centerY) {
+        int counter = 0;
+        for (int b = 0; b < dv.xlist.size(); b++) {
+            double startX = dv.xlist.get(b);
+            double startY = dv.ylist.get(b);
+            double endX = dv.xlist.get((b + 1 > dv.xlist.size() - 1 ? 0 : b + 1));
+            double endY = dv.ylist.get((b + 1 > dv.ylist.size() - 1 ? 0 : b + 1));
+            if (centerY >= Math.min(startY, endY) && centerY <= Math.max(startY, endY)) {
+                double inverseSlope = (startX - endX) / (startY - endY);
+                double expectedX = (inverseSlope * (startY - centerY)) + startX;
+                if (centerX < expectedX)
+                    counter++;
+            }
+        }
+        return counter % 2 == 0;
+
+    }
+
 
     HashMap<String, Integer> hm;
 
@@ -1996,7 +2122,7 @@ public class MainActivity extends AppCompatActivity {
         for (double m : singleR) {
             //README The last multiplication part was added to account for fact that the circles may not be full 360
             non += ((double) (Math.pow(m, 2) * Math.PI)) * (double) (dv.angleList.get(posCounter)) / 360f;
-            makeToast(non + " " + dv.angleList.get(posCounter));
+            //makeToast(non + " " + dv.angleList.get(posCounter));
             posCounter++;
         }
 
