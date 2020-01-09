@@ -1732,6 +1732,10 @@ public class MainActivity extends AppCompatActivity {
 
             boolean outside = outside(centerX, centerY);
 
+            double wastedArea = sectorArea - triangleArea;
+            //TODO Check if below works
+            if(outside)
+                wastedArea = (Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius() ) - wastedArea;
             Log.wtf("*- - Overflow Info", "Outside: " + outside);
             //makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
             /*Log.wtf("*- - Overflow Info", "\tThe angle is - " + (int) degrees + "\n\t\t\t\t\t\t\t\t\tTriangle Area - "
