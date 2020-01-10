@@ -1556,12 +1556,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     double overFlowWastage = 0;
+    double totalOverflowArea = 0;
     ArrayList<OverflowInfo> overflowInfo = new ArrayList<>();
     //Set<OverflowInfo> completelyOutside = new HashSet<>();
     HashMap<Integer, OverflowInfo> completelyOutside = new HashMap<>();
 
     private void calculateSprinklerOverflow() {
         overFlowWastage = 0;
+        totalOverflowArea = 0;
         completelyOutside = new HashMap<>();
         overflowInfo = new ArrayList<>();
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
@@ -1600,16 +1602,17 @@ public class MainActivity extends AppCompatActivity {
                     //README Point is completely outside circle, add to list
                     if (outside) {
                         //if (!added)
-                        if(!removed)
-                        completelyOutside.put(t, new OverflowInfo(t, 0, 0, 0, 0, 0, 0, 0, 0, radius
-                                , 0, 0, 0, 0));
-                        Log.wtf("*- complete outside info - " , "added: " + t + " SIze: " + completelyOutside.size());
+                        if (!removed)
+                            completelyOutside.put(t, new OverflowInfo(t, 0, 0, 0, 0, 0, 0, 0, 0, radius
+                                    , 0, 0, 0, 0));
+                        Log.wtf("*- complete outside info - ", "added: " + t + " SIze: " + completelyOutside.size());
                         added = true;
                     }
                     //FUTURE FILES
                     // You may have to check if non intersecting circle is inside. If inside, then calculate areas of only these.
                     // Right now you are calculating areas of individual ones here and area of individual ones in iterateThroughPixels
                     //overFlowWastage += radius * radius * Math.PI * dv.angleList.get(t) / 360d;
+                    //totalOverflowArea += radius * radius * Math.PI * dv.angleList.get(t) / 360d;
                     //Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "No overflow??");
                     // return Collections.emptyList();
                 } else {
@@ -1660,7 +1663,7 @@ public class MainActivity extends AppCompatActivity {
                                 removedFirst = false;*/
                             completelyOutside.remove(t);
                             removed = true;
-                            Log.wtf("*- complete outside info - " , "removed: " + t + " SIze: " + completelyOutside.size());
+                            //Log.wtf("*- complete outside info - " , "removed: " + t + " SIze: " + completelyOutside.size());
                             overflowInfo.add(new OverflowInfo(t, b, (b + 1 > dv.xlist.size() - 1 ? 0 : b + 1), startX, startY,
                                     endX, endY, circleX, circleY, radius, x1, x2, y1, y2));
                             Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "2 INTERSECTIONs - \n\t\t\t\t\t\t" + " 1x: " +
@@ -1677,8 +1680,8 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-           // if(removedFirst)
-             //   completelyOutside.remove(t);
+            // if(removedFirst)
+            //   completelyOutside.remove(t);
 
             //README Circle not fully outside ladn so have to remove from list.
             //Log.wtf("*- \t#" + (t+1)+ " Bool vars - " , "Full Outside: " + fullOutside + " Added: " + added + " Outside: " + outside);
@@ -1690,11 +1693,14 @@ public class MainActivity extends AppCompatActivity {
                 //makeToast("FUll Outside: " + fullOutside);
             }*/
         }
-        for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
+        /*for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
+        totalOverflowArea += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
+                    Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
             overFlowWastage += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
                     Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
         }
         Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
+*/
         calculateOverflowWastage();
 
     }
@@ -1718,57 +1724,111 @@ public class MainActivity extends AppCompatActivity {
     public void calculateOverflowWastage() {
         Log.wtf("*- - - - - --- --- --- - - --  -- ", "----------_-------------_------------_");
         int counteR = 0;
+        ArrayList<Integer> used = new ArrayList<>();
+        ArrayList<Integer> fullCircleUsed = new ArrayList<>();
+        double previousWastage = 0;
+        double initialWastage = overFlowWastage;
         for (OverflowInfo overflowInfo : overflowInfo) {
-            double x1 = overflowInfo.getX1();
-            double x2 = overflowInfo.getX2();
-            double y1 = overflowInfo.getY1();
-            double y2 = overflowInfo.getY2();
+            if (!used.contains(overflowInfo.getCirclePos())) {
+                double x1 = overflowInfo.getX1();
+                double x2 = overflowInfo.getX2();
+                double y1 = overflowInfo.getY1();
+                double y2 = overflowInfo.getY2();
 
-            double centerX = overflowInfo.getCircleX();
-            double centerY = overflowInfo.getCircleY();
+                double centerX = overflowInfo.getCircleX();
+                double centerY = overflowInfo.getCircleY();
 
-            double a = x1 * (y2 - centerY);
-            double b = x2 * (centerY - y1);
-            double c = centerX * (y1 - y2);
-            double triangleArea = Math.abs((a + b + c) - 2);
+                double a = x1 * (y2 - centerY);
+                double b = x2 * (centerY - y1);
+                double c = centerX * (y1 - y2);
+                double triangleArea = Math.abs((a + b + c) - 2);
 
-            double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX, y1 - centerY) -
-                    Math.atan2(x2 - centerX, y2 - centerY)));
-            double v1x = x1 - centerX;
-            double v1y = y1 - centerY;
+                double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX, y1 - centerY) -
+                        Math.atan2(x2 - centerX, y2 - centerY)));
+                double v1x = x1 - centerX;
+                double v1y = y1 - centerY;
 
-            //need to normalize:
-            double l1 = Math.sqrt(v1x * v1x + v1y * v1y);
-            v1x /= l1;
-            v1y /= l1;
+                //need to normalize:
+                double l1 = Math.sqrt(v1x * v1x + v1y * v1y);
+                v1x /= l1;
+                v1y /= l1;
 
-            double v2x = x2 - centerX;
-            double v2y = y2 - centerY;
+                double v2x = x2 - centerX;
+                double v2y = y2 - centerY;
 
-            //need to normalize:
-            double l2 = Math.sqrt(v2x * v2x + v2y * v2y);
-            v2x /= l2;
-            v2y /= l2;
-            double rad = Math.acos(v1x * v2x + v1y * v2y);
-            //INFO Changed method of calculating angle.
-            double degrees = Math.toDegrees(rad);
+                //need to normalize:
+                double l2 = Math.sqrt(v2x * v2x + v2y * v2y);
+                v2x /= l2;
+                v2y /= l2;
+                double rad = Math.acos(v1x * v2x + v1y * v2y);
+                //INFO Changed method of calculating angle.
+                double degrees = Math.toDegrees(rad);
 
-            double sectorArea = Math.PI * Math.pow(overflowInfo.getRadius(), 2) * (angle / 360d);
+                double sectorArea = Math.PI * Math.pow(overflowInfo.getRadius(), 2) * (degrees / 360d);
+                double totalArea = Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius();
 
-            boolean outside = outside(centerX, centerY);
+                boolean outside = outside(centerX, centerY);
 
-            double wastedArea = sectorArea - triangleArea;
-            //TODO Check if below works
-            if (outside)
-                wastedArea = (Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius()) - wastedArea;
-            Log.wtf("*- - Overflow Info", "Sprinkler " + (overflowInfo.getCirclePos()) + ((outside) ? " is outside" : " is inside"));
-            //makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
-            /*Log.wtf("*- - Overflow Info", "\tThe angle is - " + (int) degrees + "\n\t\t\t\t\t\t\t\t\tTriangle Area - "
-                    + triangleArea + "\n\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea + "\n\t\t\t\t\t\t\t  Final Area - " + (sectorArea - triangleArea));
-        */
-            //outsideResults(counteR, centerX, centerY);
-            counteR++;
+                double wastedArea = sectorArea - triangleArea;
+                //DONE Check if below works
+                if (wastedArea < 0) wastedArea = Math.abs(wastedArea) / 2;
+
+                if (outside)
+                    wastedArea = (Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius()) - wastedArea;
+                if (dv.angleList.get(overflowInfo.getCirclePos()) < 316) {
+                    double sprinklerAngle = dv.angleList.get(overflowInfo.getCirclePos());
+                    totalArea *= sprinklerAngle / 360;
+                    wastedArea = totalArea * 0.05;
+                    used.add(overflowInfo.getCirclePos());
+                }
+
+                /*Log.wtf("*- - Overflow Info", "Sprinkler " + (overflowInfo.getCirclePos()) + ((outside) ? " is outside" : " is inside")
+                        + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tThe angle is - " + (int) degrees + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tTriangle Area - "
+                        + triangleArea + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea +
+                        "\n\t\t\t\t\t\t\t\t\t\t\t\tTotal Area: " + totalArea + "\n\t\t\t\t\t\t\t\t\t\t\t    Final Area - " + wastedArea);*/
+
+                previousWastage = overFlowWastage - initialWastage;
+                overFlowWastage += wastedArea;
+
+                if (fullCircleUsed.contains(overflowInfo.getCirclePos())) {
+                    //double latestGain = overFlowWastage - initialWastage - previousWastage;
+                    double latestGain = wastedArea;
+                    //README If the latest addition was larger, then subtract 80% of previous smaller one.
+                    double toAdd = previousWastage * .22 + wastedArea * .21;
+                    overFlowWastage += toAdd;
+                    if (overFlowWastage > totalOverflowArea)
+                        overFlowWastage -= toAdd*.9;
+                    //TODO Fix problem that overflowwastage can go above totalOverflowArea
+                    //if(overFlowWastage )
+                    if (latestGain >= previousWastage) {
+                        //overFlowWastage -= previousWastage * .59;
+                    } else { //README The previous area was larger.
+                        //overFlowWastage -= wastedArea * .55;
+                    }
+                }
+
+                if (!fullCircleUsed.contains(overflowInfo.getCirclePos())) {
+                    totalOverflowArea += totalArea;
+                    Log.wtf("*- Total Overflow Area: ", "ADDING: " + totalArea + " = " + totalOverflowArea);
+                }
+
+                Log.wtf("*- - Overflow Info", "Sprinkler " + (overflowInfo.getCirclePos()) + ((outside) ? " is outside" : " is inside")
+                        + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tThe angle is - " + (int) degrees + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tTriangle Area - "
+                        + triangleArea + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea +
+                        "\n\t\t\t\t\t\t\t\t\t\t\t\tTotal Area: " + totalArea + "\n\t\t\t\t\t\t\t\t\t\t\t    Final Area - " + wastedArea
+                        + "\n\t\t\t\t\t\t\t Previous Wastage: " + previousWastage + "\n\t\t\t\t\t\t\t Overflow Wastage: "
+                        + overFlowWastage + "\n\t\t\t\t\t\t\t Total Overflow Area: " + totalOverflowArea);
+                //makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
+                //outsideResults(counteR, centerX, centerY);
+                if (dv.angleList.get(overflowInfo.getCirclePos()) > 316) {
+                    fullCircleUsed.add(overflowInfo.getCirclePos());
+                    Log.wtf("*- Full circle used", "It was added");
+                }
+                counteR++;
+                Log.wtf("*-", ",\nIJ");
+            }
         }
+        Log.wtf("*- End Results: ", "Overflow Wastage: " + overFlowWastage + " Total Area: " + totalOverflowArea);
     }
 
     private boolean outsideResults(int counteR, double centerX, double centerY) {
