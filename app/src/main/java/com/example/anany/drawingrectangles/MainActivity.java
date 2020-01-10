@@ -1171,7 +1171,7 @@ public class MainActivity extends AppCompatActivity {
                     sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 5.9f, 2)) - 50);
                     //sprinkr.add((int) ((double) (sradius/dv.ratio)));
                     //Log.wtf("*- IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
-                    Log.wtf("*- IMPORTANT: ", "Change Rotation Size: " + changeRotation.size() + "  rotation-" + rotate + "  angle-" + angle);
+                    //Log.wtf("*- IMPORTANT: ", "Change Rotation Size: " + changeRotation.size() + "  rotation-" + rotate + "  angle-" + angle);
                     String logger = "";
                     if (dv.xlist.size() > 0) {
                         for (int i = 0; i < dv.xlist.size(); i++) {
@@ -1614,6 +1614,7 @@ public class MainActivity extends AppCompatActivity {
                             - baY * abScalingFactor1);*/
                     //README 1 intersection
                     if (disc == 0) { // abScalingFactor1 == abScalingFactor2
+                        //TODO calculate 30% wastage
                         Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "1 INTERSECTION - " + " x: " +
                                 (startX - baX * abScalingFactor1) + " y: " + (startY - baY * abScalingFactor1));
                     } else {
@@ -1693,6 +1694,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void calculateOverflowWastage() {
         Log.wtf("*- - - - - --- --- --- - - --  -- ", "----------_-------------_------------_");
+        int counteR = 0;
         for (OverflowInfo overflowInfo : overflowInfo) {
             double x1 = overflowInfo.getX1();
             double x2 = overflowInfo.getX2();
@@ -1734,18 +1736,19 @@ public class MainActivity extends AppCompatActivity {
 
             double wastedArea = sectorArea - triangleArea;
             //TODO Check if below works
-            if(outside)
-                wastedArea = (Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius() ) - wastedArea;
-            Log.wtf("*- - Overflow Info", "Outside: " + outside);
+            if (outside)
+                wastedArea = (Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius()) - wastedArea;
+            Log.wtf("*- - Overflow Info", "Sprinkler " + (overflowInfo.getCirclePos()) + ((outside) ? " is outside": " is inside"));
             //makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
             /*Log.wtf("*- - Overflow Info", "\tThe angle is - " + (int) degrees + "\n\t\t\t\t\t\t\t\t\tTriangle Area - "
                     + triangleArea + "\n\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea + "\n\t\t\t\t\t\t\t  Final Area - " + (sectorArea - triangleArea));
         */
-            outsideResults(centerX, centerY);
+            //outsideResults(counteR, centerX, centerY);
+            counteR++;
         }
     }
 
-    private boolean outsideResults(double centerX, double centerY) {
+    private boolean outsideResults(int counteR, double centerX, double centerY) {
         int counter = 0;
         for (int b = 0; b < dv.xlist.size(); b++) {
             double startX = dv.xlist.get(b);
@@ -1754,11 +1757,11 @@ public class MainActivity extends AppCompatActivity {
             double endY = dv.ylist.get((b + 1 > dv.ylist.size() - 1 ? 0 : b + 1));
             if (centerY >= Math.min(startY, endY) && centerY <= Math.max(startY, endY)) {
                 double inverseSlope = (startX - endX) / (startY - endY);
-                double expectedX = (inverseSlope * (startY - centerY)) + startX;
+                double expectedX = (-1 * inverseSlope * (startY - centerY)) + startX;
+                Log.wtf("*- Sprink#- " + counteR + " Line#- " + b + " Outside Results - ", ",\n\t\t\t\t\t\t\t\t\t\tStart X: " + startX + " Start Y: " + startY
+                        + "\n\t\t\t\t\t\t\t\t\t\tEnd X: " + endX + " End Y: " + endY + "\n\t\t\t\t\t\t\t\t\t\tCenter X: " + centerX + " Center Y: " + centerY
+                        + "\n\t\t\t\t\t\t\t\t\t\tInverse Slope - " + (double) ((int) inverseSlope * 100) / 100d + " Expected X - " + (int) expectedX + " Start-Center: " + (startY - centerY));
                 if (centerX < expectedX) {
-                    Log.wtf("*- #" + b + " Outside Results - ", ",\n\t\t\t\t\t\t\t\t\t\tStart X: " + startX + " Start Y: " + startY
-                            + "\n\t\t\t\t\t\t\t\t\t\tEnd X: " + endX + " End Y: " + endY + "\n\t\t\t\t\t\t\t\t\t\tCenter X: " + centerX + " Center Y: " + centerY
-                            + "\n\t\t\t\t\t\t\t\t\t\tInverse Slope - " + (double)((int)inverseSlope*100)/100d + " Expected X - " + (int)expectedX + " Start-Center: " + (startY - centerY));
                     counter++;
                 }
             }
@@ -1778,13 +1781,13 @@ public class MainActivity extends AppCompatActivity {
             double endY = dv.ylist.get((b + 1 > dv.ylist.size() - 1 ? 0 : b + 1));
             if (centerY >= Math.min(startY, endY) && centerY <= Math.max(startY, endY)) {
                 double inverseSlope = (startX - endX) / (startY - endY);
-                double expectedX = (inverseSlope * (startY - centerY)) + startX;
-                if (centerX < expectedX)
+                double expectedX = (-1 * inverseSlope * (startY - centerY)) + startX;
+                if (centerX < expectedX) {
                     counter++;
+                }
             }
         }
         return counter % 2 == 0;
-
     }
 
 
