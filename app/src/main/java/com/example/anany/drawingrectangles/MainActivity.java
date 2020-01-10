@@ -1626,9 +1626,10 @@ public class MainActivity extends AppCompatActivity {
                     //README 1 intersection
                     if (disc == 0) { // abScalingFactor1 == abScalingFactor2
                         //DONE calculate 30% wastage
-                        /*overFlowWastage += radius * radius * Math.PI * dv.angleList.get(t) / 360d * .3;
+                        overFlowWastage += radius * radius * Math.PI * dv.angleList.get(t) / 360d * .3;
+                        totalOverflowArea += radius * radius * Math.PI * dv.angleList.get(t) / 360d;
                         Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "1 INTERSECTION - " + " x: " +
-                                (startX - baX * abScalingFactor1) + " y: " + (startY - baY * abScalingFactor1));*/
+                                (startX - baX * abScalingFactor1) + " y: " + (startY - baY * abScalingFactor1));
                     } else {
                         double x1 = (startX - baX * abScalingFactor1);
                         double y1 = (startY - baY * abScalingFactor1);
@@ -1693,14 +1694,13 @@ public class MainActivity extends AppCompatActivity {
                 //makeToast("FUll Outside: " + fullOutside);
             }*/
         }
-        /*for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
+        for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
         totalOverflowArea += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
                     Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
             overFlowWastage += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
                     Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
         }
         Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
-*/
         calculateOverflowWastage();
 
     }
