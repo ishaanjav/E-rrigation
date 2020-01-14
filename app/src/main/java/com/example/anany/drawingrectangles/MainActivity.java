@@ -1768,7 +1768,7 @@ public class MainActivity extends AppCompatActivity {
         hideLoading();
     }
 
-    //README Calculate areas of individual circles
+    //README Calculate areas of individual circles.
     private void individualCircleArea() {
         for (int i = 0; i < singleR.size(); i++)
             totalInsideArea += singleR.get(i) * singleR.get(i) * Math.PI * dv.angleList.get(singleP.get(i)) / 360d;
