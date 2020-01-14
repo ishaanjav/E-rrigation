@@ -6,17 +6,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -34,7 +30,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -46,17 +41,11 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Array;
-import java.nio.Buffer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -1503,7 +1492,7 @@ public class MainActivity extends AppCompatActivity {
                 showLoading();
 
                 calculateSprinklerOverflow();
-
+/*
                 //INFO Wait a bit so that the Dialog is showing, then do the calculations.
                 Handler h = new Handler();
                 final Bitmap[] bmp = {tr};
@@ -1511,7 +1500,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         //Bitmap bmp = takeScreenShot(dv);
-               /*try (FileOutputStream out = new FileOutputStream("test.png")) {
+               *//*try (FileOutputStream out = new FileOutputStream("test.png")) {
                    bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
                } catch (Exception e) {
                    makeToast(e.toString());
@@ -1523,7 +1512,7 @@ public class MainActivity extends AppCompatActivity {
                opener.setAction(Intent.ACTION_VIEW);
                File temp = new File("sdcard/Images/test.png");
                opener.setDataAndType(Uri.parse("/test.png"), "image/*");
-               startActivity(opener);*/
+               startActivity(opener);*//*
 
 
                         //DONE Before counting pixel colors, try compressing PNG to 50% quality or less
@@ -1538,7 +1527,7 @@ public class MainActivity extends AppCompatActivity {
                             //Log.wtf("*  Sprinkler Location ", "X: " + dv.sprinkx.get(i) + "  Y: " + dv.sprinky.get(i) + "  R: " + dv.sprinkr.get(i));
                         }
                         //Log.wtf("*BITMAP DIMENSIONS --------------------", "Width: " + bmp.getWidth() + " Height: " + bmp.getHeight());
-                        getIndividualCircles();
+                        //getIndividualCircles();
                         //Log.wtf("*Done getting circles", " DONE GETTING CIRCLES");
                         //README Make Bitmap smaller.
                         bmp[0] = Bitmap.createScaledBitmap(bmp[0], (int) (bmp[0].getWidth() * 1), (int) (bmp[0].getHeight() * 1), true);
@@ -1548,35 +1537,60 @@ public class MainActivity extends AppCompatActivity {
                         //File file = takeScreenShot2();
                         //iterateThroughPixels(file);
                     }
-                }, 300);
+                }, 300);*/
 
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    double overFlowWastage = 0;
-    double totalOverflowArea = 0;
+    double overFlowWastage = 0;      //INFO This is numerator for wastage
+    double totalOverflowArea = 0;    //INFO This is denominator for wastage
+    double overlapWastage = 0;       //INFO This is numbrator for wastage
+    double totalInsideArea = 0;      //INFO This is denominator for wastage
     ArrayList<OverflowInfo> overflowInfo = new ArrayList<>();
     //Set<OverflowInfo> completelyOutside = new HashSet<>();
     HashMap<Integer, OverflowInfo> completelyOutside = new HashMap<>();
+    HashMap<Integer, Double> individualCircles;
+    ArrayList<Integer> candidates = new ArrayList<>();
+    HashMap<Integer, Integer> insideCirclesH = new HashMap<>();
+    HashMap<Integer, Integer> outsideIntersectingH = new HashMap<>();
+    HashMap<Integer, Integer> completelyInsideH = new HashMap<>();
+    HashMap<Integer, OverflowInfo> insideIntersectingH = new HashMap<>();
+    ArrayList<Integer> insideCircles = new ArrayList<>();
+    ArrayList<Integer> outsideIntersecting = new ArrayList<>();
+    ArrayList<OverflowInfo> insideIntersecting = new ArrayList<>();
+    ArrayList<Integer> completelyInside = new ArrayList<>();
 
     private void calculateSprinklerOverflow() {
         overFlowWastage = 0;
         totalOverflowArea = 0;
         completelyOutside = new HashMap<>();
         overflowInfo = new ArrayList<>();
+
+        candidates = new ArrayList<>();
+        individualCircles = new HashMap<>();
+
+        insideCirclesH = new HashMap<>();
+        outsideIntersectingH = new HashMap<>();
+        completelyInsideH = new HashMap<>();
+        insideIntersectingH = new HashMap<>();
+
+        insideCircles = new ArrayList<>();
+        outsideIntersecting = new ArrayList<>();
+        completelyInside = new ArrayList<>();
+        insideIntersecting = new ArrayList<>();
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
         for (int t = 0; t < dv.sprinkx.size(); t++) {
-            boolean fullOutside = true;
-            boolean added = false;
             double circleX = dv.sprinkx.get(t);
             double circleY = dv.sprinky.get(t);
             double radius = dv.sprinkr.get(t);
             boolean outside = outside(circleX, circleY);
-            boolean removedFirst = false;
+            boolean removedCompletelyInsideCircles = false;
             boolean removed = false;
+            boolean removedIndividual = false;
+            boolean outsideIntersectingGood = false;
             for (int b = 0; b < dv.xlist.size(); b++) {
                 double startX = dv.xlist.get(b);
                 double startY = dv.ylist.get(b);
@@ -1599,15 +1613,27 @@ public class MainActivity extends AppCompatActivity {
                 double disc = pBy2 * pBy2 - q;
                 //README No intersections, but still need to check if it was outside
                 if (disc < 0) {
-                    //README Point is completely outside circle, add to list
+                    //README Circle center is outside and no intersections
                     if (outside) {
                         //if (!added)
+                        individualCircles.remove(t);
+                        removedIndividual = true;
                         if (!removed)
                             completelyOutside.put(t, new OverflowInfo(t, 0, 0, 0, 0, 0, 0, 0, 0, radius
                                     , 0, 0, 0, 0));
                         Log.wtf("*- complete outside info - ", "added: " + t + " SIze: " + completelyOutside.size());
-                        added = true;
+                    } else {
+                        //README Point had no intersections and was inside
+                        insideCirclesH.put(t, 1);
+                        if (!removedCompletelyInsideCircles)
+                            completelyInsideH.put(t, 1);
+                        if (!removedIndividual)
+                            individualCircles.put(t, radius);
                     }
+                    //FUTURE Files Try going through remaining sprinklers and calculate 2 intersections in pairs.
+                    // go from i =0 and j= i and check if they intersect. If the 2 sprinklers intersect calculate wastage.
+                    // we won't be able to account for 3 circles.
+                    // At most, check if singleR is 3 or 4 less than total circles. then estimate duplicate wastage from 3 circles.
                     //FUTURE FILES
                     // You may have to check if non intersecting circle is inside. If inside, then calculate areas of only these.
                     // Right now you are calculating areas of individual ones here and area of individual ones in iterateThroughPixels
@@ -1626,6 +1652,8 @@ public class MainActivity extends AppCompatActivity {
                     //README 1 intersection
                     if (disc == 0) { // abScalingFactor1 == abScalingFactor2
                         //DONE calculate 30% wastage
+                        completelyInsideH.remove(t);
+                        removedCompletelyInsideCircles = true;
                         overFlowWastage += radius * radius * Math.PI * dv.angleList.get(t) / 360d * .3;
                         totalOverflowArea += radius * radius * Math.PI * dv.angleList.get(t) / 360d;
                         Log.wtf("*- Sprinkler Overflow (" + t + " " + b + ")", "1 INTERSECTION - " + " x: " +
@@ -1663,7 +1691,17 @@ public class MainActivity extends AppCompatActivity {
                             if(added == true)
                                 removedFirst = false;*/
                             completelyOutside.remove(t);
+                            completelyInsideH.remove(t);
+                            removedCompletelyInsideCircles = true;
+                            individualCircles.remove(t);
+                            removedIndividual = true;
+                            if (outside)
+                                outsideIntersectingGood = true;
                             removed = true;
+                            if (!outside)
+                                insideIntersectingH.put(t, new OverflowInfo(t, b, (b + 1 > dv.xlist.size() - 1 ? 0 : b + 1), startX, startY,
+                                        endX, endY, circleX, circleY, radius, x1, x2, y1, y2));
+
                             //Log.wtf("*- complete outside info - " , "removed: " + t + " SIze: " + completelyOutside.size());
                             overflowInfo.add(new OverflowInfo(t, b, (b + 1 > dv.xlist.size() - 1 ? 0 : b + 1), startX, startY,
                                     endX, endY, circleX, circleY, radius, x1, x2, y1, y2));
@@ -1681,6 +1719,8 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
+            if (outsideIntersectingGood)
+                outsideIntersectingH.put(t, 1);
             // if(removedFirst)
             //   completelyOutside.remove(t);
 
@@ -1695,7 +1735,7 @@ public class MainActivity extends AppCompatActivity {
             }*/
         }
         for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
-        totalOverflowArea += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
+            totalOverflowArea += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
                     Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
             overFlowWastage += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
                     Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
@@ -1703,6 +1743,35 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
         calculateOverflowWastage();
 
+        for (Map.Entry<Integer, Double> map : individualCircles.entrySet()) {
+            //README Candidates contains the positions of possible individual sprinklers.
+            candidates.add(map.getKey());
+        }
+        //README method uses positions in candidates list to actually calculate individual or not.
+        //DONE Calculate areas of individual circles (including angles)
+        getIndividualCircles2();
+        individualCircleArea();
+
+        outsideIntersecting = new ArrayList<>(outsideIntersectingH.keySet());
+        insideIntersecting = new ArrayList<>(insideIntersectingH.values());
+        completelyInside = new ArrayList<>(completelyInsideH.keySet());
+        insideCircles = new ArrayList<>(insideCirclesH.keySet());
+
+        //TODO Calculate 4 things on sheet of paper.
+        //  1. Start with calculating overlap of 2 circles from insideCircles list
+        Log.wtf("*-", "-");
+        Log.wtf("*- Individual Circles", "Size: " + singleR.size());
+        Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
+        Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
+        Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
+        Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
+        hideLoading();
+    }
+
+    //README Calculate areas of individual circles
+    private void individualCircleArea() {
+        for (int i = 0; i < singleR.size(); i++)
+            totalInsideArea += singleR.get(i) * singleR.get(i) * Math.PI * dv.angleList.get(singleP.get(i)) / 360d;
     }
 
     //INFO IMPORTANT overflowWastage SHOULD NOT be added for land area covered
@@ -1797,7 +1866,7 @@ public class MainActivity extends AppCompatActivity {
                     double toAdd = previousWastage * .22 + wastedArea * .21;
                     overFlowWastage += toAdd;
                     if (overFlowWastage > totalOverflowArea)
-                        overFlowWastage -= toAdd*.9;
+                        overFlowWastage -= toAdd * .9;
                     //TODO Fix problem that overflowwastage can go above totalOverflowArea
                     //if(overFlowWastage )
                     if (latestGain >= previousWastage) {
@@ -1881,6 +1950,53 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Double> singleR = new ArrayList<>();
     ArrayList<Integer> singleP = new ArrayList<>();
     ArrayList<Integer> singleAngle = new ArrayList<>();
+
+    private void getIndividualCircles2() {
+        singleX.clear();
+        singleY.clear();
+        singleR.clear();
+        singleP.clear();
+        //Log.wtf("*Still getting circles", " Still GETTING CIRCLES");
+
+        if (dv.sprinkx.size() == 1) {
+            singleX.add((double) dv.sprinkx.get(0));
+            singleY.add((double) dv.sprinky.get(0));
+            singleR.add((double) dv.sprinkr.get(0));
+            singleAngle.add(dv.angleList.get(0));
+            singleP.add(0);
+        } else {
+            for (int a = 0; a < candidates.size(); a++) {
+                int i = candidates.get(a);
+                double x = dv.sprinkx.get(i);
+                double y = dv.sprinky.get(i);
+                double r = dv.sprinkr.get(i);
+
+                boolean good = true;
+                for (int j = 0; j < dv.sprinkx.size(); j++) {
+                    double tempX = dv.sprinkx.get(j);
+                    double tempY = dv.sprinky.get(j);
+                    double tempR = dv.sprinkr.get(j);
+
+                    if (j != i) {
+                        double distance = Math.sqrt(Math.pow(tempX - x, 2) + Math.pow(tempY - y, 2));
+                        if (distance <= tempR + r) {
+                            good = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (good) {
+                    singleX.add(x);
+                    singleY.add(y);
+                    singleR.add(r);
+                    singleP.add(i);
+                    singleAngle.add(dv.angleList.get(i));
+                }
+
+            }
+        }
+    }
 
     private void getIndividualCircles() {
         singleX.clear();
@@ -2331,6 +2447,8 @@ public class MainActivity extends AppCompatActivity {
 
                     //DONE Just do the calculations to display the actual stuff.
 
+                    //INFO README
+                    // I think a better method of calculating coverage is simply totalWaterOutput *(1-percentWastage)
                     double percentWastage = ((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion));
                     double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
                     if (coverage > 1) {
