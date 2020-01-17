@@ -1561,10 +1561,17 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Integer> outsideIntersecting = new ArrayList<>();
     ArrayList<OverflowInfo> insideIntersecting = new ArrayList<>();
     ArrayList<Integer> completelyInside = new ArrayList<>();
+    double wasted, total = 0;
 
     private void calculateSprinklerOverflow() {
         overFlowWastage = 0;
+        overlapWastage = 0;
+        totalInsideArea = 0;
+        wasted = 0;
+        total = 0;
         totalOverflowArea = 0;
+        wasted = 0;
+        total = 0;
         completelyOutside = new HashMap<>();
         overflowInfo = new ArrayList<>();
 
@@ -1750,7 +1757,7 @@ public class MainActivity extends AppCompatActivity {
         //README method uses positions in candidates list to actually calculate individual or not.
         //DONE Calculate areas of individual circles (including angles)
         getIndividualCircles2();
-        individualCircleArea();
+        //individualCircleArea();
 
         outsideIntersecting = new ArrayList<>(outsideIntersectingH.keySet());
         insideIntersecting = new ArrayList<>(insideIntersectingH.values());
@@ -1761,7 +1768,14 @@ public class MainActivity extends AppCompatActivity {
         //  1. Start with calculating overlap of 2 circles from insideCircles list
         insideCircleOverlap();
 
-        Log.wtf("*-", "-");
+        //NOTES Total area calculated -
+        // At this point all outside, intersecting, and completely inside cirlces have been calculated.
+
+        total += totalInsideArea;
+        total += totalOverflowArea;
+        wasted += overFlowWastage;
+        wasted += overlapWastage;
+        Log.wtf("*- Results:", "- " + wasted + " " + total + "\n---___---");
         Log.wtf("*- Individual Circles", "Size: " + singleR.size());
         Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
         Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
@@ -1842,6 +1856,8 @@ public class MainActivity extends AppCompatActivity {
         for (int i : completelyInside)
             totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2) * dv.angleList.get(i) / 360;
 
+        overlapWastage += overlap2;
+        totalInsideArea += totalArea;
         Log.wtf("*- Results 2insideCircleOverlap: ", overlap2 + " " + totalArea + "\n-");
     }
 
@@ -1917,7 +1933,7 @@ public class MainActivity extends AppCompatActivity {
 
                 double wastedArea = sectorArea - triangleArea;
                 //DONE Check if below works
-                if (wastedArea < 0) wastedArea = Math.abs(wastedArea) / 2;
+                if (wastedArea < 0) wastedArea = Math.abs(wastedArea) / 1.95;
 
                 if (outside)
                     wastedArea = (Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius()) - wastedArea;
@@ -1940,7 +1956,7 @@ public class MainActivity extends AppCompatActivity {
                     //double latestGain = overFlowWastage - initialWastage - previousWastage;
                     double latestGain = wastedArea;
                     //README If the latest addition was larger, then subtract 80% of previous smaller one.
-                    double toAdd = previousWastage * .22 + wastedArea * .21;
+                    double toAdd = previousWastage * .24 + wastedArea * .21;
                     overFlowWastage += toAdd;
                     if (overFlowWastage > totalOverflowArea)
                         overFlowWastage -= toAdd * .9;
@@ -1963,15 +1979,15 @@ public class MainActivity extends AppCompatActivity {
                         + triangleArea + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea +
                         "\n\t\t\t\t\t\t\t\t\t\t\t\tTotal Area: " + totalArea + "\n\t\t\t\t\t\t\t\t\t\t\t    Final Area - " + wastedArea
                         + "\n\t\t\t\t\t\t\t Previous Wastage: " + previousWastage + "\n\t\t\t\t\t\t\t Overflow Wastage: "
-                        + overFlowWastage + "\n\t\t\t\t\t\t\t Total Overflow Area: " + totalOverflowArea);
+                        + overFlowWastage + "\n\t\t\t\t\t\t\t Total Overflow Area: " + totalOverflowArea+"\n-----");
                 //makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
                 //outsideResults(counteR, centerX, centerY);
                 if (dv.angleList.get(overflowInfo.getCirclePos()) > 316) {
                     fullCircleUsed.add(overflowInfo.getCirclePos());
-                    Log.wtf("*- Full circle used", "It was added");
+                    //Log.wtf("*- Full circle used", "It was added");
                 }
                 counteR++;
-                Log.wtf("*-", ",\n");
+                //Log.wtf("*-", ",\n");
             }
         }
         Log.wtf("*- End Results: ", "Overflow Wastage: " + overFlowWastage + " Total Area: " + totalOverflowArea + "\n-");
