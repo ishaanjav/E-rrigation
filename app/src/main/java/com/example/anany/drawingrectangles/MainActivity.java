@@ -1759,6 +1759,8 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO Calculate 4 things on sheet of paper.
         //  1. Start with calculating overlap of 2 circles from insideCircles list
+        insideCircleOverlap();
+
         Log.wtf("*-", "-");
         Log.wtf("*- Individual Circles", "Size: " + singleR.size());
         Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
@@ -1766,6 +1768,71 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
         hideLoading();
+    }
+
+    //TODO Test below function
+    private void insideCircleOverlap() {
+        double overlap2 = 0;
+        double land2 = 0;
+        for (int i = 0; i < insideCircles.size() - 1; i++) {
+            for (int j = i; j < insideCircles.size(); j++) {
+                //README insideCirles contains the positions
+                int circle1 = insideCircles.get(i);
+                int circle2 = insideCircles.get(j);
+
+                double x1 = dv.sprinkx.get(circle1);
+                double x2 = dv.sprinkx.get(circle2);
+                double y1 = dv.sprinky.get(circle1);
+                double y2 = dv.sprinky.get(circle2);
+
+                double r1 = dv.sprinkr.get(circle1);
+                double r2 = dv.sprinkr.get(circle2);
+                double angle1 = dv.angleList.get(circle1);
+                double angle2 = dv.angleList.get(circle2);
+
+                double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                //README The circles overlap
+                if (distance <= r1 + r2) {
+                    double intersectionArea = 0;
+                    //DONE Calculate total sprinkler coverage area.
+                    //TODO DO calculation to calculate intersection area.
+
+                    Double r = r1;
+                    Double R = r2;
+                    double firstX = x1;
+                    double secondX = x2;
+                    double firstY = y1;
+                    double secondY = y2;
+                    int smallC = circle1;
+                    int bigc = circle2;
+                    Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+                    if (R < r) {
+                        // swap
+                        r = r2;
+                        R = r1;
+                        smallC = circle2;
+                        bigc = circle1;
+                    }
+                    Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+                    Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+                    Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+
+                    intersectionArea = part1 + part2 - part3;
+
+                    //README Maybe intersectionArea is 0 because circle is inside other circle.
+                    if (!(intersectionArea > 0)) {
+                        intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(smallC);
+                    }
+
+                    double totalArea = (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360) +
+                            (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
+
+
+                    //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
+                    Log.wtf("** INFORMATION: ", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
+                }
+            }
+        }
     }
 
     //README Calculate areas of individual circles.
@@ -1951,6 +2018,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Integer> singleP = new ArrayList<>();
     ArrayList<Integer> singleAngle = new ArrayList<>();
 
+    //TODO Check if below function works
     private void getIndividualCircles2() {
         singleX.clear();
         singleY.clear();
@@ -1972,7 +2040,7 @@ public class MainActivity extends AppCompatActivity {
                 double r = dv.sprinkr.get(i);
 
                 boolean good = true;
-                for (int j = 0; j < dv.sprinkx.size(); j++) {
+                for (int j = 0; j < candidates.size(); j++) {
                     double tempX = dv.sprinkx.get(j);
                     double tempY = dv.sprinky.get(j);
                     double tempR = dv.sprinkr.get(j);
