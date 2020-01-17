@@ -1131,7 +1131,7 @@ public class MainActivity extends AppCompatActivity {
                                     logger += "\n*- X - " + dv.xlist.get(i) + "  Y - " + dv.ylist.get(i);
                                 }
                             }
-                            Log.wtf("*- Polygon coordinates", "Information: " + logger);
+                            //Log.wtf("*- Polygon coordinates", "Information: " + logger);
                             //INFO If you comment out below, then it does not draw the dots. Only when you press a button it draws.
                             // I think this is because when button pressed, it calls invalidate(). invalidate() leads to onDraw()
                             // That's why try writing your customDrawLine() code in onDraw().
@@ -1771,11 +1771,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //TODO Test below function
+
     private void insideCircleOverlap() {
+        Log.wtf("*- INSIDE CIRCLE WASTAGE", " ");
         double overlap2 = 0;
         double land2 = 0;
         for (int i = 0; i < insideCircles.size() - 1; i++) {
-            for (int j = i; j < insideCircles.size(); j++) {
+            for (int j = i + 1; j < insideCircles.size(); j++) {
                 //README insideCirles contains the positions
                 int circle1 = insideCircles.get(i);
                 int circle2 = insideCircles.get(j);
@@ -1794,9 +1796,6 @@ public class MainActivity extends AppCompatActivity {
                 //README The circles overlap
                 if (distance <= r1 + r2) {
                     double intersectionArea = 0;
-                    //DONE Calculate total sprinkler coverage area.
-                    //TODO DO calculation to calculate intersection area.
-
                     Double r = r1;
                     Double R = r2;
                     double firstX = x1;
@@ -1824,15 +1823,26 @@ public class MainActivity extends AppCompatActivity {
                         intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(smallC);
                     }
 
-                    double totalArea = (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360) +
-                            (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
+                    //IMPORTANT Total Area is already calculated for overflow circles.
+                    //DONE When iterating through inside circle, only if it not insideIntersecting, calculate its area.
+                    double totalArea = 0;
+                    if (completelyInside.contains(circle1))
+                        totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
+                    if (completelyInside.contains(circle2))
+                        totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
 
-
+                    overlap2 += intersectionArea;
                     //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
-                    Log.wtf("** INFORMATION: ", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
+                    Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
                 }
             }
         }
+        double totalArea = 0;
+        //README Calculating completely inside circle area outside the loop so no duplicates.
+        for (int i : completelyInside)
+            totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2) * dv.angleList.get(i) / 360;
+
+        Log.wtf("*- Results 2insideCircleOverlap: ", overlap2 + " " + totalArea + "\n-");
     }
 
     //README Calculate areas of individual circles.
@@ -1961,10 +1971,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.wtf("*- Full circle used", "It was added");
                 }
                 counteR++;
-                Log.wtf("*-", ",\nIJ");
+                Log.wtf("*-", ",\n");
             }
         }
-        Log.wtf("*- End Results: ", "Overflow Wastage: " + overFlowWastage + " Total Area: " + totalOverflowArea);
+        Log.wtf("*- End Results: ", "Overflow Wastage: " + overFlowWastage + " Total Area: " + totalOverflowArea + "\n-");
     }
 
     private boolean outsideResults(int counteR, double centerX, double centerY) {
