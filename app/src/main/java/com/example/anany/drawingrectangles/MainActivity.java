@@ -1767,9 +1767,12 @@ public class MainActivity extends AppCompatActivity {
         //TODO Calculate 4 things on sheet of paper.
         //  1. Start with calculating overlap of 2 circles from insideCircles list
         insideCircleOverlap();
+        completelyInsideOverlapOutside();
 
         //NOTES Total area calculated -
         // At this point all outside, intersecting, and completely inside cirlces have been calculated.
+
+        //TODO Calculations for overflow wastage aren't working well. When circle intersects line. Check it out.
 
         total += totalInsideArea;
         total += totalOverflowArea;
@@ -1782,6 +1785,33 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
         hideLoading();
+    }
+
+    private void completelyInsideOverlapOutside() {
+        for(int i = 0; i < completelyInside.size(); i++){
+            for(int j = 0; j < outsideIntersecting.size(); j++){
+                int circle1 = completelyInside.get(i);
+                int circle2 = outsideIntersecting.get(j);
+
+                double x1 = dv.sprinkx.get(circle1);
+                double x2 = dv.sprinkx.get(circle2);
+                double y1 = dv.sprinky.get(circle1);
+                double y2 = dv.sprinky.get(circle2);
+
+                double r1 = dv.sprinkr.get(circle1);
+                double r2 = dv.sprinkr.get(circle2);
+                double angle1 = dv.angleList.get(circle1);
+                double angle2 = dv.angleList.get(circle2);
+
+                double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                //README The circles overlap
+                if (distance <= r1 + r2) {
+                    //TODO Do calculations for overlap of completely inside circle and outside-intersecting circle
+                    // (Have to account for angle)
+                }
+            }
+        }
+
     }
 
     //TODO Test below function
