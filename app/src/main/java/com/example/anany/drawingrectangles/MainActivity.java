@@ -1766,11 +1766,13 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO Calculate 4 things on sheet of paper.
         //  1. Start with calculating overlap of 2 circles from insideCircles list
+        //NOTES Total area calculated -
+        // At this point all outside, intersecting, and completely inside cirlces have been calculated.
+
         insideCircleOverlap();
         completelyInsideOverlapOutside();
 
-        //NOTES Total area calculated -
-        // At this point all outside, intersecting, and completely inside cirlces have been calculated.
+
 
         //TODO Calculations for overflow wastage aren't working well. When circle intersects line. Check it out.
 
@@ -1788,6 +1790,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void completelyInsideOverlapOutside() {
+        Log.wtf("*- Completely Inside - Outside Intersect", " ");
+        double overlap2 = 0;
+        double land2 = 0;
         for (int i = 0; i < completelyInside.size(); i++) {
             for (int j = 0; j < outsideIntersecting.size(); j++) {
                 int circle1 = completelyInside.get(i);
@@ -1807,41 +1812,8 @@ public class MainActivity extends AppCompatActivity {
                 //README The circles overlap
                 if (distance <= r1 + r2) {
                     //TODO Do calculations for overlap of completely inside circle and outside-intersecting circle
-                    // (Have to account for angle)
-                }
-            }
-        }
-
-    }
-
-    //TODO Test below function
-
-    private void insideCircleOverlap() {
-        Log.wtf("*- INSIDE CIRCLE WASTAGE", " ");
-        double overlap2 = 0;
-        double land2 = 0;
-        for (int i = 0; i < insideCircles.size() - 1; i++) {
-            for (int j = i + 1; j < insideCircles.size(); j++) {
-                //README insideCirles contains the positions
-                int circle1 = insideCircles.get(i);
-                int circle2 = insideCircles.get(j);
-
-                double x1 = dv.sprinkx.get(circle1);
-                double x2 = dv.sprinkx.get(circle2);
-                double y1 = dv.sprinky.get(circle1);
-                double y2 = dv.sprinky.get(circle2);
-
-                double r1 = dv.sprinkr.get(circle1);
-                double r2 = dv.sprinkr.get(circle2);
-                double angle1 = dv.angleList.get(circle1);
-                double angle2 = dv.angleList.get(circle2);
-
-                double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-                //README The circles overlap
-                if (distance <= r1 + r2) {
-                    //README Circle in circle
-                    if (distance + Math.min(r1, r2) <= Math.max(r1, r2) * 1.08) {
-                        double intersectionArea = Math.PI * Math.pow(Math.min(r1,r2), 2) * dv.angleList.get((Math.min(r1, r2) == r1 ? circle1 : circle2))/360;
+                    if (distance + Math.min(r1, r2) <= Math.max(r1, r2) * 0.98) {
+                        double intersectionArea = Math.PI * Math.pow(Math.min(r1, r2), 2) * (360 - (360 - dv.angleList.get((Math.min(r1, r2) == r1 ? circle1 : circle2)) / 2)) / 360;
                         double totalArea = 0;
                         if (completelyInside.contains(circle1))
                             totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
@@ -1874,7 +1846,80 @@ public class MainActivity extends AppCompatActivity {
 
                         //README Maybe intersectionArea is 0 because circle is inside other circle.
                         if (!(intersectionArea > 0)) {
-                            intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(smallC)/360;
+                            intersectionArea = Math.PI * Math.pow(r, 2) * (360 - (360 - dv.angleList.get(smallC) / 2)) / 360;
+                        }
+
+                        overlap2 += intersectionArea;
+                        //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
+                        Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Intersection Area: " + intersectionArea);
+                    }
+                }
+            }
+        }
+        overlapWastage += overlap2;
+        Log.wtf("*- Results completelyInside-outsideIntersect: ", overlap2 + "\n-");
+    }
+
+    //DONE Test below function
+    private void insideCircleOverlap() {
+        Log.wtf("*- INSIDE CIRCLE WASTAGE", " ");
+        double overlap2 = 0;
+        double land2 = 0;
+        for (int i = 0; i < insideCircles.size() - 1; i++) {
+            for (int j = i + 1; j < insideCircles.size(); j++) {
+                //README insideCirles contains the positions
+                int circle1 = insideCircles.get(i);
+                int circle2 = insideCircles.get(j);
+
+                double x1 = dv.sprinkx.get(circle1);
+                double x2 = dv.sprinkx.get(circle2);
+                double y1 = dv.sprinky.get(circle1);
+                double y2 = dv.sprinky.get(circle2);
+
+                double r1 = dv.sprinkr.get(circle1);
+                double r2 = dv.sprinkr.get(circle2);
+                double angle1 = dv.angleList.get(circle1);
+                double angle2 = dv.angleList.get(circle2);
+
+                double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                //README The circles overlap
+                if (distance <= r1 + r2) {
+                    //README Circle in circle
+                    if (distance + Math.min(r1, r2) <= Math.max(r1, r2) * 1.08) {
+                        double intersectionArea = Math.PI * Math.pow(Math.min(r1, r2), 2) * dv.angleList.get((Math.min(r1, r2) == r1 ? circle1 : circle2)) / 360;
+                        double totalArea = 0;
+                        if (completelyInside.contains(circle1))
+                            totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
+                        if (completelyInside.contains(circle2))
+                            totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
+                        Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Circle In Circle: " + intersectionArea + "  Total Area: " + totalArea);
+                    } else {//README Not circle in circle
+                        double intersectionArea = 0;
+                        Double r = r1;
+                        Double R = r2;
+                        double firstX = x1;
+                        double secondX = x2;
+                        double firstY = y1;
+                        double secondY = y2;
+                        int smallC = circle1;
+                        int bigc = circle2;
+                        Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+                        if (R < r) {
+                            // swap
+                            r = r2;
+                            R = r1;
+                            smallC = circle2;
+                            bigc = circle1;
+                        }
+                        Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+                        Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+                        Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+
+                        intersectionArea = part1 + part2 - part3;
+
+                        //README Maybe intersectionArea is 0 because circle is inside other circle.
+                        if (!(intersectionArea > 0)) {
+                            intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(smallC) / 360;
                         }
 
                         //IMPORTANT Total Area is already calculated for overflow circles.
@@ -1899,7 +1944,7 @@ public class MainActivity extends AppCompatActivity {
 
         overlapWastage += overlap2;
         totalInsideArea += totalArea;
-        Log.wtf("*- Results 2insideCircleOverlap: ", overlap2 + " " + totalArea + "\n-");
+        Log.wtf("*- Results insideCircleOverlap: ", overlap2 + " " + totalArea + "\n-");
     }
 
     //README Calculate areas of individual circles.
