@@ -1788,8 +1788,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void completelyInsideOverlapOutside() {
-        for(int i = 0; i < completelyInside.size(); i++){
-            for(int j = 0; j < outsideIntersecting.size(); j++){
+        for (int i = 0; i < completelyInside.size(); i++) {
+            for (int j = 0; j < outsideIntersecting.size(); j++) {
                 int circle1 = completelyInside.get(i);
                 int circle2 = outsideIntersecting.get(j);
 
@@ -1839,45 +1839,56 @@ public class MainActivity extends AppCompatActivity {
                 double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
                 //README The circles overlap
                 if (distance <= r1 + r2) {
-                    double intersectionArea = 0;
-                    Double r = r1;
-                    Double R = r2;
-                    double firstX = x1;
-                    double secondX = x2;
-                    double firstY = y1;
-                    double secondY = y2;
-                    int smallC = circle1;
-                    int bigc = circle2;
-                    Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
-                    if (R < r) {
-                        // swap
-                        r = r2;
-                        R = r1;
-                        smallC = circle2;
-                        bigc = circle1;
+                    //README Circle in circle
+                    if (distance + Math.min(r1, r2) <= Math.max(r1, r2) * 1.08) {
+                        double intersectionArea = Math.PI * Math.pow(Math.min(r1,r2), 2) * dv.angleList.get((Math.min(r1, r2) == r1 ? circle1 : circle2))/360;
+                        double totalArea = 0;
+                        if (completelyInside.contains(circle1))
+                            totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
+                        if (completelyInside.contains(circle2))
+                            totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
+                        Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Circle In Circle: " + intersectionArea + "  Total Area: " + totalArea);
+                    } else {//README Not circle in circle
+                        double intersectionArea = 0;
+                        Double r = r1;
+                        Double R = r2;
+                        double firstX = x1;
+                        double secondX = x2;
+                        double firstY = y1;
+                        double secondY = y2;
+                        int smallC = circle1;
+                        int bigc = circle2;
+                        Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+                        if (R < r) {
+                            // swap
+                            r = r2;
+                            R = r1;
+                            smallC = circle2;
+                            bigc = circle1;
+                        }
+                        Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+                        Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+                        Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+
+                        intersectionArea = part1 + part2 - part3;
+
+                        //README Maybe intersectionArea is 0 because circle is inside other circle.
+                        if (!(intersectionArea > 0)) {
+                            intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(smallC)/360;
+                        }
+
+                        //IMPORTANT Total Area is already calculated for overflow circles.
+                        //DONE When iterating through inside circle, only if it not insideIntersecting, calculate its area.
+                        double totalArea = 0;
+                        if (completelyInside.contains(circle1))
+                            totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
+                        if (completelyInside.contains(circle2))
+                            totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
+
+                        overlap2 += intersectionArea;
+                        //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
+                        Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
                     }
-                    Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
-                    Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
-                    Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
-
-                    intersectionArea = part1 + part2 - part3;
-
-                    //README Maybe intersectionArea is 0 because circle is inside other circle.
-                    if (!(intersectionArea > 0)) {
-                        intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(smallC);
-                    }
-
-                    //IMPORTANT Total Area is already calculated for overflow circles.
-                    //DONE When iterating through inside circle, only if it not insideIntersecting, calculate its area.
-                    double totalArea = 0;
-                    if (completelyInside.contains(circle1))
-                        totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
-                    if (completelyInside.contains(circle2))
-                        totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
-
-                    overlap2 += intersectionArea;
-                    //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
-                    Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
                 }
             }
         }
@@ -2009,7 +2020,7 @@ public class MainActivity extends AppCompatActivity {
                         + triangleArea + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea +
                         "\n\t\t\t\t\t\t\t\t\t\t\t\tTotal Area: " + totalArea + "\n\t\t\t\t\t\t\t\t\t\t\t    Final Area - " + wastedArea
                         + "\n\t\t\t\t\t\t\t Previous Wastage: " + previousWastage + "\n\t\t\t\t\t\t\t Overflow Wastage: "
-                        + overFlowWastage + "\n\t\t\t\t\t\t\t Total Overflow Area: " + totalOverflowArea+"\n-----");
+                        + overFlowWastage + "\n\t\t\t\t\t\t\t Total Overflow Area: " + totalOverflowArea + "\n-----");
                 //makeToast("Angle is: "  + angle + " Triangle Area: " + triangleArea);
                 //outsideResults(counteR, centerX, centerY);
                 if (dv.angleList.get(overflowInfo.getCirclePos()) > 316) {
