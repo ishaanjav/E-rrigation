@@ -1167,7 +1167,7 @@ public class MainActivity extends AppCompatActivity {
                             logger += "\n*- X - " + dv.xlist.get(i) + "  Y - " + dv.ylist.get(i);
                         }
                     }
-                    Log.wtf("*- Polygon coordinates", "Information: " + logger);
+                    //Log.wtf("*- Polygon coordinates", "Information: " + logger);
                     //sprinkr.add((int) Math.pow(sradius / 9, 2));
                     invalidate();
                 }
@@ -1554,11 +1554,11 @@ public class MainActivity extends AppCompatActivity {
     HashMap<Integer, Double> individualCircles;
     ArrayList<Integer> candidates = new ArrayList<>();
     HashMap<Integer, Integer> insideCirclesH = new HashMap<>();
-    HashMap<Integer, Integer> outsideIntersectingH = new HashMap<>();
+    HashMap<Integer, OverflowInfo> outsideIntersectingH = new HashMap<>();
     HashMap<Integer, Integer> completelyInsideH = new HashMap<>();
     HashMap<Integer, OverflowInfo> insideIntersectingH = new HashMap<>();
     ArrayList<Integer> insideCircles = new ArrayList<>();
-    ArrayList<Integer> outsideIntersecting = new ArrayList<>();
+    ArrayList<OverflowInfo> outsideIntersecting = new ArrayList<>();
     ArrayList<OverflowInfo> insideIntersecting = new ArrayList<>();
     ArrayList<Integer> completelyInside = new ArrayList<>();
     double wasted, total = 0;
@@ -1598,6 +1598,7 @@ public class MainActivity extends AppCompatActivity {
             boolean removed = false;
             boolean removedIndividual = false;
             boolean outsideIntersectingGood = false;
+            double ox1 = 0, ox2 = 0, oy1 = 0, oy2 = 0;
             for (int b = 0; b < dv.xlist.size(); b++) {
                 double startX = dv.xlist.get(b);
                 double startY = dv.ylist.get(b);
@@ -1628,7 +1629,7 @@ public class MainActivity extends AppCompatActivity {
                         if (!removed)
                             completelyOutside.put(t, new OverflowInfo(t, 0, 0, 0, 0, 0, 0, 0, 0, radius
                                     , 0, 0, 0, 0));
-                        Log.wtf("*- complete outside info - ", "added: " + t + " SIze: " + completelyOutside.size());
+                        //Log.wtf("*- complete outside info - ", "added: " + t + " SIze: " + completelyOutside.size());
                     } else {
                         //README Point had no intersections and was inside
                         insideCirclesH.put(t, 1);
@@ -1702,8 +1703,13 @@ public class MainActivity extends AppCompatActivity {
                             removedCompletelyInsideCircles = true;
                             individualCircles.remove(t);
                             removedIndividual = true;
-                            if (outside)
+                            if (outside) {
                                 outsideIntersectingGood = true;
+                                ox1 = x1;
+                                ox2 = x2;
+                                oy1 = y1;
+                                oy2 = y2;
+                            }
                             removed = true;
                             if (!outside)
                                 insideIntersectingH.put(t, new OverflowInfo(t, b, (b + 1 > dv.xlist.size() - 1 ? 0 : b + 1), startX, startY,
@@ -1727,7 +1733,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             if (outsideIntersectingGood)
-                outsideIntersectingH.put(t, 1);
+                outsideIntersectingH.put(t, new OverflowInfo(t, 0, 1, 0, 1,
+                        0, 1, circleX, circleY, radius, ox1, ox2, oy1, oy2));
             // if(removedFirst)
             //   completelyOutside.remove(t);
 
@@ -1741,14 +1748,6 @@ public class MainActivity extends AppCompatActivity {
                 //makeToast("FUll Outside: " + fullOutside);
             }*/
         }
-        for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
-            totalOverflowArea += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
-                    Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
-            overFlowWastage += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
-                    Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
-        }
-        Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
-        calculateOverflowWastage();
 
         for (Map.Entry<Integer, Double> map : individualCircles.entrySet()) {
             //README Candidates contains the positions of possible individual sprinklers.
@@ -1759,7 +1758,7 @@ public class MainActivity extends AppCompatActivity {
         getIndividualCircles2();
         //individualCircleArea();
 
-        outsideIntersecting = new ArrayList<>(outsideIntersectingH.keySet());
+        outsideIntersecting = new ArrayList<>(outsideIntersectingH.values());
         insideIntersecting = new ArrayList<>(insideIntersectingH.values());
         completelyInside = new ArrayList<>(completelyInsideH.keySet());
         insideCircles = new ArrayList<>(insideCirclesH.keySet());
@@ -1769,22 +1768,328 @@ public class MainActivity extends AppCompatActivity {
         //NOTES Total area calculated -
         // At this point all outside, intersecting, and completely inside cirlces have been calculated.
 
+        //FUTURE FILES - ideally for insideCircleOverlap should only go for completelyinsideCircles with insideCircles
+        //    Then, you have 3 other cases - insideIntersecting with insideIntersecting, insideIntersecting with outsideIntersecting,
+        //    and outsideIntersecting with outsideIntersecting
+        //  For the above 3 cases, when calculating overlap, you also have to account for angle between centers because
+        //  the intersecting area can be inside and outside the region.
+
+        //individualCircleArea();
+        calculateOverflowWastage();
         insideCircleOverlap();
         completelyInsideOverlapOutside();
+        insideIntersectingOutsideIntersecting();
 
-        //TODO Calculations for overflow wastage aren't working well. When circle intersects line. Check it out.
+        total = 0;
+        for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
+            total+=completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
+                    Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
+            totalOverflowArea += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
+                    Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
+            overFlowWastage += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
+                    Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
+        }
+        for (OverflowInfo outside : outsideIntersecting) {
+            total +=Math.PI * outside.getRadius() * outside.getRadius() *
+                    dv.angleList.get(outside.getCirclePos()) / 360;
+            totalInsideArea += Math.PI * outside.getRadius() * outside.getRadius() *
+                    dv.angleList.get(outside.getCirclePos()) / 360;
+        }
+        for (Integer o : insideCircles) {
+            total+= Math.PI * dv.sprinkr.get(o) * dv.sprinkr.get(o) * dv.angleList.get(o)/360;
+        }
 
-        total += totalInsideArea;
-        total += totalOverflowArea;
+
+
+        Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
+
+        //total += totalInsideArea;
+        //total += totalOverflowArea;
         wasted += overFlowWastage;
         wasted += overlapWastage;
-        Log.wtf("*- Results:", "- " + wasted + " " + total + "\n---___---");
+        Log.wtf("*- End Results:", "- " + (int) wasted + " " + (int) total + " " + (int)(wasted*100/total)+ "%\n---___---");
         Log.wtf("*- Individual Circles", "Size: " + singleR.size());
         Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
         Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
         hideLoading();
+    }
+
+    private void insideIntersectingOutsideIntersecting() {
+        Log.wtf("*- Inside and Outside Intersecting", "_______________________________________");
+        double overlap2 = 0;
+        for (int i = 0; i < insideIntersecting.size(); i++) {
+            for (int j = 0; j < outsideIntersecting.size(); j++) {
+                int circle1 = insideIntersecting.get(i).getCirclePos();
+                int circle2 = outsideIntersecting.get(j).getCirclePos();
+
+                double x1 = dv.sprinkx.get(circle1);
+                double x2 = dv.sprinkx.get(circle2);
+                double y1 = dv.sprinky.get(circle1);
+                double y2 = dv.sprinky.get(circle2);
+
+                double r1 = dv.sprinkr.get(circle1);
+                double r2 = dv.sprinkr.get(circle2);
+                double angle1 = dv.angleList.get(circle1);
+                double angle2 = dv.angleList.get(circle2);
+
+                double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+
+                double d = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                double a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+                double h = Math.sqrt(r1 * r1 - a * a);
+                double x3 = x1 + a * (x2 - x1) / d;
+                double y3 = y1 + a * (y2 - y1) / d;
+                double x4 = x3 + h * (y2 - y1) / d;     // also x3=x2-h*(y1-y0)/d
+                double y4 = y3 - h * (x2 - x1) / d;
+                x3 = x3 - h * (y2 - y1) / d;
+                y3 = y3 + h * (x2 - x1) / d;
+
+                /*RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                        ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.leftMargin = (int) x3;
+                params.topMargin = (int) y3;
+                TextView textView = new TextView(context);
+                textView.setText("(" + (int) x3 + "," + (int) y3 + ")");
+                textView.setId(dv.idCounter);
+                textView.setTextSize(7);
+                textView.setLayoutParams(params);
+                //makeToast("Making the text");
+                rlDvHolder.addView(textView);
+                dv.idCounter++;
+                RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams
+                        ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                params2.leftMargin = (int) x4;
+                params2.topMargin = (int) y4;
+                TextView textView2 = new TextView(context);
+                textView2.setText("(" + (int) x4 + "," + (int) y4 + ")");
+                textView2.setId(dv.idCounter);
+                textView2.setLayoutParams(params2);
+                textView2.setTextSize(7);
+                //makeToast("Making the text");
+                rlDvHolder.addView(textView2);
+                dv.idCounter++;*/
+
+                boolean out1 = outside(x3, y3);
+                boolean out2 = outside(x4, y4);
+
+                if (distance < r1 + r2) {
+                    //README Both intersection points are outside meaning that area is already accounted for in overflowWastage
+                    if (out1 && out2) {
+
+                    } else if (!out1 && !out2) {
+                        //README Both intersection points are inside the land meaning that it is simply overlap wastage
+                        double intersectionArea = 0;
+                        Double r = r1;
+                        Double R = r2;
+                        double firstX = x1;
+                        double secondX = x2;
+                        double firstY = y1;
+                        double secondY = y2;
+                        int smallC = circle1;
+                        int bigc = circle2;
+                        if (R < r) {
+                            // swap
+                            r = r2;
+                            R = r1;
+                            smallC = circle2;
+                            bigc = circle1;
+                        }
+                        Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+                        Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+                        Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+
+                        intersectionArea = part1 + part2 - part3;
+
+                        //README Maybe intersectionArea is 0 because circle is inside other circle.
+                        if (!(intersectionArea > 0)) {
+                            intersectionArea = Math.PI * Math.pow(r, 2) * (360 - (360 - dv.angleList.get(smallC) / 2)) / 360;
+                        }
+
+                        overlap2 += intersectionArea;
+                    } else {
+                        //README Intersection area is inside and outside
+                        //INFO You need the circle-circle intersection that is inside.
+                        //README Below is for the circle-circle intersection
+                        double circleX = 0, circleY = 0;
+                        if (out1) {
+                            circleX = x4;
+                            circleY = y4;
+                        } else if (out2) {
+                            circleX = x3;
+                            circleY = y3;
+                        }
+                        //TODO Calculate circle-line intersection for both circles.
+                        //INFO Below is for the circle-line intersections.
+                        double ix1, ix2, iy1, iy2;
+                        ix1 = insideIntersecting.get(i).getX1();
+                        iy1 = insideIntersecting.get(i).getY1();
+                        double dist = Math.sqrt(Math.pow(ix1 - outsideIntersecting.get(j).circleX, 2) +
+                                Math.pow(iy1 - outsideIntersecting.get(j).circleY, 2));
+                        //INFO This circle-intersection point is not inside the other circle so switch them
+                        if (dist > outsideIntersecting.get(j).getRadius()) {
+                            ix1 = insideIntersecting.get(i).getX2();
+                            iy1 = insideIntersecting.get(i).getY2();
+                        }
+
+                        ix2 = outsideIntersecting.get(j).getX1();
+                        iy2 = outsideIntersecting.get(j).getY1();
+                        dist = Math.sqrt(Math.pow(ix2 - insideIntersecting.get(i).circleX, 2) +
+                                Math.pow(iy2 - insideIntersecting.get(i).circleY, 2));
+                        //INFO This circle-intersection point is not inside the other circle so switch them
+                        if (dist > insideIntersecting.get(i).getRadius()) {
+                            ix2 = outsideIntersecting.get(j).getX2();
+                            iy2 = outsideIntersecting.get(j).getY2();
+                        }
+
+                        double length1 = Math.sqrt(Math.pow(ix1 - ix2, 2) + Math.pow(iy1 - iy2, 2));
+                        double length2 = Math.sqrt(Math.pow(ix2 - circleX, 2) + Math.pow(iy2 - circleY, 2));
+                        double length3 = Math.sqrt(Math.pow(ix1 - circleX, 2) + Math.pow(iy1 - circleY, 2));
+                        double s = (length1 + length2 + length3) / 2;
+
+                        /*double l = ix1 * (iy2 - circleY);
+                        double m = ix2 * (circleY - iy1);
+                        double n = circleX * (iy1 - iy2);
+
+                        double triangleArea = Math.abs((l + m + n) - 50) % (Math.PI * Math.max(r1, r2) * Math.max(r1, r2));*/
+                        //INFO Area of the triangle formed by the three points
+                        double triangleArea = Math.sqrt(s * (s - length1) * (s - length2) * (s - length3));
+                        //INFO Area of each of the two arcs.
+                        double arc1 = 0, arc2 = 0;
+                        arc1 = arcArea(r1, ix1, iy1, circleX, circleY, x1, y1);
+                        arc2 = arcArea(r1, ix2, iy2, circleX, circleY, x2, y2);
+
+                        overlap2 += triangleArea + arc1 + arc2;
+                        Log.wtf("*- Information: ", "Wastage - " + (int) overlap2 + "  Full - " +
+                                overlap(r1, r2, x1, x2, y1, y2, circle1, circle2) + " ix1-" + (int) ix1 + " ix2-" + (int) ix2
+                                + " iy1-" + (int) iy1 + " iy2-" + (int) iy2 + " c-cX:" + (int) circleX + " c-cY:" + (int) circleY
+                                + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t1 circle- " + (int) (r1 * r1 * Math.PI) + "  X1: " + (int) x1 + " Y1: " + (int) y1 + " X2: " +
+                                (int) x2 + " Y2: " + (int) y2 + " Arc1-" + (int) arc1 + " Arc2- " + (int) arc2 + " Triangle-" + (int) triangleArea);
+
+                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                                ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                        params.leftMargin = (int) ix1 - 3;
+                        params.topMargin = (int) iy1;
+                        TextView textView = new TextView(context);
+                        textView.setText("o");
+                        textView.setId(dv.idCounter);
+                        textView.setTextSize(7);
+                        textView.setLayoutParams(params);
+                        //makeToast("Making the text");
+                        rlDvHolder.addView(textView);
+                        dv.idCounter++;
+                        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams
+                                ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                        params2.leftMargin = (int) ix2 - 5;
+                        params2.topMargin = (int) iy2;
+                        TextView textView2 = new TextView(context);
+                        textView2.setText("o");
+                        textView2.setId(dv.idCounter);
+                        textView2.setLayoutParams(params2);
+                        textView2.setTextSize(7);
+                        //makeToast("Making the text");
+                        rlDvHolder.addView(textView2);
+                        dv.idCounter++;
+                        RelativeLayout.LayoutParams params3 = new RelativeLayout.LayoutParams
+                                ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                        params3.leftMargin = (int) circleX - 6;
+                        params3.topMargin = (int) circleY;
+                        TextView textView3 = new TextView(context);
+                        textView3.setText("o");
+                        textView3.setId(dv.idCounter);
+                        textView3.setLayoutParams(params3);
+                        textView3.setTextSize(7);
+                        //makeToast("Making the text");
+                        rlDvHolder.addView(textView3);
+                        dv.idCounter++;
+                    }
+
+                    /* Log.wtf("*- Information: ", "X1: " + (int) x1 + " Y1: " + (int) y1 + " X2: " + (int) x2 + " Y2: " + (int) y2
+                            + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t Radius - " + (int) r1 + " X3: " + (int) x3 + " Y3: " + (int) y3 + " X4: " + (int) x4 + " Y4: " + (int) y4
+                            + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tWastage - " + overlap2 +"  Total - " +
+                            overlap(r1, r2, x1, x2, y1, y2, circle1, circle2));*/
+
+                }
+            }
+        }
+        overlapWastage += overlap2;
+        Log.wtf("Results insideIntersecting-outsideIntersecting:", (int) overlap2 + ".\n-");
+    }
+
+    public int overlap(double r1, double r2, double x1, double x2, double y1, double y2, int circle1, int circle2) {
+        double intersectionArea = 0;
+        Double r = r1;
+        Double R = r2;
+        double firstX = x1;
+        double secondX = x2;
+        double firstY = y1;
+        double secondY = y2;
+        int smallC = circle1;
+        int bigc = circle2;
+        Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+        if (R < r) {
+            // swap
+            r = r2;
+            R = r1;
+            smallC = circle2;
+            bigc = circle1;
+        }
+        Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+        Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+        Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+
+        intersectionArea = part1 + part2 - part3;
+
+        //README Maybe intersectionArea is 0 because circle is inside other circle.
+        if (!(intersectionArea > 0)) {
+            intersectionArea = Math.PI * Math.pow(r, 2) * (360 - (360 - dv.angleList.get(smallC) / 2)) / 360;
+        }
+        return (int) intersectionArea;
+    }
+
+    private double arcArea(double r, double x1, double y1, double x2, double y2, double centerX, double centerY) {
+        double a = x1 * (y2 - centerY);
+        double b = x2 * (centerY - y1);
+        double c = centerX * (y1 - y2);
+        double totalArea = Math.PI * r * r;
+
+        double length1 = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        double length2 = Math.sqrt(Math.pow(x2 - centerX, 2) + Math.pow(y2 - centerY, 2));
+        double length3 = Math.sqrt(Math.pow(x1 - centerX, 2) + Math.pow(y1 - centerY, 2));
+        double s = (length1 + length2 + length3) / 2;
+        double area = Math.sqrt(s * (s - length1) * (s - length2) * (s - length3));
+
+        //INFO Added the mod totalArea because sometimes, triangleArea gets greater than totalArea.
+        //double triangleArea = Math.abs((a + b + c) - 50) % totalArea;
+
+        double triangleArea = area;
+
+        double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX, y1 - centerY) -
+                Math.atan2(x2 - centerX, y2 - centerY)));
+        double v1x = x1 - centerX;
+        double v1y = y1 - centerY;
+
+        //need to normalize:
+        double l1 = Math.sqrt(v1x * v1x + v1y * v1y);
+        v1x /= l1;
+        v1y /= l1;
+
+        double v2x = x2 - centerX;
+        double v2y = y2 - centerY;
+
+        //need to normalize:
+        double l2 = Math.sqrt(v2x * v2x + v2y * v2y);
+        v2x /= l2;
+        v2y /= l2;
+        double rad = Math.acos(v1x * v2x + v1y * v2y);
+        //INFO Changed method of calculating angle.
+        double degrees = Math.toDegrees(rad);
+
+        double sectorArea = Math.PI * Math.pow(r, 2) * (degrees / 360d);
+
+        double arcArea = Math.abs(sectorArea - triangleArea);
+        return arcArea;
     }
 
     private void completelyInsideOverlapOutside() {
@@ -1794,7 +2099,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < completelyInside.size(); i++) {
             for (int j = 0; j < outsideIntersecting.size(); j++) {
                 int circle1 = completelyInside.get(i);
-                int circle2 = outsideIntersecting.get(j);
+                int circle2 = outsideIntersecting.get(j).getCirclePos();
 
                 double x1 = dv.sprinkx.get(circle1);
                 double x2 = dv.sprinkx.get(circle2);
@@ -1855,7 +2160,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         overlapWastage += overlap2;
-        Log.wtf("*- Results completelyInside-outsideIntersect: ", overlap2 + "\n-");
+        Log.wtf("*- Results completelyInside-outsideIntersect: ", (int) overlap2 + "\n-");
     }
 
     //DONE Test below function
@@ -1863,6 +2168,8 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- INSIDE CIRCLE WASTAGE", " ");
         double overlap2 = 0;
         double land2 = 0;
+        //IMPORTANT Ideally below should loop for only completelyInsideCircles and inisideCircles
+        // Check calling function for more info
         for (int i = 0; i < insideCircles.size() - 1; i++) {
             for (int j = i + 1; j < insideCircles.size(); j++) {
                 //README insideCirles contains the positions
@@ -1942,7 +2249,7 @@ public class MainActivity extends AppCompatActivity {
 
         overlapWastage += overlap2;
         totalInsideArea += totalArea;
-        Log.wtf("*- Results insideCircleOverlap: ", overlap2 + " " + totalArea + "\n-");
+        Log.wtf("*- Results insideCircleOverlap: ", (int) overlap2 + " " + (int) totalArea + "\n-");
     }
 
     //README Calculate areas of individual circles.
@@ -1990,7 +2297,13 @@ public class MainActivity extends AppCompatActivity {
                 double totalArea = Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius();
 
                 //INFO Added the mod totalArea because sometimes, triangleArea gets greater than totalArea.
-                double triangleArea = Math.abs((a + b + c) - 50) % totalArea;
+                //double triangleArea = Math.abs((a + b + c) - 50) % totalArea;
+
+                double length1 = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                double length2 = Math.sqrt(Math.pow(x2 - centerX, 2) + Math.pow(y2 - centerY, 2));
+                double length3 = Math.sqrt(Math.pow(x1 - centerX, 2) + Math.pow(y1 - centerY, 2));
+                double s = (length1 + length2 + length3) / 2;
+                double triangleArea = Math.sqrt(s * (s - length1) * (s - length2) * (s - length3));
 
                 double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX, y1 - centerY) -
                         Math.atan2(x2 - centerX, y2 - centerY)));
@@ -2022,7 +2335,7 @@ public class MainActivity extends AppCompatActivity {
                 if (wastedArea < 0) wastedArea = Math.abs(wastedArea) / 1.95;
 
                 if (outside)
-                    wastedArea = (Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius()) - wastedArea;
+                    wastedArea = (totalArea) - wastedArea;
                 if (dv.angleList.get(overflowInfo.getCirclePos()) < 316) {
                     double sprinklerAngle = dv.angleList.get(overflowInfo.getCirclePos());
                     totalArea *= sprinklerAngle / 360;
@@ -2056,7 +2369,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (!fullCircleUsed.contains(overflowInfo.getCirclePos())) {
-                    totalOverflowArea += totalArea;
+                    //totalOverflowArea += totalArea;
                     Log.wtf("*- Total Overflow Area: ", "ADDING: " + totalArea + " = " + totalOverflowArea);
                 }
 
@@ -2076,7 +2389,7 @@ public class MainActivity extends AppCompatActivity {
                 //Log.wtf("*-", ",\n");
             }
         }
-        Log.wtf("*- End Results: ", "Overflow Wastage: " + overFlowWastage + " Total Area: " + totalOverflowArea + "\n-");
+        Log.wtf("*- Overflow Results: ", "Overflow Wastage: " + (int) overFlowWastage + " Total Area: " + (int) totalOverflowArea + "\n-");
     }
 
     private boolean outsideResults(int counteR, double centerX, double centerY) {
