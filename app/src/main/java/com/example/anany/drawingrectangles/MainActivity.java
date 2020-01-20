@@ -1589,6 +1589,8 @@ public class MainActivity extends AppCompatActivity {
         insideIntersecting = new ArrayList<>();
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
         Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
+        Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
+        Log.wtf("*---------------*-", "*----*----*----*----*----*----*----*----*----*----*----*----*----");
         for (int t = 0; t < dv.sprinkx.size(); t++) {
             double circleX = dv.sprinkx.get(t);
             double circleY = dv.sprinky.get(t);
@@ -1968,7 +1970,7 @@ public class MainActivity extends AppCompatActivity {
                                 + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t1 circle- " + (int) (r1 * r1 * Math.PI) + "  X1: " + (int) x1 + " Y1: " + (int) y1 + " X2: " +
                                 (int) x2 + " Y2: " + (int) y2 + " Arc1-" + (int) arc1 + " Arc2- " + (int) arc2 + " Triangle-" + (int) triangleArea);
 
-                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                        /*RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
                                 ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
                         params.leftMargin = (int) ix1 - 3;
                         params.topMargin = (int) iy1;
@@ -2003,7 +2005,7 @@ public class MainActivity extends AppCompatActivity {
                         textView3.setTextSize(7);
                         //makeToast("Making the text");
                         rlDvHolder.addView(textView3);
-                        dv.idCounter++;
+                        dv.idCounter++;*/
                     }
 
                     /* Log.wtf("*- Information: ", "X1: " + (int) x1 + " Y1: " + (int) y1 + " X2: " + (int) x2 + " Y2: " + (int) y2
@@ -2525,7 +2527,7 @@ public class MainActivity extends AppCompatActivity {
                             totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
                         if (completelyInside.contains(circle2))
                             totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
-                        overlap2+=intersectionArea;
+                        overlap2 += intersectionArea;
                         Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Circle In Circle: " + intersectionArea + "  Total Area: " + totalArea);
                     } else {//README Not circle in circle
                         double intersectionArea = 0;
@@ -2574,13 +2576,15 @@ public class MainActivity extends AppCompatActivity {
         double land2 = 0;
         //IMPORTANT Ideally below should loop for only completelyInsideCircles and inisideCircles
         // Check calling function for more info
-        for (int i = 0; i < insideCircles.size(); i++) {
-            for (int j = 0; j < completelyInside.size(); j++) {
+        for (int i = 0; i < insideCircles.size() - 1; i++) {
+            for (int j = i + 1; j < insideCircles.size(); j++) {
                 //README insideCirles contains the positions
                 int circle1 = insideCircles.get(i);
-                int circle2 = completelyInside.get(j);
+                int circle2 = insideCircles.get(j);
 
-                if (circle1 != circle2) {
+                //INFO if both circles are insideIntersecting, don't calculate because we have another function for that.
+                if (insideIntersecting.contains(circle1) && insideIntersecting.contains(circle2)) {
+                } else {
                     double x1 = dv.sprinkx.get(circle1);
                     double x2 = dv.sprinkx.get(circle2);
                     double y1 = dv.sprinky.get(circle1);
@@ -2602,7 +2606,6 @@ public class MainActivity extends AppCompatActivity {
                                 totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
                             if (completelyInside.contains(circle2))
                                 totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
-                            overlap2 += intersectionArea;
                             Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Circle In Circle: " + intersectionArea + "  Total Area: " + totalArea);
                         } else {//README Not circle in circle
                             double intersectionArea = 0;
@@ -2649,6 +2652,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
         double totalArea = 0;
         //README Calculating completely inside circle area outside the loop so no duplicates.
         for (int i : completelyInside)
