@@ -1772,8 +1772,6 @@ public class MainActivity extends AppCompatActivity {
         insideCircleOverlap();
         completelyInsideOverlapOutside();
 
-
-
         //TODO Calculations for overflow wastage aren't working well. When circle intersects line. Check it out.
 
         total += totalInsideArea;
@@ -1989,7 +1987,10 @@ public class MainActivity extends AppCompatActivity {
                 double a = x1 * (y2 - centerY);
                 double b = x2 * (centerY - y1);
                 double c = centerX * (y1 - y2);
-                double triangleArea = Math.abs((a + b + c) - 2);
+                double totalArea = Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius();
+
+                //INFO Added the mod totalArea because sometimes, triangleArea gets greater than totalArea.
+                double triangleArea = Math.abs((a + b + c) - 50) % totalArea;
 
                 double angle = Math.abs(Math.toDegrees(Math.atan2(x1 - centerX, y1 - centerY) -
                         Math.atan2(x2 - centerX, y2 - centerY)));
@@ -2013,7 +2014,6 @@ public class MainActivity extends AppCompatActivity {
                 double degrees = Math.toDegrees(rad);
 
                 double sectorArea = Math.PI * Math.pow(overflowInfo.getRadius(), 2) * (degrees / 360d);
-                double totalArea = Math.PI * overflowInfo.getRadius() * overflowInfo.getRadius();
 
                 boolean outside = outside(centerX, centerY);
 
