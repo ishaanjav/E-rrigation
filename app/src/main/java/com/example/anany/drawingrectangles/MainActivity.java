@@ -2017,7 +2017,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         overlapWastage += overlap2;
-        Log.wtf("Results insideIntersecting-outsideIntersecting:", (int) overlap2 + ".\n-");
+        Log.wtf("*- Results insideIntersecting-outsideIntersecting:", (int) overlap2 + ".\n-");
     }
 
     private void outsideIntersectingOutsideIntersecting() {
@@ -2218,7 +2218,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         overlapWastage += overlap2;
-        Log.wtf("Results outsideIntersecting-outsideIntersecting:", (int) overlap2 + ".\n-");
+        Log.wtf("*- Results outsideIntersecting-outsideIntersecting:", (int) overlap2 + ".\n-");
     }
 
     private void insideIntersectingInsideIntersecting() {
@@ -2419,7 +2419,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         overlapWastage += overlap2;
-        Log.wtf("Results insideIntersecting-insideIntersecting:", (int) overlap2 + ".\n-");
+        Log.wtf("*- Results insideIntersecting-insideIntersecting:", (int) overlap2 + ".\n-");
     }
 
     public int overlap(double r1, double r2, double x1, double x2, double y1, double y2, int circle1, int circle2) {
@@ -2583,7 +2583,7 @@ public class MainActivity extends AppCompatActivity {
                 int circle2 = insideCircles.get(j);
 
                 //INFO if both circles are insideIntersecting, don't calculate because we have another function for that.
-                if (insideIntersecting.contains(circle1) && insideIntersecting.contains(circle2)) {
+                if(insideIntersectingContains(circle1, circle2)){
                 } else {
                     double x1 = dv.sprinkx.get(circle1);
                     double x2 = dv.sprinkx.get(circle2);
@@ -2661,6 +2661,20 @@ public class MainActivity extends AppCompatActivity {
         overlapWastage += overlap2;
         totalInsideArea += totalArea;
         Log.wtf("*- Results insideCircleOverlap: ", (int) overlap2 + " " + (int) totalArea + "\n-");
+    }
+
+    private boolean insideIntersectingContains(int circle1, int circle2) {
+        boolean c1 = false;
+        boolean c2 = false;
+        for(OverflowInfo info : insideIntersecting){
+            if(info.getCirclePos() == circle1)
+                c1 = true;
+            if(info.getCirclePos() == circle2)
+                c2 = true;
+        }
+        if(c1 && c2)
+            return true;
+        return false;
     }
 
     //README Calculate areas of individual circles.
