@@ -1889,27 +1889,26 @@ public class MainActivity extends AppCompatActivity {
                             double i1x, i1y, i2x, i2y, i3x, i3y;
 
 
-
                             boolean chain1 = false, chain2 = false, chain3 = false;
                             double[] intersection1 = circleCircleIntersectionisInOtherCircle(x4, y4, x5, y5, x3, y3, r3);
                             double[] intersection2 = circleCircleIntersectionisInOtherCircle(x6, y6, x7, y7, x2, y2, r2);
                             double[] intersection3 = circleCircleIntersectionisInOtherCircle(x8, y8, x9, y9, x1, y1, r1);
-                            chain3 = intersection1[2] ==1;
-                            chain2 = intersection2[2] ==1;
-                            chain1 = intersection3[2] ==1;
+                            chain3 = intersection1[2] == 1;
+                            chain2 = intersection2[2] == 1;
+                            chain1 = intersection3[2] == 1;
                             //README There is a chain
-                            if(chain1 || chain2 || chain3){
+                            if (chain1 || chain2 || chain3) {
                                 //TODO IF chain need to subtract area of overlap of 2 circles.
                                 //INFO Below is the info for the circles that we need to calculate the overlap of.
                                 double xc1 = x1, xc2 = x2, yc1 = y1, yc2 = y2, rc1 = r1, rc2 = r2;
-                                if(chain3){
+                                if (chain3) {
                                     //Overlap of 1 and 2
-                                }else if(chain2){
+                                } else if (chain2) {
                                     //Overlap of 1 and 3
                                     xc2 = x3;
                                     yc2 = y3;
                                     rc2 = r3;
-                                }else{
+                                } else {
                                     //Overlap of 2 and 3
                                     xc1 = x2;
                                     yc1 = y2;
@@ -1943,8 +1942,29 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 area += intersectionArea;
                                 Log.wtf("*- Chain Circles", "Overlap: " + intersectionArea + " Total Area: " + area);
-                            }else{
+                            } else {
+                                i1x = intersection3[0];
+                                i1y = intersection3[1];
+                                i2x = intersection2[0];
+                                i2y = intersection2[1];
+                                i3x = intersection1[0];
+                                i3y = intersection1[1];
 
+                                double length1 = Math.sqrt(Math.pow(i1x - i2x, 2) + Math.pow(i1y - i2y, 2));
+                                double length2 = Math.sqrt(Math.pow(i2x - i3x, 2) + Math.pow(i2y - i3y, 2));
+                                double length3 = Math.sqrt(Math.pow(i1x - i3x, 2) + Math.pow(i1y - i3y, 2));
+                                double s = (length1 + length2 + length3) / 2;
+
+                                //INFO Area of the triangle formed by the three points
+                                double triangleArea = Math.sqrt(s * (s - length1) * (s - length2) * (s - length3));
+                                double arc1, arc2, arc3;
+                                arc1 = arcArea(r1, i2x, i2y, i3x, i3y, x1, y1);
+                                arc2 = arcArea(r2, i1x, i1y, i3x, i3y, x2, y2);
+                                arc3 = arcArea(r3, i1x, i1y, i2x, i2y, x3, y3);
+                                double intersectionArea = arc1 + arc2 + arc3 + triangleArea;
+                                area += intersectionArea;
+                                Log.wtf("*- Areas", "Overlap: " + intersectionArea + " Total Area: " + area + " Triangle: "
+                                        + triangleArea + " Arc1:" + arc1 + " Arc2:" + arc2 + " Arc3:" + arc3 + " Circles: " + (Math.PI * r1*r1*3));
                             }
 
                         }
@@ -1966,7 +1986,7 @@ public class MainActivity extends AppCompatActivity {
         b1 = distance1 <= radius;
         b2 = distance2 <= radius;
         chain = b1 && b2;
-        return new double[]{b1?x1:x2,b1?y1:y2, chain?1:0};
+        return new double[]{b1 ? x1 : x2, b1 ? y1 : y2, chain ? 1 : 0};
     }
 
     private void insideIntersectingOutsideIntersecting() {
