@@ -1770,19 +1770,21 @@ public class MainActivity extends AppCompatActivity {
         //NOTES Total area calculated -
         // At this point all outside, intersecting, and completely inside cirlces have been calculated.
 
-        //FUTURE FILES - ideally for insideCircleOverlap should only go for completelyinsideCircles with insideCircles
+        //DONE - ideally for insideCircleOverlap should only go for completelyinsideCircles with insideCircles
         //    Then, you have 3 other cases - insideIntersecting with insideIntersecting, insideIntersecting with outsideIntersecting,
         //    and outsideIntersecting with outsideIntersecting
         //  For the above 3 cases, when calculating overlap, you also have to account for angle between centers because
         //  the intersecting area can be inside and outside the region.
 
+        //OLD Don't call below anymore.
         //individualCircleArea();
-        //calculateOverflowWastage();
-        //insideCircleOverlap();
-        /*completelyInsideOverlapOutside();
+
+        calculateOverflowWastage();
+        insideCircleOverlap();
+        completelyInsideOverlapOutside();
         insideIntersectingOutsideIntersecting();
         outsideIntersectingOutsideIntersecting();
-        insideIntersectingInsideIntersecting();*/
+        insideIntersectingInsideIntersecting();
         calculate3CircleOverlap();
 
         total = 0;
@@ -1805,12 +1807,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
+        //Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
 
         //total += totalInsideArea;
         //total += totalOverflowArea;
         wasted += overFlowWastage;
         wasted += overlapWastage;
+        //INFO Subtracts overlap of 3 circles
+        wasted -= overCounted3;
         Log.wtf("*- End Results:", "- " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
         Log.wtf("*- Individual Circles", "Size: " + singleR.size());
         Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
@@ -1819,6 +1823,8 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
         hideLoading();
     }
+
+    double overCounted3 = 0;
 
     private void calculate3CircleOverlap() {
         Log.wtf("*- 3 Overlapping Circles", "_______________________________________");
@@ -1964,7 +1970,7 @@ public class MainActivity extends AppCompatActivity {
                                 double intersectionArea = arc1 + arc2 + arc3 + triangleArea;
                                 area += intersectionArea;
                                 Log.wtf("*- Areas", "Overlap: " + intersectionArea + " Total Area: " + area + " Triangle: "
-                                        + triangleArea + " Arc1:" + arc1 + " Arc2:" + arc2 + " Arc3:" + arc3 + " Circles: " + (Math.PI * r1*r1*3));
+                                        + triangleArea + " Arc1:" + arc1 + " Arc2:" + arc2 + " Arc3:" + arc3 + " Circles: " + (Math.PI * r1 * r1 * 3));
                             }
 
                         }
@@ -1972,6 +1978,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        overCounted3 += area;
+        Log.wtf("*- 3 Circle Overlap Results", overCounted3 + "");
     }
 
     //README Give it the intersections of 2 circles (x1, y1) and (x2, y2) then the center/radius of the other circle.
