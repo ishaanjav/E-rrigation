@@ -1777,12 +1777,13 @@ public class MainActivity extends AppCompatActivity {
         //  the intersecting area can be inside and outside the region.
 
         //individualCircleArea();
-        calculateOverflowWastage();
-        insideCircleOverlap();
-        completelyInsideOverlapOutside();
+        //calculateOverflowWastage();
+        //insideCircleOverlap();
+        /*completelyInsideOverlapOutside();
         insideIntersectingOutsideIntersecting();
         outsideIntersectingOutsideIntersecting();
-        insideIntersectingInsideIntersecting();
+        insideIntersectingInsideIntersecting();*/
+        calculate3CircleOverlap();
 
         total = 0;
         for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
@@ -1817,6 +1818,155 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
         hideLoading();
+    }
+
+    private void calculate3CircleOverlap() {
+        Log.wtf("*- 3 Overlapping Circles", "_______________________________________");
+        double area = 0;
+        for (int i = 0; i < insideCircles.size() - 2; i++) {
+            for (int j = i + 1; j < insideCircles.size() - 1; j++) {
+                int circle1 = insideCircles.get(i);
+                int circle2 = insideCircles.get(j);
+
+                double x1 = dv.sprinkx.get(circle1);
+                double x2 = dv.sprinkx.get(circle2);
+                double y1 = dv.sprinky.get(circle1);
+                double y2 = dv.sprinky.get(circle2);
+
+                double r1 = dv.sprinkr.get(circle1);
+                double r2 = dv.sprinkr.get(circle2);
+                double angle1 = dv.angleList.get(circle1);
+                double angle2 = dv.angleList.get(circle2);
+
+                double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                //README The circles overlap
+                if (distance <= r1 + r2) {
+                    for (int k = j + 1; k < insideCircles.size(); k++) {
+                        int circle3 = insideCircles.get(k);
+                        double x3 = dv.sprinkx.get(circle3);
+                        double y3 = dv.sprinky.get(circle3);
+                        double r3 = dv.sprinkr.get(circle3);
+                        double angle3 = dv.angleList.get(circle3);
+                        double dist1 = Math.sqrt(Math.pow(x1 - x3, 2) + Math.pow(y1 - y3, 2));
+                        double dist2 = Math.sqrt(Math.pow(x2 - x3, 2) + Math.pow(y2 - y3, 2));
+                        if ((dist1 <= r1 + r3) && (dist2 <= r2 + r3)) {
+                            Log.wtf("*- 3 intersects: ", circle1 + " " + circle2 + " " + circle3);
+                            //README 3rd circle overlaps with other 2.
+                            //TODO Have to determine the intersection points of c1-c2, c1-c3, c2-c3 that are inside the other circle.
+                            double d = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                            double a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+                            double h = Math.sqrt(r1 * r1 - a * a);
+
+                            double x4 = x1 + a * (x2 - x1) / d;
+                            double y4 = y1 + a * (y2 - y1) / d;
+                            double x5 = x4 + h * (y2 - y1) / d;     // also x3=x2-h*(y1-y0)/d
+                            double y5 = y4 - h * (x2 - x1) / d;
+                            x4 = x4 - h * (y2 - y1) / d;
+                            y4 = y4 + h * (x2 - x1) / d;
+
+                            double d2 = Math.sqrt(Math.pow(x1 - x3, 2) + Math.pow(y1 - y3, 2));
+                            double a2 = (r1 * r1 - r3 * r3 + d2 * d2) / (2 * d2);
+                            double h2 = Math.sqrt(r1 * r1 - a2 * a2);
+
+                            double x6 = x1 + a2 * (x3 - x1) / d2;
+                            double y6 = y1 + a2 * (y3 - y1) / d2;
+                            double x7 = x6 + h2 * (y3 - y1) / d2;     // also x3=x2-h*(y1-y0)/d
+                            double y7 = y6 - h2 * (x3 - x1) / d2;
+                            x6 = x6 - h2 * (y3 - y1) / d2;
+                            y6 = y6 + h2 * (x3 - x1) / d2;
+
+                            double d3 = Math.sqrt(Math.pow(x2 - x3, 2) + Math.pow(y2 - y3, 2));
+                            double a3 = (r2 * r2 - r3 * r3 + d3 * d3) / (2 * d3);
+                            double h3 = Math.sqrt(r2 * r2 - a3 * a3);
+
+                            double x8 = x2 + a3 * (x3 - x2) / d3;
+                            double y8 = y2 + a3 * (y3 - y2) / d3;
+                            double x9 = x8 + h3 * (y3 - y2) / d3;     // also x3=x2-h*(y1-y0)/d
+                            double y9 = y8 - h3 * (x3 - x2) / d3;
+                            x8 = x8 - h3 * (y3 - y2) / d3;
+                            y8 = y8 + h3 * (x3 - x2) / d3;
+
+                            double i1x, i1y, i2x, i2y, i3x, i3y;
+
+
+
+                            boolean chain1 = false, chain2 = false, chain3 = false;
+                            double[] intersection1 = circleCircleIntersectionisInOtherCircle(x4, y4, x5, y5, x3, y3, r3);
+                            double[] intersection2 = circleCircleIntersectionisInOtherCircle(x6, y6, x7, y7, x2, y2, r2);
+                            double[] intersection3 = circleCircleIntersectionisInOtherCircle(x8, y8, x9, y9, x1, y1, r1);
+                            chain3 = intersection1[2] ==1;
+                            chain2 = intersection2[2] ==1;
+                            chain1 = intersection3[2] ==1;
+                            //README There is a chain
+                            if(chain1 || chain2 || chain3){
+                                //TODO IF chain need to subtract area of overlap of 2 circles.
+                                //INFO Below is the info for the circles that we need to calculate the overlap of.
+                                double xc1 = x1, xc2 = x2, yc1 = y1, yc2 = y2, rc1 = r1, rc2 = r2;
+                                if(chain3){
+                                    //Overlap of 1 and 2
+                                }else if(chain2){
+                                    //Overlap of 1 and 3
+                                    xc2 = x3;
+                                    yc2 = y3;
+                                    rc2 = r3;
+                                }else{
+                                    //Overlap of 2 and 3
+                                    xc1 = x2;
+                                    yc1 = y2;
+                                    rc1 = r2;
+                                    xc2 = x3;
+                                    yc2 = y3;
+                                    rc2 = r3;
+                                }
+                                //INFO calculate the overlap
+                                Double r = rc1;
+                                Double R = rc2;
+                                double firstX = xc1;
+                                double secondX = xc2;
+                                double firstY = yc1;
+                                double secondY = yc2;
+                                Double dm = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+                                if (R < r) {
+                                    // swap
+                                    r = rc2;
+                                    R = rc1;
+                                }
+                                Double part1 = r * r * Math.acos((dm * dm + r * r - R * R) / (2 * dm * r));
+                                Double part2 = R * R * Math.acos((dm * dm + R * R - r * r) / (2 * dm * R));
+                                Double part3 = 0.5f * Math.sqrt((-dm + r + R) * (dm + r - R) * (dm - r + R) * (dm + r + R));
+
+                                double intersectionArea = part1 + part2 - part3;
+
+                                //README Maybe intersectionArea is 0 because circle is inside other circle.
+                                if (!(intersectionArea > 0)) {
+                                    intersectionArea = Math.PI * Math.pow(r, 2) * 345 / 360;
+                                }
+                                area += intersectionArea;
+                                Log.wtf("*- Chain Circles", "Overlap: " + intersectionArea + " Total Area: " + area);
+                            }else{
+
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //README Give it the intersections of 2 circles (x1, y1) and (x2, y2) then the center/radius of the other circle.
+    private double[] circleCircleIntersectionisInOtherCircle(double x1, double y1, double x2, double y2, double centerX, double centerY, double radius) {
+        double distance1 = Math.sqrt(Math.pow(x1 - centerX, 2) + Math.pow(y1 - centerY, 2));
+        double distance2 = Math.sqrt(Math.pow(x2 - centerX, 2) + Math.pow(y2 - centerY, 2));
+        boolean b1 = false;
+        boolean b2 = false;
+        //README Chainis important becasue we can have a chain of 3 circles, side by side
+        //  and 1 circle intersects with other 2.
+        boolean chain = false;
+        b1 = distance1 <= radius;
+        b2 = distance2 <= radius;
+        chain = b1 && b2;
+        return new double[]{b1?x1:x2,b1?y1:y2, chain?1:0};
     }
 
     private void insideIntersectingOutsideIntersecting() {
@@ -2583,7 +2733,7 @@ public class MainActivity extends AppCompatActivity {
                 int circle2 = insideCircles.get(j);
 
                 //INFO if both circles are insideIntersecting, don't calculate because we have another function for that.
-                if(insideIntersectingContains(circle1, circle2)){
+                if (insideIntersectingContains(circle1, circle2)) {
                 } else {
                     double x1 = dv.sprinkx.get(circle1);
                     double x2 = dv.sprinkx.get(circle2);
@@ -2666,13 +2816,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean insideIntersectingContains(int circle1, int circle2) {
         boolean c1 = false;
         boolean c2 = false;
-        for(OverflowInfo info : insideIntersecting){
-            if(info.getCirclePos() == circle1)
+        for (OverflowInfo info : insideIntersecting) {
+            if (info.getCirclePos() == circle1)
                 c1 = true;
-            if(info.getCirclePos() == circle2)
+            if (info.getCirclePos() == circle2)
                 c2 = true;
         }
-        if(c1 && c2)
+        if (c1 && c2)
             return true;
         return false;
     }
