@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BackUpClass extends AppCompatActivity {
+public class DataCollectionBackUp extends AppCompatActivity {
 
     Button button, btnUndo;
     static RelativeLayout rlDvHolder;
@@ -103,7 +103,7 @@ public class BackUpClass extends AppCompatActivity {
         setRadiusBar();
         dv.sradius = radius.getProgress();
         container = background.findViewById(R.id.container);
-        lengthUpdater();
+        //lengthUpdater();
 
         //radius.setVisibility(View.VISIBLE);
         //real.setVisibility(View.VISIBLE);
@@ -114,7 +114,7 @@ public class BackUpClass extends AppCompatActivity {
         //askForLength(true, 2);
 
         angleAndRotateClicks();
-
+        clickCounter = 0;
         //handleResults(3, 3, 3, 3, 100);
     }
 
@@ -203,13 +203,13 @@ public class BackUpClass extends AppCompatActivity {
                                 Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
                             }
                         }
-                    } else if (length.getText().toString().equals("") || length.getText().toString().equals(previous)) {
+                    } /*else if (length.getText().toString().equals("") || length.getText().toString().equals(previous)) {
 
                     } else {
                         length.setText("");
                         //leaveAlone = true;
                         makeToast("First, you must plot the first side.");
-                    }
+                    }*/
                 } else {
                     timesR = 0;
                     String temp = length.getText().toString();
@@ -316,7 +316,7 @@ public class BackUpClass extends AppCompatActivity {
     AlertDialog created;
 
     public void showLoading() {
-        loading = new AlertDialog.Builder(BackUpClass.this);
+        loading = new AlertDialog.Builder(DataCollectionBackUp.this);
         LayoutInflater inflater = getLayoutInflater();
         final View dialogCoordinate = inflater.inflate(R.layout.loading, null);
         loading.setCancelable(false);
@@ -351,7 +351,7 @@ public class BackUpClass extends AppCompatActivity {
                 .setNegativeButton(android.R.string.no, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();*/
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(BackUpClass.this);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(DataCollectionBackUp.this);
         LayoutInflater inflater = getLayoutInflater();
         final View dialogCoordinate = inflater.inflate(R.layout.specify_length, null);
         dialogBuilder.setCancelable(false);
@@ -554,7 +554,7 @@ public class BackUpClass extends AppCompatActivity {
                     minSideLength = 8d / dv.ratio;
                 }
                 if (maxSideLength > 325) {
-                    pixelSideLength = (double) 250d / dv.ratio;
+                    pixelSideLength = (double) 950d / dv.ratio;
                     minSideLength = 10d / dv.ratio;
                 }
 
@@ -623,7 +623,7 @@ public class BackUpClass extends AppCompatActivity {
                         minSideLength = 8d / dv.ratio;
                     }
                     if (maxSideLength > 325) {
-                        pixelSideLength = (double) 250d / dv.ratio;
+                        pixelSideLength = (double) 950d / dv.ratio;
                         minSideLength = 10d / dv.ratio;
                     }
                     double dif = pixelSideLength - minSideLength;
@@ -1055,7 +1055,7 @@ public class BackUpClass extends AppCompatActivity {
             switch (currentMode) {
                 case splot:
                     plotSprinklers2(canvas);
-                    //makeToast("Plotting sprinklers");
+                    makeToast("Plotting sprinklers");
                     //mmakeToast("Was Circle? : " + wasCircle);
                     if (!wasCircle)
                         drawLine(canvas);
@@ -1085,6 +1085,7 @@ public class BackUpClass extends AppCompatActivity {
                 case DOTPLOT:
                     showDots(canvas);
                     //Log.wtf("*DOTPLOT", "DOT Plot being called");
+                    plotSprinklers2(canvas);
                     drawLine(canvas);
                     if (xlist.size() == 2) {
                         //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
@@ -1237,7 +1238,7 @@ public class BackUpClass extends AppCompatActivity {
                     //  On higher ppi phones, sprinkle  r appears very small.
                     //INFO For 3 lines, changed sradius/9 to /4.
 
-                    int progress = BackUpClass.radius.getProgress();
+                    int progress = DataCollectionBackUp.radius.getProgress();
                     double pixelSideLength = (double) maxSideLength / dv.ratio * 0.7d;
                     double setToI = ((double) progress / 100d * pixelSideLength) / 2;
                     double minSideLength = 4d / dv.ratio;
@@ -1262,7 +1263,7 @@ public class BackUpClass extends AppCompatActivity {
                         minSideLength = 8d / dv.ratio;
                     }
                     if (maxSideLength > 325) {
-                        pixelSideLength = (double) 250d / dv.ratio;
+                        pixelSideLength = (double) 950d / dv.ratio;
                         minSideLength = 10d / dv.ratio;
                     }
                     double dif = pixelSideLength - minSideLength;
@@ -1326,71 +1327,6 @@ public class BackUpClass extends AppCompatActivity {
             maxSideLength = 0;
             if (xlist.size() > 2) {
                 posCount = xlist.size() - 2;
-                if (xlist.size() == 3) {
-                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
-                            ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
-                    params.leftMargin = (xlist.get(0) + xlist.get(1)) / 2;
-                    params.topMargin = (ylist.get(0) + ylist.get(1)) / 2;
-
-                    TextView textView = new TextView(context);
-                    int val = (int) (Math.hypot(Math.abs(xlist.get(0) - xlist.get(1)),
-                            Math.abs(ylist.get(0) - ylist.get(1))) * ratio);
-                    if (maxSideLength < val) maxSideLength = val;
-                    textView.setText("" + val);
-                    textView.setId(idCounter);
-                    textView.setLayoutParams(params);
-                    //makeToast("Making the text");
-                    rlDvHolder.addView(textView);
-                    idCounter++;
-                }
-
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
-                        ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
-                params.leftMargin = (xlist.get(posCount) + xlist.get(posCount + 1)) / 2;
-                params.topMargin = (ylist.get(posCount) + ylist.get(posCount + 1)) / 2;
-
-                TextView textView = new TextView(context);
-                int val = (int) (Math.hypot(Math.abs(xlist.get(posCount) - xlist.get(posCount + 1)),
-                        Math.abs(ylist.get(posCount) - ylist.get(posCount + 1))) * ratio);
-                if (maxSideLength < val) maxSideLength = val;
-                textView.setText("" + val);
-                textView.setId(idCounter);
-                textView.setLayoutParams(params);
-                //makeToast("Making the text");
-                rlDvHolder.addView(textView);
-
-                //DONE HAVE to deal with adding textview from last to first. and removing from previous touch.
-
-                //Log.wtf("* Location: ", xlist.get(posCount) + " " + xlist.get(posCount + 1)
-                //       + " " + ylist.get(posCount) + " " + ylist.get(posCount + 1));
-
-                Log.wtf("*  Length INFO", "Ratio: " + ratio + "  Length: " + length);
-                if (specialCounter != Integer.MAX_VALUE) {
-                    rlDvHolder.findViewById(dv.specialCounter + 1).setVisibility(View.GONE);
-                }
-
-
-                RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams
-                        ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
-                int xlast = xlist.get(xlist.size() - 1) + xlist.get(0);
-                int ylast = ylist.get(ylist.size() - 1) + ylist.get(0);
-                params2.leftMargin = (xlast) / 2;
-                params2.topMargin = (ylast) / 2;
-
-                TextView last = new TextView(context);
-                int val2 = (int) (Math.hypot(Math.abs(xlist.get(xlist.size() - 1) - xlist.get(0)),
-                        Math.abs(ylist.get(ylist.size() - 1) - ylist.get(0))) * ratio);
-                if (maxSideLength < val2) maxSideLength = val2;
-                last.setText("" + val2);
-                last.setId(specialCounter);
-                last.setLayoutParams(params2);
-                //makeToast("Making the last text");
-                rlDvHolder.addView(last);
-
-                //Log.wtf("**a-", "Side Length - " + maxSideLength);
-                idCounter++;
-                posCount++;
-                specialCounter--;
 
                 for (int i = 0; i < xlist.size() - 1; i++) {
                     canvas.drawLine(xlist.get(i), ylist.get(i), xlist.get(i + 1), ylist.get(i + 1), linePaint);
@@ -1482,7 +1418,7 @@ public class BackUpClass extends AppCompatActivity {
             //Log.wtf("*Showing dots", "X List size: " + xlist.size());
             if (xlist.size() > 0) {
                 for (int i = 0; i < xlist.size(); i++) {
-                    canvas.drawCircle(xlist.get(i), ylist.get(i), 9.0f, circlePaint);
+                    canvas.drawCircle(xlist.get(i) * 6, ylist.get(i) * 6, 9.0f, circlePaint);
                 }
             }
 
@@ -1502,32 +1438,32 @@ public class BackUpClass extends AppCompatActivity {
         public double polygonArea() {
             // Initialze area
             //if (currentMode == Mode.splot || currentMode == Mode.RESET) {
-            if (pastMode == PastMode.DRAW) {
-                int n = xlist.size();
-                double area = 0.0;
+            // if (pastMode == PastMode.DRAW) {
+            int n = xlist.size();
+            double area = 0.0;
 
-                // Calculate value using shoelace formula
-                int j = n - 1;
-                for (int i = 0; i < n; i++) {
-                    area += (xlist.get(j) + xlist.get(i)) * (ylist.get(j) - ylist.get(i));
-                    // j is previous vertex to i
-                    j = i;
-                }
-                // Return absolute value
-                if (area != 0)
-                    return Math.abs(area / 2.0);
-                else {
-                    double curRadius = radius * (screenW / 200);
-                    return (int) Math.pow(curRadius, 2) * Math.PI;
-                }
-            } else {
+            // Calculate value using shoelace formula
+            int j = n - 1;
+            for (int i = 0; i < n; i++) {
+                area += (xlist.get(j) + xlist.get(i)) * (ylist.get(j) - ylist.get(i));
+                // j is previous vertex to i
+                j = i;
+            }
+            // Return absolute value
+            if (area != 0)
+                return Math.abs(area / 2.0);
+            else {
+                double curRadius = radius * (screenW / 200);
+                return (int) Math.pow(curRadius, 2) * Math.PI;
+            }
+            /*} else {
                 if (radius == -5)
                     return (int) 90000 * Math.PI;
                 else {
                     double curRadius = radius * (screenW / 200);
                     return (int) Math.pow(curRadius, 2) * Math.PI;
                 }
-            }
+            }*/
         }
     }
 
@@ -1540,15 +1476,74 @@ public class BackUpClass extends AppCompatActivity {
 
     boolean rectangle = false;
 
+    public void addRadius(double... radius) {
+        for (double r : radius)
+            dv.sprinkr.add((int) (r * 15));
+    }
+
+    public void addX(double... radius) {
+        for (double r : radius)
+            dv.sprinkx.add((int) (r * 15));
+    }
+
+    public void addY(double... radius) {
+        for (double r : radius)
+            dv.sprinky.add((int) (r * 15));
+    }
+
+    public void lineAddX(double... radius) {
+        for (double r : radius)
+            dv.xlist.add((int) (r * 15));
+    }
+
+    public void lineAddY(double... radius) {
+        for (double r : radius)
+            dv.ylist.add((int) (r * 15));
+    }
+
+    public void lineDrawAddX(double... radius) {
+        for (double r : radius)
+            dv.xlist.add((int) (r * 85) + 100);
+    }
+
+    public void lineDrawAddY(double... radius) {
+        for (double r : radius)
+            dv.ylist.add((int) (r * -85) + 300);
+    }
+
+    public void angleAdd(double... radius) {
+        for (double r : radius)
+            dv.angleList.add((int) r);
+    }
+
+    public void rotateAdd(double... radius) {
+        for (double r : radius)
+            dv.rotationList.add((int) r);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //makeToast("Polygon area: " + dv.polygonArea());
         switch (item.getItemId()) {
             case R.id.circle:
                 //TODO Have to draw circle.
+                dv.ylist.clear();
+                dv.xlist.clear();
+                dv.sprinkr.clear();
+                dv.sprinkx.clear();
+                dv.sprinky.clear();
+                dv.angleList.clear();
+                ;
                 if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
                     //INFO Need to switch from circle to polygon
-                    radius.setVisibility(View.INVISIBLE);
+                    lineAddX(0, 14, 14, 0);
+                    lineAddY(0, 0, -10, -10);
+                    addX(0, 14, 14, 0);
+                    addY(0, 0, -10, -10);
+                    addRadius(10.8, 10.8, 10.8, 10.8);
+                    angleAdd(90, 90, 90, 90);
+                    calculateSprinklerOverflow(true);
+                    /*radius.setVisibility(View.INVISIBLE);
                     polygon.setVisibility(View.VISIBLE);
                     item.setTitle("Draw Circle");
                     dv.currentMode = DrawingView.Mode.DOTPLOT;
@@ -1565,10 +1560,25 @@ public class BackUpClass extends AppCompatActivity {
                     right2.setVisibility(View.INVISIBLE);
                     right1.setVisibility(View.INVISIBLE);
                     removeAllLengths();
-                    dv.invalidate();
+                    dv.invalidate();*/
                 } else {
                     //INFO Currently on polygon. Switch to circle.
-                    dv.currentMode = DrawingView.Mode.drawc;
+                    lineAddX(0, 17.3, 17.3, 8.6, 0);
+                    lineAddY(0, 0, -6.5, -5, -6.5);
+                    addX(0, 8.6, 17.3, 17.3, 8.6, 0);
+                    addY(0, 0, 0, -6.5, -5, -6.5);
+                    addRadius(11, 9, 11, 11, 9, 11);
+                    angleAdd(90, 180, 90, 90, 200, 85);
+                    rotateAdd(90, 90, 180, 280, 260, 0);
+                    dv.invalidate();
+                    /*lineAddX(0, 14, 14, 0);
+                    lineAddY(0, 0, -10, -10);
+                    addX(0, 14, 14, 0);
+                    addY(0, 0, -10, -10);
+                    addRadius(10.8, 10.8, 10.8, 10.8);
+                    angleAdd(90, 90, 90, 90);*/
+                    calculateSprinklerOverflow(true);
+                    /*dv.currentMode = DrawingView.Mode.drawc;
                     dv.wasCircle = true;
                     item.setTitle("Draw Shapes");
                     dv.resetTouchPoints();
@@ -1585,7 +1595,7 @@ public class BackUpClass extends AppCompatActivity {
                     left2.setVisibility(View.INVISIBLE);
                     right2.setVisibility(View.INVISIBLE);
                     right1.setVisibility(View.INVISIBLE);
-                    dv.invalidate();
+                    dv.invalidate();*/
                 }
                 // dv.resetSprinklers();
                 return true;
@@ -1594,9 +1604,9 @@ public class BackUpClass extends AppCompatActivity {
                 //polygon.setText("");
                 if (dv.xlist.size() < 3 && dv.currentMode != DrawingView.Mode.drawc && dv.currentMode != DrawingView.Mode.resetc) {
                     makeToast("You must first plot the area of land.");
-                } else if (!handleSideLength()) {
+                } /*else if (!handleSideLength()) {
                     //INFO They have not entered a side length/radius
-                } else {
+                } */ else {
                     ft.setVisibility(View.INVISIBLE);
                     textview.setVisibility(View.INVISIBLE);
                     length.setVisibility(View.INVISIBLE);
@@ -1615,10 +1625,24 @@ public class BackUpClass extends AppCompatActivity {
 
             case R.id.calculate:
                 //INFO The purpose of this is to display the loading Alert Dialog.
-                Bitmap tr = takeScreenShot(dv);
-                showLoading();
+                //Bitmap tr = takeScreenShot(dv);
+                //showLoading();
+                clickCounter++;
+                if (clickCounter % 2 == 0) {
+                    calculateSprinklerOverflow(false);
+                } else {
+                    dv.ylist.clear();
+                    dv.xlist.clear();
+                    dv.sprinkr.clear();
+                    dv.sprinkx.clear();
+                    dv.sprinky.clear();
+                    dv.angleList.clear();
+                    lineAddX(0, 17.3, 17.3, 8.6, 0);
+                    lineAddY(0, 0, -6.5, -5, -6.5);
+                    maxSideLength = 840;
+                    dv.invalidate();
+                }
 
-                calculateSprinklerOverflow();
 /*
                 //INFO Wait a bit so that the Dialog is showing, then do the calculations.
                 Handler h = new Handler();
@@ -1690,7 +1714,7 @@ public class BackUpClass extends AppCompatActivity {
     ArrayList<Integer> completelyInside = new ArrayList<>();
     double wasted, total = 0;
 
-    private void calculateSprinklerOverflow() {
+    private void calculateSprinklerOverflow(boolean generated) {
         overFlowWastage = 0;
         overlapWastage = 0;
         totalInsideArea = 0;
@@ -1905,17 +1929,23 @@ public class BackUpClass extends AppCompatActivity {
 
         //OLD Don't call below anymore.
         //individualCircleArea();
-
-        calculateOverflowWastage();
-        insideCircleOverlap();
-        completelyInsideOverlapOutside();
-        insideIntersectingOutsideIntersecting();
-        outsideIntersectingOutsideIntersecting();
+        if (generated)
+            insideCircles.addAll(completelyInside);
+        if (!generated)
+            calculateOverflowWastage();
+        //insideCircleOverlap();
+        if (!generated)
+            completelyInsideOverlapOutside();
+        if (!generated)
+            insideIntersectingOutsideIntersecting();
+        if (!generated)
+            outsideIntersectingOutsideIntersecting();
         insideIntersectingInsideIntersecting();
         calculate3CircleOverlap();
 
+
         total = 0;
-        for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
+        /*for (Map.Entry<Integer, OverflowInfo> completelyOutside : completelyOutside.entrySet()) {
             total += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
                     Math.PI * dv.angleList.get(completelyOutside.getValue().getCirclePos()) / 360d;
             totalOverflowArea += completelyOutside.getValue().getRadius() * completelyOutside.getValue().getRadius() *
@@ -1928,30 +1958,49 @@ public class BackUpClass extends AppCompatActivity {
                     dv.angleList.get(outside.getCirclePos()) / 360;
             totalInsideArea += Math.PI * outside.getRadius() * outside.getRadius() *
                     dv.angleList.get(outside.getCirclePos()) / 360;
-        }
+        }*/
         for (Integer o : insideCircles) {
-            total += Math.PI * dv.sprinkr.get(o) * dv.sprinkr.get(o) * dv.angleList.get(o) / 360;
+            total += Math.PI * (double) dv.sprinkr.get(o) * (double) dv.sprinkr.get(o) * (double) dv.angleList.get(o) / 360;
+            Log.wtf("*-Total ", "" + total);
         }
-
+       /* for (Integer o : completelyInside) {
+            total += Math.PI * (double) dv.sprinkr.get(o) * (double) dv.sprinkr.get(o) * (double) dv.angleList.get(o) / 360;
+            Log.wtf("*-Total ", "" + total);
+        }*/
 
         //Log.wtf("*- Completely Outside", "Sprinkler # - " + completelyOutside.size() + "\n\t\t\t\t\t\t\t\t\t Wastage - " + overFlowWastage);
 
         //total += totalInsideArea;
         //total += totalOverflowArea;
-        wasted += overFlowWastage;
+        //wasted += overFlowWastage;
+        landArea = 0;
+        insideCircleOverlap();
+        landArea -= overCounted3 * 2;
+        landArea = total - landArea;
+
         wasted += overlapWastage;
-        //INFO Subtracts overlap of 3 circles
-        wasted -= overCounted3;
-        Log.wtf("*- End Results:", "- " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
+        //IMPORTANT ADD overlap of 3 circles
+        wasted += overCounted3;
+        //wasted /= 2;
+        double rat = Math.min(100, landArea * 100 / dv.polygonArea()) * 100;
+
+        Log.wtf("*-Lists - ", dv.xlist.toString() + "__" + dv.ylist.toString() + "    " +
+                dv.sprinkx.toString() + "__" + dv.sprinky.toString() + " :  " + dv.sprinkr.toString() + "\n.");
+
+        Log.wtf("*- Land Coverage:", "- " + landArea + " " + dv.polygonArea() + " " + ((double) (((int) rat) / 100)) + "%");
+        Log.wtf("*- " + (generated ? "Gardena - " : "Me- ") + " End Results:", "- " + (int) (wasted / 1) + " " + (int) (total / 1) + " " + (int) (wasted * 100 / total) + "%\n---___---");
         Log.wtf("*- Individual Circles", "Size: " + singleR.size());
-        Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
+        //Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
         Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
-        hideLoading();
+        //hideLoading();
     }
 
+    double landArea = 0;
+
     double overCounted3 = 0;
+    int clickCounter = 0;
 
     private void calculate3CircleOverlap() {
         Log.wtf("*- 3 Overlapping Circles", "_______________________________________");
@@ -1973,7 +2022,7 @@ public class BackUpClass extends AppCompatActivity {
 
                 double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
                 //README The circles overlap
-                if (distance <= r1 + r2) {
+                if (distance * 1.03 <= r1 + r2) {
                     for (int k = j + 1; k < insideCircles.size(); k++) {
                         int circle3 = insideCircles.get(k);
                         double x3 = dv.sprinkx.get(circle3);
@@ -2963,8 +3012,9 @@ public class BackUpClass extends AppCompatActivity {
         for (int i : completelyInside)
             totalArea += Math.PI * Math.pow(dv.sprinkr.get(i), 2) * dv.angleList.get(i) / 360;
 
-        overlapWastage += overlap2;
-        totalInsideArea += totalArea;
+        landArea += overlap2;
+       /* overlapWastage += overlap2;
+        totalInsideArea += totalArea;*/
         Log.wtf("*- Results insideCircleOverlap: ", (int) overlap2 + " " + (int) totalArea + "\n-");
     }
 
@@ -3581,7 +3631,7 @@ public class BackUpClass extends AppCompatActivity {
     }
 
     private void handleResults(final int non, final int counter, final int overlappingButOnly1SprinklerRegion, final int area, final double v) {
-        final Dialog dialog = new Dialog(BackUpClass.this);
+        final Dialog dialog = new Dialog(DataCollectionBackUp.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.result);
