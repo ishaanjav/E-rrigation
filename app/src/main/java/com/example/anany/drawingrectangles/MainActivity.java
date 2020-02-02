@@ -1615,7 +1615,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.calculate:
                 //INFO The purpose of this is to display the loading Alert Dialog.
-                Bitmap tr = takeScreenShot(dv);
+                //Bitmap tr = takeScreenShot(dv);
                 showLoading();
 
                 calculateSprinklerOverflow();
@@ -1949,7 +1949,183 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
         hideLoading();
+        displayResults();
     }
+
+    private void displayResults() {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.result);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        Button next = (Button) dialog.findViewById(R.id.done);
+        Button backBtn = (Button) dialog.findViewById(R.id.goBack);
+        final RelativeLayout results = (RelativeLayout) dialog.findViewById(R.id.realresults);
+        final RelativeLayout toHide = dialog.findViewById(R.id.questions);
+        final EditText waterUsedE = dialog.findViewById(R.id.waterused);
+        final EditText durationE = dialog.findViewById(R.id.duration);
+        final Spinner soilType = dialog.findViewById(R.id.soilType);
+/*
+        //results.setVisibility(View.VISIBLE);
+
+        final TextView numSprink = results.findViewById(R.id.sNum);
+        final TextView nonOverlapT = dialog.findViewById(R.id.noA);
+        final TextView overlapA = dialog.findViewById(R.id.oA);
+        final TextView totalA = dialog.findViewById(R.id.tA);
+        final TextView landCovered = dialog.findViewById(R.id.lcA);
+        final TextView totalLandA = dialog.findViewById(R.id.tlA);
+        final TextView percentCoveredA = dialog.findViewById(R.id.pcA);
+        final TextView numIntersect = dialog.findViewById(R.id.plc);
+        final TextView wasted = dialog.findViewById(R.id.ww);
+        final TextView totalWaterOutput = dialog.findViewById(R.id.two);
+        final TextView percentWasted = dialog.findViewById(R.id.pww);
+        final TextView perMonth = dialog.findViewById(R.id.permonth);
+        final TextView perYear = dialog.findViewById(R.id.peryear);*/
+
+        //TODO rephrase question for how much water sprinkler uses to
+        // How much water system uses (System always outputs same amount of water)
+        // Then, change calculations (it will be easier now)
+
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                dialog.dismiss();
+            }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String wU = waterUsedE.getText().toString();
+                boolean fgood = false;
+                boolean sgood = false;
+                double waterUsed = 0;
+                double duration = 0;
+                if (wU != null) {
+                    if (wU.length() > 0) {
+                        waterUsed = Double.parseDouble(wU);
+                        fgood = true;
+                    }
+                }
+
+                String d = durationE.getText().toString();
+                if (d != null) {
+                    if (d.length() > 0) {
+                        duration = Double.parseDouble(d);
+                        sgood = true;
+                    }
+                }
+                Log.wtf("*  Progress", fgood + " " + sgood);
+
+                if (!(fgood && sgood))
+                    makeToast("Please fill in the information.");
+                else {
+                    //DONE IT is good to contineu ahead.
+                    final Dialog dialog = new Dialog(MainActivity.this);
+                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    dialog.setCancelable(false);
+                    dialog.setContentView(R.layout.real_result);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
+                            (int)(dv.screenH*0.9d));
+
+
+                    showResults(dialog);
+                    makeToast("Information calculated. Scroll for more.");
+
+
+                    dialog.show();
+                    /*toHide.setVisibility(View.INVISIBLE);
+                    results.setVisibility(View.VISIBLE);
+
+                    Button goBack = dialog.findViewById(R.id.goBack);
+                    Button done = dialog.findViewById(R.id.done);
+                    done.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                            dialog.cancel();
+                        }
+                    });
+
+                    goBack.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            toHide.setVisibility(View.VISIBLE);
+                            results.setVisibility(View.INVISIBLE);
+                        }
+                    });*/
+/*
+
+                    //DONE Just do the calculations to display the actual stuff.
+
+                    //INFO README
+                    // I think a better method of calculating coverage is simply totalWaterOutput *(1-percentWastage)
+                    double percentWastage = ((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion));
+                    double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
+                    if (coverage > 1) {
+                        coverage = 0;
+                        for (int r : dv.sprinkr) {
+                            coverage += Math.PI * Math.pow(r, 2);
+                        }
+                        coverage -= coverage * percentWastage;
+                        coverage = coverage / v;
+                        if (coverage > 1)
+                            coverage = 0.7678;
+                    }
+                    //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
+
+                    //README Accounting for soil type
+                    String choice = soilType.getSelectedItem().toString();
+                    if (choice.equals("Sandy")) {
+                        percentWastage *= 0.95f;
+                    } else if (choice.equals("Loam")) {
+                        percentWastage *= 0.9f;
+                    } else if (choice.equals("Clay")) {
+                        percentWastage *= 1.15f;
+                    }
+
+                    numSprink.setText(dv.sprinkx.size() + "");
+                    Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
+                    numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
+                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
+                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
+                    percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
+                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    wasted.setText(String.format("%1$,.2f",
+                            duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
+
+
+                    nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
+                    //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
+                    overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
+                    //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
+*/
+
+                    //TODO Shift left and shift right
+
+                    //wasted.setText(String.format("%1$,.1f", duration * pixToGallon(area, waterUsed)) + " gal/wk");
+                    //totalWaterOutput.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + " gal/wk");
+
+                }
+
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void showResults(Dialog dialog) {
+
+    }
+
 
     double overCounted3 = 0;
 
@@ -3610,6 +3786,10 @@ public class MainActivity extends AppCompatActivity {
         final TextView percentWasted = dialog.findViewById(R.id.pww);
         final TextView perMonth = dialog.findViewById(R.id.permonth);
         final TextView perYear = dialog.findViewById(R.id.peryear);
+
+        //TODO rephrase question for how much water sprinkler uses to
+        // How much water system uses (System always outputs same amount of water)
+        // Then, change calculations (it will be easier now)
 
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override

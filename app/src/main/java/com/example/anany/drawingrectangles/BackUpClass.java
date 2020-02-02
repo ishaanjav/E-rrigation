@@ -3611,6 +3611,10 @@ public class BackUpClass extends AppCompatActivity {
         final TextView perMonth = dialog.findViewById(R.id.permonth);
         final TextView perYear = dialog.findViewById(R.id.peryear);
 
+        //TODO rephrase question for how much water sprinkler uses to
+        // How much water system uses (System always outputs same amount of water)
+        // Then, change calculations (it will be easier now)
+
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
