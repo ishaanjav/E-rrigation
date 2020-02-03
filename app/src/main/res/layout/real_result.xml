@@ -8,6 +8,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <RelativeLayout
             android:id="@+id/titleContainer"
             android:layout_width="match_parent"
@@ -28,437 +29,460 @@
                 android:textStyle="bold" />
 
         </RelativeLayout>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:id="@+id/scroll"
-        android:layout_below="@id/titleContainer"
-        android:layout_above="@id/ll"
-        android:layout_height="wrap_content">
 
-        <RelativeLayout
+        <ScrollView
+            android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#fff">
-
-
-
-            <TextView
-                android:id="@+id/generalstatisticstitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10sp"
-                android:layout_marginTop="10sp"
-                android:fontFamily="@font/ralewayregular"
-                android:text="@string/general"
-                android:textColor="#5D815D"
-                android:textSize="25sp"
-                android:textStyle="bold" />
-
+            android:layout_height="wrap_content"
+            android:layout_above="@id/ll"
+            android:layout_below="@id/titleContainer">
 
             <RelativeLayout
-                android:id="@+id/realresults"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/generalstatisticstitle"
-                android:visibility="visible">
-
-                <TextView
-                    android:id="@+id/sprinklers"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="5sp"
-                    android:text="# of Sprinklers:"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/sNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="8sp"
-                    android:layout_marginRight="8sp"
-                    android:enabled="false"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/overflowSprinklers"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="6sp"
-                    android:text="Outside Sprinklers:"
-                    android:layout_below="@+id/sNum"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/outsideNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="10sp"
-                    android:layout_marginRight="8sp"
-                    android:enabled="false"
-                    android:text="200"
-                    android:layout_below="@id/sNum"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/overlapSprinklers"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="5sp"
-                    android:text="Inside Sprinklers:"
-                    android:layout_below="@+id/outsideNum"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/insideNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="9sp"
-                    android:layout_marginRight="8sp"
-                    android:enabled="false"
-                    android:text="200"
-                    android:layout_below="@id/outsideNum"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
+                android:layout_height="match_parent"
+                android:background="#fff">
 
 
                 <TextView
-                    android:id="@+id/totaloutput"
+                    android:id="@+id/generalstatisticstitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/insideNum"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="23sp"
-                    android:text="Total Water Output:"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/tA"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/insideNum"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="28sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-
-
-                <TextView
-                    android:id="@+id/nonoverlap"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/tA"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="4sp"
-                    android:text="Water Output of Non-overlapping\n Sprinklers:"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/noA"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/tA"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="28sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/overlap"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/nonoverlap"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="4sp"
-                    android:layout_marginRight="10sp"
-                    android:text="Water Output of Overlapping\n Sprinklers:"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/oA"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/nonoverlap"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="26sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-
-
-
-
-                <TextView
-                    android:id="@+id/landcovered"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/oA"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="23sp"
-                    android:text="Total Land Area:"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/totalLand"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/oA"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="26sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-
-                <TextView
-                    android:id="@+id/totalland"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/totalLand"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="5sp"
-                    android:text="Land Area Covered: "
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/landCovered"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/totalLand"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="7sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/percentcovered"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/landCovered"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="5sp"
-                    android:text="Percentage of Land Covered: "
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/pcA"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/landCovered"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="7sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-
-                <TextView
-                    android:id="@+id/wastageStatistics"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/pcA"
                     android:layout_marginLeft="10sp"
-                    android:layout_marginTop="25sp"
+                    android:layout_marginTop="10sp"
                     android:fontFamily="@font/ralewayregular"
-                    android:text="@string/wastage"
+                    android:text="@string/general"
                     android:textColor="#5D815D"
                     android:textSize="25sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:layout_width="wrap_content"
+
+                <RelativeLayout
+                    android:id="@+id/realresults"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/wastageStatistics"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="4dp"
-                    android:text="# of Overlapping Sprinklers: "
-                    android:textSize="17sp" />
+                    android:layout_below="@+id/generalstatisticstitle"
+                    android:visibility="visible">
 
-                <TextView
-                    android:id="@+id/overlapNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/wastageStatistics"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="7sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/sprinklers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="# of Sprinklers:"
+                        android:textSize="17sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/overlapNum"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="3sp"
-                    android:text="# of Overflowing Sprinklers: "
-                    android:textSize="17sp" />
+                    <TextView
+                        android:id="@+id/sNum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="8sp"
+                        android:layout_marginRight="9sp"
+                        android:enabled="false"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/overflowNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/overlapNum"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="7sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/overflowSprinklers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/sNum"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="6sp"
+                        android:text="Sprinklers - Outside Plot:"
+                        android:textSize="17sp" />
 
+                    <TextView
+                        android:id="@+id/outsideNum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/sNum"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="10sp"
+                        android:layout_marginRight="9sp"
+                        android:enabled="false"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
+                    <TextView
+                        android:id="@+id/overlapSprinklers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/outsideNum"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="Sprinklers - Inside Plot:"
+                        android:textSize="17sp" />
 
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/overflowNum"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="20sp"
-                    android:text="Total Water Output: "
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/two"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/overflowNum"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="23sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/two"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="5sp"
-                    android:text="*Water Wasted: "
-                    android:textColor="#5D815D"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/ww"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/two"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="9sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/insideNum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/outsideNum"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="9sp"
+                        android:layout_marginRight="9sp"
+                        android:enabled="false"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/ww"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="4sp"
-                    android:text="*Percentage of Water Wasted: "
-                    android:textColor="#5D815D"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/totaloutput"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/insideNum"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="18sp"
+                        android:text="Total Water Output:"
+                        android:textSize="17sp" />
 
-                <TextView
-                    android:id="@+id/pww"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/ww"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="7sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tA"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/insideNum"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="21sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/pww"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="20sp"
-                    android:text="*Water Wasted Per Month: "
-                    android:textColor="#5D815D"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/landcovered"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tA"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="4sp"
+                        android:text="Total Land Area:"
+                        android:textSize="17sp" />
 
-                <TextView
-                    android:id="@+id/permonth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/pww"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="23sp"
-                    android:layout_marginRight="8sp"
-                    android:text="200"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/permonth"
-                    android:layout_marginLeft="18sp"
-                    android:layout_marginTop="5sp"
-                    android:text="*Water Wasted Per Year: "
-                    android:textColor="#5D815D"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/peryear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/permonth"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="9sp"
-                    android:layout_marginRight="8sp"
-                    android:text="iuyi"
-                    android:textColor="#000"
-                    android:textStyle="bold" />
-                <!--marginTop for above should be 9, not 109-->
+                    <TextView
+                        android:id="@+id/totalLand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tA"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="8sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
 
+                    <TextView
+                        android:id="@+id/totalland"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/totalLand"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="Land Area Covered: "
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/landCovered"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/totalLand"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="7sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/percentcovered"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/landCovered"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="% of Land Covered: "
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/pcA"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/landCovered"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="7sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
 
+                    <TextView
+                        android:id="@+id/wastageStatistics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/pcA"
+                        android:layout_marginLeft="10sp"
+                        android:layout_marginTop="219sp"
+                        android:fontFamily="@font/ralewayregular"
+                        android:text="@string/wastage"
+                        android:textColor="#5D815D"
+                        android:textSize="25sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/wastageStatistics"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="4dp"
+                        android:text="# of Overlapping Sprinklers: "
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/overlapNum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/wastageStatistics"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="7sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/overlapNum"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="3sp"
+                        android:text="# of Overflowing Sprinklers: "
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/overflowNum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/overlapNum"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="7sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/overflowNum"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="17sp"
+                        android:text="Total Water Output: "
+                        android:textColor="#5D815D"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/two"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/overflowNum"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="20sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/excessHelp"
+                        android:layout_width="18sp"
+                        android:layout_height="18sp"
+                        android:layout_below="@id/two"
+                        android:layout_marginLeft="3sp"
+                        android:layout_marginTop="9sp"
+                        android:src="@drawable/helpicon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/two"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="Excessive Water Output: "
+                        android:textColor="#5D815D"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/excess"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/two"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="9sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+
+                    <ImageView
+                        android:id="@+id/overflowHelp"
+                        android:layout_width="18sp"
+                        android:layout_height="18sp"
+                        android:layout_below="@id/excess"
+                        android:layout_marginLeft="3sp"
+                        android:layout_marginTop="9sp"
+                        android:src="@drawable/helpicon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/excess"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="Overflow Water Output: "
+                        android:textColor="#5D815D"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/overflow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/excess"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="9sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/overflow"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="*Total Water Wasted: "
+                        android:textColor="#5D815D"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/ww"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/overflow"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="9sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ww"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="4sp"
+                        android:text="* % of Water Wasted: "
+                        android:textColor="#5D815D"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/pww"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ww"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="7sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/pww"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="20sp"
+                        android:text="*Water Wasted Per Month: "
+                        android:textColor="#5D815D"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/permonth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/pww"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="23sp"
+                        android:layout_marginRight="9sp"
+                        android:text="200"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/permonth"
+                        android:layout_marginLeft="27sp"
+                        android:layout_marginTop="5sp"
+                        android:text="*Water Wasted Per Year: "
+                        android:textColor="#5D815D"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/peryear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/permonth"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="9sp"
+                        android:layout_marginRight="9sp"
+                        android:text="iuyi"
+                        android:textColor="#000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <!--marginTop for above should be 9, not 109-->
+
+
+                </RelativeLayout>
             </RelativeLayout>
-        </RelativeLayout>
-    </ScrollView>
+        </ScrollView>
+
         <LinearLayout
+            android:id="@+id/ll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="4sp"
-            android:id="@+id/ll"
             android:orientation="horizontal">
 
             <Button

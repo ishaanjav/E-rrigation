@@ -2023,6 +2023,8 @@ public class MainActivity extends AppCompatActivity {
                     makeToast("Please fill in the information.");
                 else {
                     //DONE IT is good to contineu ahead.
+                    dialog.cancel();
+                    dialog.dismiss();
                     final Dialog dialog = new Dialog(MainActivity.this);
                     dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                     dialog.setCancelable(false);
@@ -2122,7 +2124,37 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showResults(Dialog dialog) {
+    private void showResults(final Dialog dialog) {
+        final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
+        ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
+        View.OnTouchListener toucher = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(view.getId() == excessHelp.getId())
+                    makeToast("Amount of water wasted by overwatering" +
+                            " the same region repeatedly");
+                else
+                    makeToast("Amount of water wasted by overflowing out of the specified land plot");
+                return false;
+            }
+        };
+        excessHelp.setOnTouchListener(toucher);
+        overflowHelp.setOnTouchListener(toucher);
+
+        final Button back = dialog.findViewById(R.id.goBack);
+        Button done = dialog.findViewById(R.id.done);
+        View.OnClickListener clicker = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                dialog.cancel();
+                if(view.getId() == back.getId()) displayResults();
+            }
+        };
+        back.setOnClickListener(clicker);
+        done.setOnClickListener(clicker);
+
+
 
     }
 
