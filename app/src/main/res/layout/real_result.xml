@@ -73,7 +73,7 @@
                         android:textSize="17sp" />
 
                     <TextView
-                        android:id="@+id/sNum"
+                        android:id="@+id/sprinks"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
@@ -85,11 +85,19 @@
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
+                    <ImageView
+                        android:id="@+id/outsideHelp"
+                        android:layout_width="18sp"
+                        android:layout_height="18sp"
+                        android:layout_below="@id/sprinks"
+                        android:layout_marginLeft="3sp"
+                        android:layout_marginTop="9sp"
+                        android:src="@drawable/helpicon" />
                     <TextView
                         android:id="@+id/overflowSprinklers"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/sNum"
+                        android:layout_below="@+id/sprinks"
                         android:layout_marginLeft="27sp"
                         android:layout_marginTop="6sp"
                         android:text="Sprinklers - Outside Plot:"
@@ -99,7 +107,7 @@
                         android:id="@+id/outsideNum"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/sNum"
+                        android:layout_below="@id/sprinks"
                         android:layout_alignParentRight="true"
                         android:layout_marginTop="10sp"
                         android:layout_marginRight="9sp"
@@ -109,6 +117,14 @@
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
+                    <ImageView
+                        android:id="@+id/insideHelp"
+                        android:layout_width="18sp"
+                        android:layout_height="18sp"
+                        android:layout_below="@id/outsideNum"
+                        android:layout_marginLeft="3sp"
+                        android:layout_marginTop="9sp"
+                        android:src="@drawable/helpicon" />
                     <TextView
                         android:id="@+id/overlapSprinklers"
                         android:layout_width="wrap_content"
@@ -234,7 +250,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/pcA"
                         android:layout_marginLeft="10sp"
-                        android:layout_marginTop="219sp"
+                        android:layout_marginTop="19sp"
                         android:fontFamily="@font/ralewayregular"
                         android:text="@string/wastage"
                         android:textColor="#5D815D"

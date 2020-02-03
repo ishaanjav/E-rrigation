@@ -44,8 +44,10 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -1699,6 +1701,7 @@ public class MainActivity extends AppCompatActivity {
         totalOverflowArea = 0;
         wasted = 0;
         total = 0;
+        overlaps = new HashSet<>();
         completelyOutside = new HashMap<>();
         overflowInfo = new ArrayList<>();
 
@@ -1949,7 +1952,9 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
         hideLoading();
+        //handleResults(3, 3, 3, 3, 3);
         displayResults();
+        //showResults(2,3,"None");
     }
 
     private void displayResults() {
@@ -2025,20 +2030,10 @@ public class MainActivity extends AppCompatActivity {
                     //DONE IT is good to contineu ahead.
                     dialog.cancel();
                     dialog.dismiss();
-                    final Dialog dialog = new Dialog(MainActivity.this);
-                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                    dialog.setCancelable(false);
-                    dialog.setContentView(R.layout.real_result);
-                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                    dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
-                            (int)(dv.screenH*0.9d));
 
-
-                    showResults(dialog);
-                    makeToast("Information calculated. Scroll for more.");
-
-
-                    dialog.show();
+                    String choice = soilType.getSelectedItem().toString();
+                    showResults(waterUsed, duration, choice);
+                    //handleResults(3, 3, 3, 3, 3);
                     /*toHide.setVisibility(View.INVISIBLE);
                     results.setVisibility(View.VISIBLE);
 
@@ -2124,22 +2119,46 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showResults(final Dialog dialog) {
+    int overlappingCount = 0;
+    Set<Integer> overlaps;
+
+    //FUTURE FILES see how app looks with plotting sprinkler center as a black dot.
+    //FUTURE FILES Give actual feedback as to how they can improve the design plan.
+    //  Have if statements. Maybe say you have 3 sprinklers outside land plot, reposition them inside to
+    //  save x amount of water. You have x overlapping sprinklers
+    //  and only 60% coverage, reposition them to cover more land.
+    private void showResults(double waterUsed, double duration, String choice) {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.real_result);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
+                (int) (dv.screenH * 0.9d));
+        dialog.show();
         final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
         ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
+        final ImageView insideHelp = dialog.findViewById(R.id.insideHelp);
+        final ImageView outsideHelp = dialog.findViewById(R.id.outsideHelp);
         View.OnTouchListener toucher = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(view.getId() == excessHelp.getId())
+                if (view.getId() == excessHelp.getId())
                     makeToast("Amount of water wasted by overwatering" +
-                            " the same region repeatedly");
+                            " the same region repeatedly.");
+                if (view.getId() == insideHelp.getId())
+                    makeToast("# of sprinklers inside the land plot.");
+                if (view.getId() == outsideHelp.getId())
+                    makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
                 else
-                    makeToast("Amount of water wasted by overflowing out of the specified land plot");
+                    makeToast("Amount of water wasted by overflowing out of the specified land plot.");
                 return false;
             }
         };
         excessHelp.setOnTouchListener(toucher);
         overflowHelp.setOnTouchListener(toucher);
+        insideHelp.setOnTouchListener(toucher);
+        outsideHelp.setOnTouchListener(toucher);
 
         final Button back = dialog.findViewById(R.id.goBack);
         Button done = dialog.findViewById(R.id.done);
@@ -2148,14 +2167,128 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 dialog.dismiss();
                 dialog.cancel();
-                if(view.getId() == back.getId()) displayResults();
+                if (view.getId() == back.getId()) displayResults();
             }
         };
         back.setOnClickListener(clicker);
         done.setOnClickListener(clicker);
 
+        double soilFactor = 1;
+        if (choice.equals("Sandy")) {
+            soilFactor *= 0.95f;
+        } else if (choice.equals("Loam")) {
+            soilFactor *= 0.9f;
+        } else if (choice.equals("Clay")) {
+            soilFactor *= 1.15f;
+        }
+
+        //total += totalInsideArea;
+        //total += totalOverflowArea;
+        /*wasted += overFlowWastage;
+        wasted += overlapWastage;
+        //INFO Subtracts overlap of 3 circles
+        wasted -= overCounted3;*/
+        wasted *= soilFactor;
+        if (wasted < 0 || wasted > total)
+            wasted = total * .95;
+        Log.wtf("*- End Results:", "- " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
+        Log.wtf("*- Individual Circles", "Size: " + singleR.size());
+        Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
+        Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
+        Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
+        Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
+
+        //TODO Land Coverage is not always working accurately
+
+        TextView numSprink = (TextView) dialog.findViewById(R.id.sprinks);
+        numSprink.setText(Integer.toString(dv.sprinkx.size()));
+        TextView outsideSprink = dialog.findViewById(R.id.outsideNum);
+        TextView insideSprink = dialog.findViewById(R.id.insideNum);
+        outsideSprink.setText(Integer.toString(outsideIntersecting.size() + completelyOutside.size()));
+        insideSprink.setText(Integer.toString(insideCircles.size()));
+        TextView overlappingSprink = dialog.findViewById(R.id.overlapNum);
+        TextView overflowSprink = dialog.findViewById(R.id.overflowNum);
+        overflowSprink.setText(Integer.toString(outsideIntersecting.size() + completelyOutside.size()
+                + insideIntersecting.size()));
+        //overlappingSprink.setText(Integer.toString(Math.max(overlappingCount, dv.sprinkx.size())));
+        /*overlappingSprink.setText(Integer.toString(dv.sprinkx.size() - singleX.size()
+        -completelyOutside.size()));*/
+        overlappingSprink.setText(Integer.toString(overlaps.size()));
+        /*final TextView nonOverlapT = dialog.findViewById(R.id.noA);
+        final TextView overlapA = dialog.findViewById(R.id.oA);*/
+        final TextView totalA = dialog.findViewById(R.id.tA);
+        final TextView landCovered = dialog.findViewById(R.id.landCovered);
+        final TextView totalLandA = dialog.findViewById(R.id.totalLand);
+        final TextView percentCoveredA = dialog.findViewById(R.id.pcA);
+        final TextView wastedT = dialog.findViewById(R.id.ww);
+        final TextView totalWaterOutput = dialog.findViewById(R.id.two);
+        final TextView percentWasted = dialog.findViewById(R.id.pww);
+        final TextView perMonth = dialog.findViewById(R.id.permonth);
+        final TextView perYear = dialog.findViewById(R.id.peryear);
+        TextView overflowWaterOutput = dialog.findViewById(R.id.overflow);
+        TextView excessiveWaterOutput = dialog.findViewById(R.id.excess);
+
+        double landArea = dv.polygonArea() * dv.ratio * dv.ratio;
+        int num = dv.sprinkx.size();
+        double totalWater = num * duration * waterUsed;
+        totalLandA.setText(format(landArea) + " sq. ft");
+        totalWaterOutput.setText(format(totalWater) + " gal/wk");
+        totalA.setText(Math.round(totalWater * 10) / 10 + " gal/wk");
+        double overflowWater = totalWater * overFlowWastage / total;
+        overflowWaterOutput.setText(format(overflowWater) + " gal/wk");
+        double excessive = totalWater * (overlapWastage - overCounted3) / total;
+        excessiveWaterOutput.setText(format(excessive) + " gal/wk");
+
+        double waterWasted = totalWater * wasted / total;
+        wastedT.setText(format(waterWasted) + " gal/wk");
+
+        double percentageWasted = wasted / total;
+        percentWasted.setText(format(percentageWasted * 100) + "%");
+
+        perMonth.setText((format2(waterWasted * 4 )) + " gal");
+        perYear.setText((format2(waterWasted * 52 )) + " gal");
+
+        double notWastedWater = 1-percentageWasted;
+        double landCoveredArea = notWastedWater * total / dv.polygonArea() * landArea;
+        double percentLandCovered = landCoveredArea / landArea;
+        Log.wtf("*- Land Coverage - " , dv.polygonArea()+ " " + notWastedWater + " " + landCoveredArea
+        + " " + percentLandCovered);
+        landCovered.setText(format(landCoveredArea) + " sq. ft");
+        percentCoveredA.setText(format(percentLandCovered*100) + "%");
 
 
+
+
+        /* numSprink.setText(dv.sprinkx.size() + "");
+                    Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
+                    numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
+                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
+                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
+                    percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
+                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    wasted.setText(String.format("%1$,.2f",
+                            duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
+
+
+                    nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
+                    //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
+                    overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
+                    //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
+*/
+
+    }
+
+    private String format2(double v) {
+        return String.format("%1$,.0f", (int) Math.round(v * 10) / 10d);
+    }
+
+    private String format(double overflowWater) {
+        return String.format("%1$,.1f", Math.round(overflowWater * 10) / 10d);
     }
 
 
@@ -2180,7 +2313,7 @@ public class MainActivity extends AppCompatActivity {
                 double angle2 = dv.angleList.get(circle2);
 
                 double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-                //README The circles overlap
+                //README The 2 circles overlap
                 if (distance <= r1 + r2) {
                     for (int k = j + 1; k < insideCircles.size(); k++) {
                         int circle3 = insideCircles.get(k);
@@ -2188,9 +2321,12 @@ public class MainActivity extends AppCompatActivity {
                         double y3 = dv.sprinky.get(circle3);
                         double r3 = dv.sprinkr.get(circle3);
                         double angle3 = dv.angleList.get(circle3);
+                        overlaps.add(circle1);
+                        overlaps.add(circle2);
                         double dist1 = Math.sqrt(Math.pow(x1 - x3, 2) + Math.pow(y1 - y3, 2));
                         double dist2 = Math.sqrt(Math.pow(x2 - x3, 2) + Math.pow(y2 - y3, 2));
                         if ((dist1 <= r1 + r3) && (dist2 <= r2 + r3)) {
+                            overlaps.add(circle3);
                             Log.wtf("*- 3 intersects: ", circle1 + " " + circle2 + " " + circle3);
                             //README 3rd circle overlaps with other 2.
                             //TODO Have to determine the intersection points of c1-c2, c1-c3, c2-c3 that are inside the other circle.
@@ -2313,7 +2449,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        overCounted3 += area;
+        overCounted3 = area;
         Log.wtf("*- 3 Circle Overlap Results", overCounted3 + "");
     }
 
@@ -2396,6 +2532,9 @@ public class MainActivity extends AppCompatActivity {
 
                     } else if (!out1 && !out2) {
                         //README Both intersection points are inside the land meaning that it is simply overlap wastage
+                        overlaps.add(circle2);
+                        overlaps.add(circle1);
+                        overlappingCount++;
                         double intersectionArea = 0;
                         Double r = r1;
                         Double R = r2;
@@ -2425,7 +2564,10 @@ public class MainActivity extends AppCompatActivity {
 
                         overlap2 += intersectionArea;
                     } else {
-                        //README Intersection area is inside and outside
+                        overlaps.add(circle2);
+                        overlaps.add(circle1);
+                        overlappingCount++;
+//README Intersection area is inside and outside
                         //INFO You need the circle-circle intersection that is inside.
                         //README Below is for the circle-circle intersection
                         double circleX = 0, circleY = 0;
@@ -2596,6 +2738,9 @@ public class MainActivity extends AppCompatActivity {
                     if (out1 && out2) {
 
                     } else if (!out1 && !out2) {
+                        overlaps.add(circle2);
+                        overlaps.add(circle1);
+                        overlappingCount++;
                         //README Both intersection points are inside the land meaning that it is simply overlap wastage
                         double intersectionArea = 0;
                         Double r = r1;
@@ -2626,7 +2771,10 @@ public class MainActivity extends AppCompatActivity {
 
                         overlap2 += intersectionArea;
                     } else {
-                        //README Intersection area is inside and outside
+                        overlaps.add(circle2);
+                        overlaps.add(circle1);
+                        overlappingCount++;
+//README Intersection area is inside and outside
                         //INFO You need the circle-circle intersection that is inside.
                         //README Below is for the circle-circle intersection
                         double circleX = 0, circleY = 0;
@@ -2797,6 +2945,9 @@ public class MainActivity extends AppCompatActivity {
                     if (out1 && out2) {
 
                     } else if (!out1 && !out2) {
+                        overlaps.add(circle2);
+                        overlaps.add(circle1);
+                        overlappingCount++;
                         //README Both intersection points are inside the land meaning that it is simply overlap wastage
                         double intersectionArea = 0;
                         Double r = r1;
@@ -2827,7 +2978,10 @@ public class MainActivity extends AppCompatActivity {
 
                         overlap2 += intersectionArea;
                     } else {
-                        //README Intersection area is inside and outside
+                        overlaps.add(circle2);
+                        overlaps.add(circle1);
+                        overlappingCount++;
+//README Intersection area is inside and outside
                         //INFO You need the circle-circle intersection that is inside.
                         //README Below is for the circle-circle intersection
                         double circleX = 0, circleY = 0;
@@ -3032,6 +3186,8 @@ public class MainActivity extends AppCompatActivity {
                 double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
                 //README The circles overlap
                 if (distance <= r1 + r2) {
+                    overlaps.add(circle2);
+                    overlaps.add(circle1);
                     //TODO Do calculations for overlap of completely inside circle and outside-intersecting circle
                     if (distance + Math.min(r1, r2) <= Math.max(r1, r2) * 0.98) {
                         double intersectionArea = Math.PI * Math.pow(Math.min(r1, r2), 2) * (360 - (360 - dv.angleList.get((Math.min(r1, r2) == r1 ? circle1 : circle2)) / 2)) / 360;
@@ -3070,7 +3226,7 @@ public class MainActivity extends AppCompatActivity {
                         if (!(intersectionArea > 0)) {
                             intersectionArea = Math.PI * Math.pow(r, 2) * (360 - (360 - dv.angleList.get(smallC) / 2)) / 360;
                         }
-
+                        overlappingCount++;
                         overlap2 += intersectionArea;
                         //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
                         Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Intersection Area: " + intersectionArea);
@@ -3112,6 +3268,8 @@ public class MainActivity extends AppCompatActivity {
                     //README The circles overlap
                     if (distance <= r1 + r2) {
                         //README Circle in circle
+                        overlaps.add(circle2);
+                        overlaps.add(circle1);
                         if (distance + Math.min(r1, r2) <= Math.max(r1, r2) * 1.08) {
                             double intersectionArea = Math.PI * Math.pow(Math.min(r1, r2), 2) * dv.angleList.get((Math.min(r1, r2) == r1 ? circle1 : circle2)) / 360;
                             double totalArea = 0;
@@ -3158,6 +3316,7 @@ public class MainActivity extends AppCompatActivity {
                                 totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
 
                             overlap2 += intersectionArea;
+                            overlappingCount++;
                             //intersectionArea = Math.PI * Math.pow(r, 2) * 0.015f;
                             Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Intersection Area: " + intersectionArea + "  Total Area: " + totalArea);
                         }
@@ -3803,27 +3962,29 @@ public class MainActivity extends AppCompatActivity {
         final EditText durationE = dialog.findViewById(R.id.duration);
         Button next = (Button) dialog.findViewById(R.id.continueBtn);
         final Spinner soilType = dialog.findViewById(R.id.soilType);
+        TextView minutes = dialog.findViewById(R.id.minutes);
+        minutes.setText("23");
         //results.setVisibility(View.VISIBLE);
 
-        final TextView numSprink = results.findViewById(R.id.sNum);
-        final TextView nonOverlapT = dialog.findViewById(R.id.noA);
+        //final TextView numSprink = results.findViewById(R.id.sNum);
+        /*final TextView nonOverlapT = dialog.findViewById(R.id.noA);
         final TextView overlapA = dialog.findViewById(R.id.oA);
         final TextView totalA = dialog.findViewById(R.id.tA);
         final TextView landCovered = dialog.findViewById(R.id.lcA);
         final TextView totalLandA = dialog.findViewById(R.id.tlA);
         final TextView percentCoveredA = dialog.findViewById(R.id.pcA);
-        final TextView numIntersect = dialog.findViewById(R.id.plc);
+        //final TextView numIntersect = dialog.findViewById(R.id.plc);
         final TextView wasted = dialog.findViewById(R.id.ww);
         final TextView totalWaterOutput = dialog.findViewById(R.id.two);
         final TextView percentWasted = dialog.findViewById(R.id.pww);
-        final TextView perMonth = dialog.findViewById(R.id.permonth);
-        final TextView perYear = dialog.findViewById(R.id.peryear);
+        final TextView perMonth = dialog.findViewById(R.id.permonth);*/
+        //final TextView perYear = dialog.findViewById(R.id.peryear);
 
         //TODO rephrase question for how much water sprinkler uses to
         // How much water system uses (System always outputs same amount of water)
         // Then, change calculations (it will be easier now)
 
-        backBtn.setOnClickListener(new View.OnClickListener() {
+        /*backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog.cancel();
@@ -3857,87 +4018,88 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!(fgood && sgood))
                     makeToast("Please fill in the information.");
-                else {
-                    //DONE IT is good to contineu ahead.
-                    toHide.setVisibility(View.INVISIBLE);
-                    results.setVisibility(View.VISIBLE);
+                else {*/
+        //DONE IT is good to contineu ahead.
+        toHide.setVisibility(View.INVISIBLE);
+//        results.setVisibility(View.VISIBLE);
 
-                    Button goBack = dialog.findViewById(R.id.goBack);
-                    Button done = dialog.findViewById(R.id.done);
-                    done.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.dismiss();
-                            dialog.cancel();
-                        }
-                    });
-
-                    goBack.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            toHide.setVisibility(View.VISIBLE);
-                            results.setVisibility(View.INVISIBLE);
-                        }
-                    });
-
-                    //DONE Just do the calculations to display the actual stuff.
-
-                    //INFO README
-                    // I think a better method of calculating coverage is simply totalWaterOutput *(1-percentWastage)
-                    double percentWastage = ((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion));
-                    double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
-                    if (coverage > 1) {
-                        coverage = 0;
-                        for (int r : dv.sprinkr) {
-                            coverage += Math.PI * Math.pow(r, 2);
-                        }
-                        coverage -= coverage * percentWastage;
-                        coverage = coverage / v;
-                        if (coverage > 1)
-                            coverage = 0.7678;
-                    }
-                    //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
-
-                    //README Accounting for soil type
-                    String choice = soilType.getSelectedItem().toString();
-                    if (choice.equals("Sandy")) {
-                        percentWastage *= 0.95f;
-                    } else if (choice.equals("Loam")) {
-                        percentWastage *= 0.9f;
-                    } else if (choice.equals("Clay")) {
-                        percentWastage *= 1.15f;
-                    }
-
-                    numSprink.setText(dv.sprinkx.size() + "");
-                    Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
-                    numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
-                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
-                    Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
-                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
-                    percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
-                    percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
-                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-                    perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-                    totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-                    totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-                    wasted.setText(String.format("%1$,.2f",
-                            duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
-
-
-                    nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
-                    //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
-                    overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
-                    //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
-
-                    //TODO Shift left and shift right
-
-                    //wasted.setText(String.format("%1$,.1f", duration * pixToGallon(area, waterUsed)) + " gal/wk");
-                    //totalWaterOutput.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + " gal/wk");
-
-                }
-
+        Button goBack = dialog.findViewById(R.id.goBack);
+        Button done = dialog.findViewById(R.id.done);
+        done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                dialog.cancel();
             }
         });
+
+        goBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toHide.setVisibility(View.VISIBLE);
+                results.setVisibility(View.INVISIBLE);
+            }
+        });
+        double duration = 10;
+        double waterUsed = 10;
+        //DONE Just do the calculations to display the actual stuff.
+
+        //INFO README
+        // I think a better method of calculating coverage is simply totalWaterOutput *(1-percentWastage)
+        double percentWastage = ((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion));
+        double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
+        if (coverage > 1) {
+            coverage = 0;
+            for (int r : dv.sprinkr) {
+                coverage += Math.PI * Math.pow(r, 2);
+            }
+            coverage -= coverage * percentWastage;
+            coverage = coverage / v;
+            if (coverage > 1)
+                coverage = 0.7678;
+        }
+        //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
+
+        //README Accounting for soil type
+        String choice = soilType.getSelectedItem().toString();
+        if (choice.equals("Sandy")) {
+            percentWastage *= 0.95f;
+        } else if (choice.equals("Loam")) {
+            percentWastage *= 0.9f;
+        } else if (choice.equals("Clay")) {
+            percentWastage *= 1.15f;
+        }
+
+        //numSprink.setText(dv.sprinkx.size() + "");
+        Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
+        //numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
+//        totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
+//        Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
+//        landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
+//        percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
+//        percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
+//        perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+        // perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+//        totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+//        totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+        /*wasted.setText(String.format("%1$,.2f",
+                duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
+*/
+
+       /* nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
+        //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
+        overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
+        //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
+*/
+        //TODO Shift left and shift right
+
+        //wasted.setText(String.format("%1$,.1f", duration * pixToGallon(area, waterUsed)) + " gal/wk");
+        //totalWaterOutput.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + " gal/wk");
+//
+//                }
+//
+//            }
+//        });
 
         dialog.show();
     }
