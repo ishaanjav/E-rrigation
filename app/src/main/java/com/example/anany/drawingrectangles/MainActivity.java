@@ -2199,6 +2199,12 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
 
         //TODO Land Coverage is not always working accurately
+        //TODO Extra button -
+        //  1. Try to do "Make into Rectangle" button again. This time assign TextViews properly
+        //  2.If it doesn't work remove the button completely and shift down side length asker
+        //TODO IMPORTANT Wastage calculation is wrong for: big circle intersect big circle with
+        //  small circle intersecting small circle. Wastage region jumps from 87 (big only)
+        // to 140 (big and small overlaps). Check it out (may be linked to land coverage)
 
         TextView numSprink = (TextView) dialog.findViewById(R.id.sprinks);
         numSprink.setText(Integer.toString(dv.sprinkx.size()));
