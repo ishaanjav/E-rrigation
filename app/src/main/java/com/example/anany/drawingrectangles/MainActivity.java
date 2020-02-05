@@ -2179,7 +2179,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (choice.equals("Loam")) {
             soilFactor *= 0.9f;
         } else if (choice.equals("Clay")) {
-            soilFactor *= 1.15f;
+            soilFactor *= 1.1f;
         }
 
         //total += totalInsideArea;
