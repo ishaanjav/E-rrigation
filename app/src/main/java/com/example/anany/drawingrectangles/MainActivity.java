@@ -2251,16 +2251,16 @@ public class MainActivity extends AppCompatActivity {
         double percentageWasted = wasted / total;
         percentWasted.setText(format(percentageWasted * 100) + "%");
 
-        perMonth.setText((format2(waterWasted * 4 )) + " gal");
-        perYear.setText((format2(waterWasted * 52 )) + " gal");
+        perMonth.setText((format2(waterWasted * 4)) + " gal");
+        perYear.setText((format2(waterWasted * 52)) + " gal");
 
-        double notWastedWater = 1-percentageWasted;
+        double notWastedWater = 1 - percentageWasted;
         double landCoveredArea = notWastedWater * total / dv.polygonArea() * landArea;
         double percentLandCovered = landCoveredArea / landArea;
-        Log.wtf("*- Land Coverage - " , dv.polygonArea()+ " " + notWastedWater + " " + landCoveredArea
-        + " " + percentLandCovered);
+        Log.wtf("*- Land Coverage - ", dv.polygonArea() + " " + notWastedWater + " " + landCoveredArea
+                + " " + percentLandCovered);
         landCovered.setText(format(landCoveredArea) + " sq. ft");
-        percentCoveredA.setText(format(percentLandCovered*100) + "%");
+        percentCoveredA.setText(format(percentLandCovered * 100) + "%");
 
 
 
@@ -3283,6 +3283,7 @@ public class MainActivity extends AppCompatActivity {
                                 totalArea += (Math.PI * Math.pow(r1, 2)) * ((double) (angle1) / 360);
                             if (completelyInside.contains(circle2))
                                 totalArea += (Math.PI * Math.pow(r2, 2)) * ((double) (angle2) / 360);
+                            overlap2 += intersectionArea;
                             Log.wtf("*- INFORMATION (" + circle1 + "," + circle2 + ")", "Circle In Circle: " + intersectionArea + "  Total Area: " + totalArea);
                         } else {//README Not circle in circle
                             double intersectionArea = 0;
