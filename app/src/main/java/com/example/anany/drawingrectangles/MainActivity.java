@@ -31,6 +31,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -1618,7 +1620,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.calculate:
                 //INFO The purpose of this is to display the loading Alert Dialog.
                 //Bitmap tr = takeScreenShot(dv);
-                showLoading();
+                //showLoading();
 
                 calculateSprinklerOverflow();
 /*
@@ -1693,6 +1695,7 @@ public class MainActivity extends AppCompatActivity {
     double wasted, total = 0;
 
     private void calculateSprinklerOverflow() {
+        //showLoading();
         overFlowWastage = 0;
         overlapWastage = 0;
         totalInsideArea = 0;
@@ -1951,18 +1954,21 @@ public class MainActivity extends AppCompatActivity {
         Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
         Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());
-        hideLoading();
         //handleResults(3, 3, 3, 3, 3);
         displayResults();
         //showResults(2,3,"None");
     }
 
+    boolean darken;
+    boolean isHeadtoHead;
     private void displayResults() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.result);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        darken = false;
+        isHeadtoHead = false;
 
         Button next = (Button) dialog.findViewById(R.id.done);
         Button backBtn = (Button) dialog.findViewById(R.id.goBack);
@@ -1971,6 +1977,37 @@ public class MainActivity extends AppCompatActivity {
         final EditText waterUsedE = dialog.findViewById(R.id.waterused);
         final EditText durationE = dialog.findViewById(R.id.duration);
         final Spinner soilType = dialog.findViewById(R.id.soilType);
+        final CheckBox cb = dialog.findViewById(R.id.head);
+        ImageView headHelp = dialog.findViewById(R.id.headhelp);
+
+        headHelp.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                makeToast("Head to head coverage is when sprinklers require overlap to evenly distribute water. Overlap of 2 sprinklers" +
+                        " will not be included in wastage.");
+                return false;
+            }
+        });
+
+        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) buttonView.setTextColor(0XFF000000);
+                if (!isChecked)  buttonView.setTextColor(0XFF757575);
+                isHeadtoHead = isChecked;
+            }
+        });
+       /* cb.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                darken ^= darken;
+                if(darken)
+                    cb.setTextColor(0XFF0000);
+                else
+                    cb.setTextColor(0XFF757575);
+                return false;
+            }
+        });*/
 /*
         //results.setVisibility(View.VISIBLE);
 
@@ -1991,6 +2028,7 @@ public class MainActivity extends AppCompatActivity {
         //TODO rephrase question for how much water sprinkler uses to
         // How much water system uses (System always outputs same amount of water)
         // Then, change calculations (it will be easier now)
+        //hideLoading();
 
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -2137,7 +2175,7 @@ public class MainActivity extends AppCompatActivity {
                 (int) (dv.screenH * 0.9d));
         dialog.show();
         final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
-        ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
+        final ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
         final ImageView insideHelp = dialog.findViewById(R.id.insideHelp);
         final ImageView outsideHelp = dialog.findViewById(R.id.outsideHelp);
         View.OnTouchListener toucher = new View.OnTouchListener() {
@@ -2150,7 +2188,7 @@ public class MainActivity extends AppCompatActivity {
                     makeToast("# of sprinklers inside the land plot.");
                 if (view.getId() == outsideHelp.getId())
                     makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
-                else
+                else if(view.getId() == overflowHelp.getId())
                     makeToast("Amount of water wasted by overflowing out of the specified land plot.");
                 return false;
             }
@@ -2188,6 +2226,11 @@ public class MainActivity extends AppCompatActivity {
         wasted += overlapWastage;
         //INFO Subtracts overlap of 3 circles
         wasted -= overCounted3;*/
+
+        if(isHeadtoHead){
+            wasted = overFlowWastage + overCounted3;
+        }
+
         wasted *= soilFactor;
         if (wasted < 0 || wasted > total)
             wasted = total * .95;
@@ -2241,9 +2284,9 @@ public class MainActivity extends AppCompatActivity {
         totalWaterOutput.setText(format(totalWater) + " gal/wk");
         totalA.setText(Math.round(totalWater * 10) / 10 + " gal/wk");
         double overflowWater = totalWater * overFlowWastage / total;
-        overflowWaterOutput.setText(format(overflowWater) + " gal/wk");
+        overflowWaterOutput.setText(format(overflowWater * soilFactor) + " gal/wk");
         double excessive = totalWater * (overlapWastage - overCounted3) / total;
-        excessiveWaterOutput.setText(format(excessive) + " gal/wk");
+        excessiveWaterOutput.setText(format(excessive * soilFactor) + " gal/wk");
 
         double waterWasted = totalWater * wasted / total;
         wastedT.setText(format(waterWasted) + " gal/wk");
@@ -3930,7 +3973,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        hideLoading();
+        //hideLoading();
         //  makeToast("Got everything");
 
 

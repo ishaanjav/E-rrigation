@@ -64,6 +64,15 @@
                 android:text="Before your results are displayed, please enter the following information."
                 android:textSize="18sp" />
 
+          <!--  <ImageView
+                android:layout_width="17sp"
+                android:layout_height="17sp"
+                android:layout_below="@id/messageT"
+                android:layout_marginTop="28sp"
+                android:layout_marginLeft="5sp"
+                android:src="@drawable/helpicon"
+                />-->
+
             <TextView
                 android:id="@+id/amtText"
                 android:layout_width="wrap_content"
@@ -104,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/waterused"
                 android:layout_marginLeft="27sp"
-                android:layout_marginTop="25sp"
+                android:layout_marginTop="23sp"
                 android:layout_marginRight="10sp"
                 android:text="# of minutes sprinklers in use per week:"
                 android:textSize="17sp" />
@@ -153,6 +162,29 @@
                 android:layout_marginTop="26sp"
                 android:layout_toRightOf="@+id/soilTypeText"
                 android:entries="@array/soil_types" />
+
+            <ImageView
+                android:layout_width="18sp"
+                android:layout_height="18sp"
+                android:id="@+id/headhelp"
+                android:layout_below="@+id/soilType"
+                android:layout_marginTop="0sp"
+                android:layout_marginLeft="4sp"
+                android:src="@drawable/helpicon"
+                />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/head"
+                android:layout_below="@id/soilType"
+                android:layout_marginTop="-7sp"
+                android:textColor="#757575"
+                android:buttonTint="#000"
+                android:layout_marginLeft="22sp"
+                android:textSize="17sp"
+                android:text=" Head to Head Coverage"
+                />
 
 <!--
             <Button
