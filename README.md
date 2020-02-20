@@ -18,7 +18,7 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 
 -----
 
-<img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="left">
+<img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="right">
 
 ## Demonstration and Features
 
@@ -33,7 +33,7 @@ It also has to determine which side of a sprinkler is overflowing.
 
 <p align="center">
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Special%20Sprinkler%20Cases%20App%20Calculates.PNG"
-width="85%"/>
+width="96%"/>
   </p>
 
 ###### Above is a diagram illustrating just a few of the *irregular* cases that the app has to account for. 
