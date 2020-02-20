@@ -13,12 +13,15 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 
 - [Demonstration / Features](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#demonstration-and-features)
 - [Code](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#code)
+
+<img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="right">
+
 - [Applications](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#applications)
 - [Water Waste Images](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#water-waste-images)
 
 -----
 
-<img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="right">
+
 
 ## Demonstration and Features
 
