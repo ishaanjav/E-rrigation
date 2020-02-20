@@ -24,10 +24,10 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 ## Code
 Below are links to access some of the important files containing code for the application.
 
--[**MainActivity.java -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/java/com/example/anany/drawingrectangles/CleanMainActivity.java) Code for plotting land, sprinklers, adjusting angle/radius, and more. ***Also contains calculations** and displaying of results*.
--[**activity_main.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/activity_main.xml)  Layout for app's main screen.
--[**additional_info.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/result.xml) Dialog that pops up to ask users for additional information.
--[**result.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/real_result.xml) Dialog box that displays statistics to users.
+- [**MainActivity.java -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/java/com/example/anany/drawingrectangles/CleanMainActivity.java) Code for plotting land, sprinklers, adjusting angle/radius, and more. ***Also contains calculations** and displaying of results*.
+- [**activity_main.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/activity_main.xml)  Layout for app's main screen.
+- [**additional_info.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/result.xml) Dialog that pops up to ask users for additional information.
+- [**result.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/real_result.xml) Dialog box that displays statistics to users.
 
 -----
 ## Applications
