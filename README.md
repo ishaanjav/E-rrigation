@@ -55,7 +55,7 @@ As shown by the [images below](https://github.com/ishaanjav/E-rrigation/blob/mas
 - **Agricultural Use:** Since farms use a large quantity of water, farmers can more efficiently plot sprinklers on a large-scale using E-rrigation.
 - **Civic Use:** Water wastage is common near neighborhoods, cities, and even schools. Using E-rrigation, the city can cut down on its budget by effectively placing sprinklers.
 - **General Calculations:** At its core, E-rrigation is an app that performs complex calculations about areas of multiple circles and lines. Because of the lack of software that calculates areas like this, E-rrigation can be used.
-  - Example: If a painter wanted to paint an art piece by placing circles such that some were partially overlapping on top of each other *(shown below)*, then they could use the app to accurately determine the area of the visible regions of the artpiece and how much paint to use.
+  - Example: If a painter wanted to paint an art piece by placing circles such that some were partially overlapping on top of each other *(shown below)*, then they could use the app to accurately determine the area of visible regions of the artpiece and how much paint to use.
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Application%20Example.png" align="right"/>
 
 -----
