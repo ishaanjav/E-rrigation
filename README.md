@@ -11,11 +11,10 @@ In fact, water wastage is even common in our neighborhoods and cities.
 It does this by **eliminating overflowing and repetitive watering** of the same regions.
 By providing these statistics, E-rrigation reduces water usage even *before* sprinklers are put into place: cutting down on expenditures in the long run.
 
-- [Demonstration / Features](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#demonstration-and-features)
-- [Code](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#code)
-
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="right">
 
+- [Demonstration / Features](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#demonstration-and-features)
+- [Code](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#code)
 - [Applications](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#applications)
 - [Water Waste Images](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#water-waste-images)
 
