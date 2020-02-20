@@ -1,7 +1,7 @@
 # E-rrigation
 
 
-  <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Neighborhood%20Water%20Wastage%201.JPG" width="500" alt="Water Wastage on a Farm" align="right">
+  <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Neighborhood%20Water%20Wastage%201.JPG" width="530" alt="Water Wastage on a Farm" align="right">
   
  Every day, ***more than 9 billion gallons*** of water are consumed for irrigation in the U.S. alone.
 Unfortunately, approximately **50% of water** used in agriculture is wasted due to inefficient irrigation systems.
