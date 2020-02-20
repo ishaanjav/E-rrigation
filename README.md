@@ -20,7 +20,8 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="left">
 
-## Demonstration and Features
+## [Demonstration and Features]()
+#### A [video]() on using the app can be found [here]()
 
 Using the app is easy: Users simply have to plot their land area and sprinklers by tapping on the screen. **However, the calculations that take place beneath the hood are a lot more complex.** 
 
