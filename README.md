@@ -37,7 +37,7 @@ It also has to determine which side of a sprinkler is overflowing.
 width="96%"/>
   </p>
 
-###### Above is a diagram illustrating just a few of the *irregular* cases that the app has to account for. 
+###### Above is a diagram illustrating  a few of the *irregular* cases that the app has to account for. 
 
 -----
 ## Code
