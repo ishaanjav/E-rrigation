@@ -44,7 +44,11 @@ Below are links to access some of the important files containing code for the ap
 
 -----
 ## Applications
+As shown by the [images below](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#water-waste-images), water wastage through inefficient sprinkler placement is a global issue:
 
+- **Agricultural Use:** Since farms use a large quantity of water, farmers can more efficiently plot sprinklers on a large-scale using E-rrigation.
+- **Civic Use:** Water wastage is common near neighborhoods, cities, and even schools. Using E-rrigation, the city can cut down on its budget by effectively placing sprinklers.
+- **General Calculations:** At its core, E-rrigation is an app that performs complex calculations about areas of multiple circles and lines. Because of the lack of software that calculates areas like this, E-rrigation can be used.
 
 
 -----
