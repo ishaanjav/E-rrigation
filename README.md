@@ -1,4 +1,5 @@
-# E-rrigation
+# [E-rrigation](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
+### [Click here for video demonstration](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
 
 
   <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Neighborhood%20Water%20Wastage%201.JPG" width="530" alt="Water Wastage on a Farm" align="right">
@@ -20,8 +21,8 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="left">
 
-## [Demonstration and Features]()
-#### A [video]() on using the app can be found [here.]()
+## [Demonstration and Features](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
+#### A [video](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be) on using the app can be found [here.](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
 
 Using the app is easy: Users simply have to plot their land area and sprinklers by tapping on the screen. **However, the calculations that take place beneath the hood are a lot more complex.** 
 
