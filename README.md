@@ -17,14 +17,19 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 - [Water Waste Images](https://github.com/ishaanjav/E-rrigation/blob/master/README.md#water-waste-images)
 
 -----
+
+<img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="left">
+
 ## Demonstration and Features
 
 Using the app is easy: Users simply have to plot their land area and sprinklers by tapping on the screen. **However, the calculations that take place beneath the hood are a lot more complex.** 
 
 
-- E-rrigation must be able to distinguish between whether the overlap of 2 sprinklers is outside the land or inside the land or **both**.
-- It must also detect a special case of 3 circles overlapping vs the normal case *(both of which require lots of mathematical calculations)* 
-- It also has to determine which side of a sprinkler is overflowing.
+ E-rrigation must be able to distinguish between whether the overlap of 2 sprinklers is outside the land or inside the land or **both**.
+ 
+ It must also detect a special case of 3 circles overlapping vs the normal case *(both of which require lots of mathematical calculations)* 
+ 
+It also has to determine which side of a sprinkler is overflowing.
 
 <p align="center">
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Special%20Sprinkler%20Cases%20App%20Calculates.PNG"
