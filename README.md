@@ -9,8 +9,8 @@ In fact, water wastage is even common in our neighborhoods and cities.
 
 **E-rrigation is a mobile application that serves as a sprinkler system designer.** It allows users to create sprinkler system designs by plotting land and sprinklers, then it calculates crucial statistics about a given design plan in order to optimize water usage *before* the sprinklers are put into place.
 
-It does this by eliminating overflowing and repetitive watering of the same  regions.
-By providing these useful statistics, E-rrigation reduces water usage even *before* sprinklers are put into place: cutting down on expenditures in the long run.
+It does this by **eliminating overflowing and repetitive watering** of the same regions.
+By providing these statistics, E-rrigation reduces water usage even *before* sprinklers are put into place: cutting down on expenditures in the long run.
 
 - [Demonstration / Features]
 - [Code]
