@@ -850,9 +850,11 @@ public class MainActivity extends AppCompatActivity {
     public void removeAllLengths() {
 
         for (int i = 0; i < dv.idCounter; i++)
-            rlDvHolder.findViewById(i).setVisibility(View.GONE);
+            if (rlDvHolder.findViewById(i) != null)
+                rlDvHolder.findViewById(i).setVisibility(View.GONE);
         for (int i = Integer.MAX_VALUE; i > dv.specialCounter; i--)
-            rlDvHolder.findViewById(i).setVisibility(View.GONE);
+            if (rlDvHolder.findViewById(i) != null)
+                rlDvHolder.findViewById(i).setVisibility(View.GONE);
         saveRadius = dv.ratio;
         dv.ratio = 1;
 
@@ -863,7 +865,7 @@ public class MainActivity extends AppCompatActivity {
         length.setEnabled(true);
     }
 
-    public void removeAllLengths(boolean t) {
+    public static void removeAllLengths(boolean t) {
         for (int i = 0; i < dv.idCounter; i++)
             if (rlDvHolder.findViewById(i) != null)
                 rlDvHolder.findViewById(i).setVisibility(View.GONE);
@@ -1119,6 +1121,7 @@ public class MainActivity extends AppCompatActivity {
                     //mmakeToast("Was Circle? : " + wasCircle);
                     if (!wasCircle) {
                         resetCoordinates();
+                        removeAllLengths(true);
                         handleCoordinates();
                         drawLine(canvas);
                     } else {
@@ -1147,9 +1150,10 @@ public class MainActivity extends AppCompatActivity {
                     //makeToast("Resetting sprinklers.");
                     break;
                 case DOTPLOT:
-                    showDots(canvas);
                     //Log.wtf("*DOTPLOT", "DOT Plot being called");
+                    removeAllLengths(true);
                     resetCoordinates();
+                    showDots(canvas);
                     handleCoordinates();
                     drawLine(canvas);
                     if (xlist.size() == 2) {
@@ -1167,7 +1171,8 @@ public class MainActivity extends AppCompatActivity {
                     currentMode = Mode.DOTPLOT;
                     resetTouchPoints();
                     resetSprinklers();
-                    //makeToast("Resetting");
+                    removeAllLengths(true);
+//makeToast("Resetting");
                     //TODO Try uncommenting and commenting out below line to see if it works after reset button
                     //linePaint.setColor(Color.WHITE);
                     Log.wtf("*RESET RESET RESET RESET RESET", "Reset was called. Reset screen.");
@@ -1276,8 +1281,8 @@ public class MainActivity extends AppCompatActivity {
                 String str1, str2;
                 TextView textView = new TextView(context);
                 if (c.isSprinkler()) {
-                    setToX = c.getX()-65;
-                    setToY = c.getY()-15;
+                    setToX = c.getX()-84;
+                    setToY = c.getY()-21;
                     str1 = String.format("%.1f", xDif * dv.ratio);
                     if (str1.charAt(str1.length() - 1) == '0' && str1.charAt(str1.length() - 2) == '.')
                         str1 = str1.substring(0, str1.length() - 2);
@@ -1321,8 +1326,8 @@ public class MainActivity extends AppCompatActivity {
                 textView.setTextColor(Color.parseColor("#458f61"));
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_SP,11);
                 rlDvHolder.addView(textView);*/
-                //TODO Reset not working
-                //DONE Do it for sprinklers
+                //DONE Reset not working
+                // Do it for sprinklers
                 //  Text Size not changed
                 //  Update on dismiss, not just back button press.
             }
@@ -1518,7 +1523,26 @@ public class MainActivity extends AppCompatActivity {
             maxSideLength = 0;
             if (xlist.size() > 2) {
                 posCount = xlist.size() - 2;
-                if (xlist.size() == 3) {
+
+                for(int i = 0; i < xlist.size(); i++){
+                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                            ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params.leftMargin = (xlist.get(i) + xlist.get((i+1)%xlist.size())) / 2;
+                    params.topMargin = (ylist.get(i) + ylist.get((i+1)%xlist.size())) / 2;
+
+                    TextView textView = new TextView(context);
+                    int val = (int) (Math.hypot(Math.abs(xlist.get(i) - xlist.get((i+1)%xlist.size())),
+                            Math.abs(ylist.get(i) - ylist.get((i+1)%xlist.size()))) * ratio);
+                    if (maxSideLength < val) maxSideLength = val;
+                    textView.setText("" + val);
+                    textView.setId(idCounter);
+                    textView.setTextColor(Color.parseColor("#000000"));
+                    textView.setLayoutParams(params);
+                    //makeToast("Making the text");
+                    rlDvHolder.addView(textView);
+                    idCounter++;
+                }
+                /*if (xlist.size() == 3) {
                     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
                             ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
                     params.leftMargin = (xlist.get(0) + xlist.get(1)) / 2;
@@ -1585,7 +1609,7 @@ public class MainActivity extends AppCompatActivity {
                 //Log.wtf("**a-", "Side Length - " + maxSideLength);
                 idCounter++;
                 posCount++;
-                specialCounter--;
+                specialCounter--;*/
 
                 for (int i = 0; i < xlist.size() - 1; i++) {
                     canvas.drawLine(xlist.get(i), ylist.get(i), xlist.get(i + 1), ylist.get(i + 1), linePaint);
