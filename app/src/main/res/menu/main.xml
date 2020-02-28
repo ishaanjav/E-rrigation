@@ -8,6 +8,11 @@
         android:title="Draw Circle"/>
 
     <item
+        android:id = "@+id/coordinates"
+        app:showAsAction = "never"
+        android:title="Show Coordinates"/>
+
+    <item
         android:id="@+id/sprinklers"
         app:showAsAction="always"
         android:title="Plot Sprinklers"
@@ -17,5 +22,6 @@
         app:showAsAction="never"
         android:title="Calculate Wastage"
         />
+
 
 </menu>

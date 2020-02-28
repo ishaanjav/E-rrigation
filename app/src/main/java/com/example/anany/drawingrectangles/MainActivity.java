@@ -22,6 +22,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,7 +44,9 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
 
         angleAndRotateClicks();
 
+        landCoordinates = false;
+        sprinklerCoordinates = false;
+        coordinateIds = new ArrayList<>();
+
         //handleResults(3, 3, 3, 3, 100);
     }
 
@@ -151,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                     if (r == null) {
                         timesR = 0;
                     } else if (previous.length() > 0 && dv.xlist.size() > 2 && !leaveAlone) {
-                        makeToast("To change the length, please reset the plot");
+                        shortToast("To change the length, please reset the plot");
                         /*if (done) {
                             length.setText(previous);
                             done = false;
@@ -182,13 +189,13 @@ public class MainActivity extends AppCompatActivity {
                         Log.wtf("* Inside: ", "inside here deeper");
                         String temp = length.getText().toString();
                         if (temp == null) {
-                            makeToast("Please enter the side length.");
+                            shortToast("Please enter the side length.");
                         } else if (temp.isEmpty() || temp.length() == 0) {
-                            makeToast("You must enter the side length in feet");
+                            shortToast("You must enter the side length in feet");
                         } else {
                             int numVal = Integer.parseInt(temp);
                             if (numVal < 2) {
-                                makeToast("Please make your side length larger");
+                                shortToast("Please make your side length larger");
                             } else {
                                 //TODO Have to also set the value of dv.ratio to get
                                 // the ratio between their length and pixel length;
@@ -212,19 +219,19 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         length.setText("");
                         //leaveAlone = true;
-                        makeToast("First, you must plot the first side.");
+                        shortToast("First, you must plot the first side.");
                     }
                 } else {
                     timesR = 0;
                     String temp = length.getText().toString();
                     if (temp == null) {
-                        makeToast("Please enter the radius in feet.");
+                        shortToast("Please enter the radius in feet.");
                     } else if (temp.isEmpty() || temp.length() == 0) {
-                        makeToast("You must enter the radius in feet");
+                        shortToast("You must enter the radius in feet");
                     } else {
                         int numVal = Integer.parseInt(temp);
                         if (numVal < 2) {
-                            makeToast("Please make your radius larger");
+                            shortToast("Please make your radius larger");
                         } else {
                             //TODO Have to also set the value of dv.ratio to get
                             // the ratio between their length and pixel length;
@@ -577,7 +584,7 @@ public class MainActivity extends AppCompatActivity {
                             "   Set to I - " + ((int) Math.round(setToI * 100000) / 100000));
                     //makeToast("Radius: " + (String.format("%1$,.1f", (sprinklerRadius * bigCircleFeet /bigCircleRadius))) + " feet.");
                     //makeToast("Radius: " + (String.format("%1$,.1f", (newProgress * dv.ratio))) + " feet.");
-                    makeToast("Radius: " + (String.format("%1$,.1f", (setToI * ((double) dv.ratio)))) + " feet.");
+                    shortToast("Radius: " + (String.format("%1$,.1f", (setToI * ((double) dv.ratio)))) + " feet.");
                 }
 
 
@@ -657,16 +664,49 @@ public class MainActivity extends AppCompatActivity {
     private void setButtonClick() {
         //README I commented out below because when user presses make into rectangle buttona and then plots sprimnklers
         // The radius is completely messed up.
-        /*polygon.setOnClickListener(new View.OnClickListener() {
+        polygon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //TODO Deal with making a polygon.
-                if (dv.xlist.size() > 2 && !rectangle) {
+                if (dv.xlist.size() == 4 /*&& !rectangle*/) {
                     rectangle = true;
                     //dv.currentMode = DrawingView.Mode.POLYGON;
                     //ArrayList<Integer> newX = new ArrayList<>();
                     //ArrayList<Integer> newY = new ArrayList<>();
-                    int tL = 1000, bR = 0;
+                    int x1 = dv.xlist.get(0);
+                    int x2 = dv.xlist.get(1);
+                    int x3 = dv.xlist.get(2);
+                    int x4 = dv.xlist.get(3);
+                    int y1 = dv.ylist.get(0);
+                    int y2 = dv.ylist.get(1);
+                    int y3 = dv.ylist.get(2);
+                    int y4 = dv.ylist.get(3);
+                    int tLx, tLy, tRx, tRy, bLy, bRy, bLx, bRx;
+                    ArrayList<Integer> notUsed = new ArrayList<>();
+                    notUsed.add(1);
+                    notUsed.add(2);
+                    notUsed.add(3);
+                    notUsed.add(4);
+//                    if(x1 < x2 && x1 < x3)
+                    double dist1 = Math.abs(x1 - x2);
+                    double dist2 = Math.abs(x1 - x4);
+                    if (dist1 < dist2) {
+                        tLx = x2 / 2 + x1 / 2;
+                        tLy = y2 / 2 + y3 / 2;
+                        bRx = x3 / 2 + x4 / 2;
+                        bRy = y1 / 2 + y4 / 2;
+                    } else {
+                        tLx = x1 / 2 + x4 / 2;
+                        tLy = y1 / 2 + y2 / 2;
+                        bRx = x3 / 2 + x2 / 2;
+                        bRy = y3 / 2 + y4 / 2;
+                    }
+
+                    Log.wtf("*-* Points", x1 + ", " + y1 + "  " + x2 + ", " + y2 + "  " + x3 + ", " + y3 + "  " + x4 + ", " + y4);
+
+
+
+                    /*int tL = 1000, bR = 0;
                     int tLy = 1000, bRy = 0;
                     for (int i = 0; i < dv.xlist.size(); i++) {
                         if (dv.xlist.get(i) < tL) tL = dv.xlist.get(i);
@@ -674,32 +714,37 @@ public class MainActivity extends AppCompatActivity {
 
                         if (dv.xlist.get(i) > bR) bR = dv.xlist.get(i);
                         if (dv.ylist.get(i) > bRy) bRy = dv.ylist.get(i);
-                    }
+                    }*/
                     dv.resetTouchPoints();
 
-                    dv.xlist.add(tL);
-                    dv.xlist.add(bR);
-                    dv.xlist.add(bR);
-                    dv.xlist.add(tL);
+                    dv.xlist.add(tLx);
+                    dv.xlist.add(bRx);
+                    dv.xlist.add(bRx);
+                    dv.xlist.add(tLx);
                     dv.ylist.add(tLy);
                     dv.ylist.add(tLy);
                     dv.ylist.add(bRy);
                     dv.ylist.add(bRy);
+                    Log.wtf("*-* New List X:", dv.xlist.toString());
+                    Log.wtf("*-* New List Y:", dv.ylist.toString());
 
-                    dv.xs.add(tL);
+                    /*dv.xs.add(tL);
                     dv.xs.add(bR);
                     dv.xs.add(bR);
                     dv.xs.add(tL);
                     dv.ys.add(tLy);
                     dv.ys.add(tLy);
                     dv.ys.add(bRy);
-                    dv.ys.add(bRy);
+                    dv.ys.add(bRy);*/
 
+                    dv.resetCoordinates();
                     removeAllLengths(false);
                     dv.invalidate();
+                } else {
+                    shortToast("The land must have 4 coordinates to be made into a rectangle.");
                 }
             }
-        });*/
+        });
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -708,18 +753,21 @@ public class MainActivity extends AppCompatActivity {
                     case splot:
                         //TODO Reset the sprinkler points.
                         dv.currentMode = DrawingView.Mode.sreset;
+                        dv.resetCoordinates();
                         dv.invalidate();
                         break;
                     case drawc:
                         dv.currentMode = DrawingView.Mode.resetc;
                         removeAllLengths();
                         dv.pastMode = DrawingView.PastMode.CIRCLE;
+                        dv.resetCoordinates();
                         dv.invalidate();
                         break;
                     case DOTPLOT:
                         dv.currentMode = DrawingView.Mode.RESET;
                         dv.pastMode = DrawingView.PastMode.DRAW;
                         removeAllLengths();
+                        dv.resetCoordinates();
                         dv.invalidate();
                         break;
                     case PLOT:
@@ -727,6 +775,7 @@ public class MainActivity extends AppCompatActivity {
                         dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.currentMode = DrawingView.Mode.RESET;
                         removeAllLengths();
+                        dv.resetCoordinates();
                         dv.resetTouchPoints();
                         //dv.invalidate();
                         break;
@@ -735,6 +784,7 @@ public class MainActivity extends AppCompatActivity {
                         //dv.currentMode = DrawingView.Mode.RECORDING;
                         //dv.currentMode = DrawingView.Mode.DOTPLOT;
                         dv.pastMode = DrawingView.PastMode.DRAW;
+                        dv.resetCoordinates();
                         removeAllLengths();
                         dv.invalidate();
                         button.setText("Draw Line");
@@ -742,6 +792,7 @@ public class MainActivity extends AppCompatActivity {
                     case RECORDING:
                         dv.currentMode = DrawingView.Mode.DRAWING;
                         removeAllLengths();
+                        dv.resetCoordinates();
                         dv.pastMode = DrawingView.PastMode.DRAW;
                         dv.invalidate();
                         button.setText("Reset");
@@ -776,6 +827,7 @@ public class MainActivity extends AppCompatActivity {
                         rlDvHolder.findViewById(++dv.specialCounter).setVisibility(View.GONE);
                     }*/
                     removeAllLengths(true);
+                    dv.resetCoordinates();
 
                     Log.wtf("* Text ID Info:", dv.idCounter + " " + dv.specialCounter);
                 } else {
@@ -787,6 +839,8 @@ public class MainActivity extends AppCompatActivity {
                         dv.rotationList.remove(dv.rotationList.size() - 1);
                     }
                     dv.removeLastSprinkler();
+                    dv.resetCoordinates();
+                    dv.invalidate();
                 }
 
             }
@@ -811,9 +865,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeAllLengths(boolean t) {
         for (int i = 0; i < dv.idCounter; i++)
-            rlDvHolder.findViewById(i).setVisibility(View.GONE);
+            if (rlDvHolder.findViewById(i) != null)
+                rlDvHolder.findViewById(i).setVisibility(View.GONE);
         for (int i = Integer.MAX_VALUE; i > dv.specialCounter; i--)
-            rlDvHolder.findViewById(i).setVisibility(View.GONE);
+            if (rlDvHolder.findViewById(i) != null)
+                rlDvHolder.findViewById(i).setVisibility(View.GONE);
     }
 
 
@@ -850,7 +906,7 @@ public class MainActivity extends AppCompatActivity {
                 double rotateDisplay = dv.rotate;
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                shortToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -867,7 +923,7 @@ public class MainActivity extends AppCompatActivity {
                 if (dv.angle != 360)
                     dv.rotate = (dv.rotate - 15) % 360;
                 else
-                    makeToast("Change the sprinkler angle before rotating it.");
+                    shortToast("Change the sprinkler angle before rotating it.");
 
                 if (dv.rotate < 0)
                     dv.rotate += 360;
@@ -875,7 +931,7 @@ public class MainActivity extends AppCompatActivity {
                 double rotateDisplay = dv.rotate;
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                shortToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -892,12 +948,12 @@ public class MainActivity extends AppCompatActivity {
                 if (dv.angle != 360)
                     dv.rotate = (dv.rotate + 15) % 360;
                 else
-                    makeToast("Change the sprinkler angle before rotating it.");
+                    shortToast("Change the sprinkler angle before rotating it.");
 
                 double rotateDisplay = dv.rotate;
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
-                makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                shortToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -1024,7 +1080,6 @@ public class MainActivity extends AppCompatActivity {
                 sprinkr.remove(sprinkr.size() - 1);
                 sprinky.remove(sprinky.size() - 1);
             }
-            invalidate();
         }
 
         public void undo() {
@@ -1053,6 +1108,7 @@ public class MainActivity extends AppCompatActivity {
            canvas.drawPath(path, paint);*/
             mCanvas = canvas;
 
+
             //INFO I think when you call invalidate() it calls onDraw again. Check it out by putting
             // your custom draw function for the line here. Test it out.
             //drawCustomLine(mCanvas, downx, downy, upx, upy);
@@ -1061,9 +1117,11 @@ public class MainActivity extends AppCompatActivity {
                     plotSprinklers2(canvas);
                     //makeToast("Plotting sprinklers");
                     //mmakeToast("Was Circle? : " + wasCircle);
-                    if (!wasCircle)
+                    if (!wasCircle) {
+                        resetCoordinates();
+                        handleCoordinates();
                         drawLine(canvas);
-                    else {
+                    } else {
                         if (radius == -5) {
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                     300, fillPaint);
@@ -1084,11 +1142,15 @@ public class MainActivity extends AppCompatActivity {
                 case sreset:
                     currentMode = Mode.splot;
                     resetSprinklers();
+                    resetCoordinates();
+                    handleCoordinates();
                     //makeToast("Resetting sprinklers.");
                     break;
                 case DOTPLOT:
                     showDots(canvas);
                     //Log.wtf("*DOTPLOT", "DOT Plot being called");
+                    resetCoordinates();
+                    handleCoordinates();
                     drawLine(canvas);
                     if (xlist.size() == 2) {
                         //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
@@ -1111,6 +1173,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.wtf("*RESET RESET RESET RESET RESET", "Reset was called. Reset screen.");
                     break;
                 case PLOT:
+                    resetCoordinates();
+                    handleCoordinates();
                     drawCustomLine(mCanvas, downx, downy, upx, upy);
                     break;
                 case resetc:
@@ -1147,6 +1211,130 @@ public class MainActivity extends AppCompatActivity {
 
             }
             super.onDraw(canvas);
+        }
+
+        private void handleCoordinates() {
+            if (landCoordinates) {
+                for (int i = 0; i < xlist.size(); i++) {
+                    dv.idCounter++;
+                    coordinateIds.add(new Coordinates(dv.idCounter, xlist.get(i), ylist.get(i), false));
+                }
+            }
+            if (sprinklerCoordinates) {
+                for (int i = 0; i < sprinkx.size(); i++) {
+                    dv.idCounter++;
+                    coordinateIds.add(new Coordinates(dv.idCounter, sprinkx.get(i), sprinky.get(i),true));
+                }
+            }
+            drawCoordinates(coordinateIds);
+        }
+
+        private void drawCoordinates(ArrayList<Coordinates> coordinateIds) {
+            Coordinates lowerLeft = new Coordinates(0, 0, 0, true);
+            if (dv.xlist.size() > 0)
+                lowerLeft = new Coordinates(5, dv.xlist.get(0), dv.ylist.get(0), true);
+            for (int i = 1; i < dv.xlist.size(); i++) {
+                if (lowerLeft.compareTo(new Coordinates(3, dv.xlist.get(i), dv.ylist.get(i), true)))
+                    lowerLeft = new Coordinates(3, dv.xlist.get(i), dv.ylist.get(i), true);
+            }
+            //INFO LowerLeft should contain teh lowerleft coordinate
+
+            int average = 0;
+            for (int i : ylist) {
+                average += i;
+            }
+            if (ylist.size() > 0)
+                average /= ylist.size();
+
+            int x = lowerLeft.getX(), y = lowerLeft.getY();
+            for (Coordinates c : coordinateIds) {
+                double xDif = c.getX() - x;
+                double yDif = y - c.getY();
+                if (xDif == 0)
+                    xDif = 0;
+                if (yDif == 0)
+                    yDif = 0;
+
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                        ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
+                int setToX = c.getX() - 101;
+                int setToY = c.getY() - 65;
+                if (setToY < average) setToY -= 20;
+                else setToY += 85;
+                Log.wtf("*-* Outside or not", "" + outside(setToX, setToY));
+                /*if(setToX < 100)
+                    setToX+=110;
+                else {
+                    if (!outside(setToX, setToY)) {
+                        //setToX += 140;
+                        setToX += 100;
+                        if (setToX > screenW - 125)
+                            setToX -= 100;
+                    }
+                }*/
+
+                String str1, str2;
+                TextView textView = new TextView(context);
+                if (c.isSprinkler()) {
+                    setToX = c.getX()-65;
+                    setToY = c.getY()-15;
+                    str1 = String.format("%.1f", xDif * dv.ratio);
+                    if (str1.charAt(str1.length() - 1) == '0' && str1.charAt(str1.length() - 2) == '.')
+                        str1 = str1.substring(0, str1.length() - 2);
+                    str2 = String.format("%.1f", yDif * dv.ratio);
+                    if (str2.charAt(str2.length() - 1) == '0' && str2.charAt(str2.length() - 2) == '.')
+                        str2 = str2.substring(0, str2.length() - 2);
+                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                    textView.setTextColor(Color.parseColor("#1665a6"));
+                    textView.setText(str1 + ", " + str2);
+                } else {
+                    str1 = String.format("%.0f", xDif * dv.ratio);
+                    str2 = String.format("%.0f", yDif * dv.ratio);
+                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+                    textView.setTextColor(Color.parseColor("#458f61"));
+                    textView.setText("(" + str1 + "," + str2 + ")");
+                }
+
+                params.leftMargin = setToX;
+                params.topMargin = setToY;
+
+
+
+                textView.setId(c.getTextId());
+                textView.setLayoutParams(params);
+                rlDvHolder.addView(textView);
+
+                /*params.leftMargin = setToX;
+                params.topMargin = setToY;
+
+                TextView textView = new TextView(context);
+                String str1 = String.format("%.0f", xDif * dv.ratio);
+                *//*if (str1.charAt(str1.length() - 1) == '0' && str1.charAt(str1.length() - 2) == '.')
+                    str1 = str1.substring(0, str1.length() - 2);*//*
+                String str2 = String.format("%.0f", yDif * dv.ratio);
+                *//*if (str2.charAt(str2.length() - 1) == '0' && str2.charAt(str2.length() - 2) == '.')
+                    str2 = str2.substring(0, str2.length() - 2);*//*
+
+                textView.setText("(" + str1 + "," + str2 + ")");
+                textView.setId(c.getTextId());
+                textView.setLayoutParams(params);
+                textView.setTextColor(Color.parseColor("#458f61"));
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP,11);
+                rlDvHolder.addView(textView);*/
+                //TODO Reset not working
+                //DONE Do it for sprinklers
+                //  Text Size not changed
+                //  Update on dismiss, not just back button press.
+            }
+            dv.idCounter++;
+        }
+
+        private void resetCoordinates() {
+            for (Coordinates i : coordinateIds)
+                rlDvHolder.findViewById(i.getTextId()).setVisibility(View.GONE);
+
+            coordinateIds.removeAll(coordinateIds);
+            dv.idCounter++;
         }
 
         boolean down = true;
@@ -1222,7 +1410,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
                         if (exceededCount % 5 == 0)
-                            makeToast("You have exceeded the limit on the number of sides.");
+                            shortToast("You have exceeded the limit on the number of sides.");
                         exceededCount++;
                     }
                 }
@@ -1342,6 +1530,7 @@ public class MainActivity extends AppCompatActivity {
                     if (maxSideLength < val) maxSideLength = val;
                     textView.setText("" + val);
                     textView.setId(idCounter);
+                    textView.setTextColor(Color.parseColor("#000000"));
                     textView.setLayoutParams(params);
                     //makeToast("Making the text");
                     rlDvHolder.addView(textView);
@@ -1358,6 +1547,7 @@ public class MainActivity extends AppCompatActivity {
                         Math.abs(ylist.get(posCount) - ylist.get(posCount + 1))) * ratio);
                 if (maxSideLength < val) maxSideLength = val;
                 textView.setText("" + val);
+                textView.setTextColor(Color.parseColor("#000000"));
                 textView.setId(idCounter);
                 textView.setLayoutParams(params);
                 //makeToast("Making the text");
@@ -1388,6 +1578,7 @@ public class MainActivity extends AppCompatActivity {
                 last.setText("" + val2);
                 last.setId(specialCounter);
                 last.setLayoutParams(params2);
+                last.setTextColor(Color.parseColor("#000000"));
                 //makeToast("Making the last text");
                 rlDvHolder.addView(last);
 
@@ -1548,6 +1739,40 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //makeToast("Polygon area: " + dv.polygonArea());
         switch (item.getItemId()) {
+            case R.id.coordinates:
+                final Dialog dialog = new Dialog(MainActivity.this);
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setCancelable(true);
+                dialog.setContentView(R.layout.ask_coordinates);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+                Button back = (Button) dialog.findViewById(R.id.back);
+                final CheckBox sprinklers = dialog.findViewById(R.id.sprinklers);
+                final CheckBox land = dialog.findViewById(R.id.land);
+                sprinklers.setChecked(sprinklerCoordinates);
+                land.setChecked(landCoordinates);
+
+                back.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        sprinklerCoordinates = sprinklers.isChecked();
+                        landCoordinates = land.isChecked();
+                        dialog.dismiss();
+                        dialog.cancel();
+                        dv.invalidate();
+                    }
+                });
+                dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        sprinklerCoordinates = sprinklers.isChecked();
+                        landCoordinates = land.isChecked();
+                        dv.invalidate();
+                    }
+                });
+
+                dialog.show();
+                return true;
             case R.id.circle:
                 //TODO Have to draw circle.
                 if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
@@ -1961,6 +2186,7 @@ public class MainActivity extends AppCompatActivity {
 
     boolean darken;
     boolean isHeadtoHead;
+
     private void displayResults() {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -1993,7 +2219,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) buttonView.setTextColor(0XFF000000);
-                if (!isChecked)  buttonView.setTextColor(0XFF757575);
+                if (!isChecked) buttonView.setTextColor(0XFF757575);
                 isHeadtoHead = isChecked;
             }
         });
@@ -2063,7 +2289,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.wtf("*  Progress", fgood + " " + sgood);
 
                 if (!(fgood && sgood))
-                    makeToast("Please fill in the information.");
+                    shortToast("Please fill in the information.");
                 else {
                     //DONE IT is good to contineu ahead.
                     dialog.cancel();
@@ -2188,7 +2414,7 @@ public class MainActivity extends AppCompatActivity {
                     makeToast("# of sprinklers inside the land plot.");
                 if (view.getId() == outsideHelp.getId())
                     makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
-                else if(view.getId() == overflowHelp.getId())
+                else if (view.getId() == overflowHelp.getId())
                     makeToast("Amount of water wasted by overflowing out of the specified land plot.");
                 return false;
             }
@@ -2227,7 +2453,7 @@ public class MainActivity extends AppCompatActivity {
         //INFO Subtracts overlap of 3 circles
         wasted -= overCounted3;*/
 
-        if(isHeadtoHead){
+        if (isHeadtoHead) {
             wasted = overFlowWastage + overCounted3;
         }
 
@@ -2516,6 +2742,9 @@ public class MainActivity extends AppCompatActivity {
         chain = b1 && b2;
         return new double[]{b1 ? x1 : x2, b1 ? y1 : y2, chain ? 1 : 0};
     }
+
+    public static boolean landCoordinates, sprinklerCoordinates;
+    public static ArrayList<Coordinates> coordinateIds;
 
     private void insideIntersectingOutsideIntersecting() {
         Log.wtf("*- Inside and Outside Intersecting", "_______________________________________");
@@ -2887,6 +3116,7 @@ public class MainActivity extends AppCompatActivity {
                         params.topMargin = (int) iy1;
                         TextView textView = new TextView(context);
                         textView.setText("o");
+                        textView.setTextColor(Color.parseColor("#000000"));
                         textView.setId(dv.idCounter);
                         textView.setTextSize(7);
                         textView.setLayoutParams(params);
@@ -2900,6 +3130,7 @@ public class MainActivity extends AppCompatActivity {
                         TextView textView2 = new TextView(context);
                         textView2.setText("o");
                         textView2.setId(dv.idCounter);
+                        textView2.setTextColor(Color.parseColor("#000000"));
                         textView2.setLayoutParams(params2);
                         textView2.setTextSize(7);
                         //makeToast("Making the text");
@@ -2911,6 +3142,7 @@ public class MainActivity extends AppCompatActivity {
                         params3.topMargin = (int) circleY;
                         TextView textView3 = new TextView(context);
                         textView3.setText("o");
+                        textView3.setTextColor(Color.parseColor("#000000"));
                         textView3.setId(dv.idCounter);
                         textView3.setLayoutParams(params3);
                         textView3.setTextSize(7);
@@ -3563,7 +3795,7 @@ public class MainActivity extends AppCompatActivity {
 
     //INFO Possible problem could be with formula below. (inverseSlope * otherstuff). Or could be (startY -centerY) is opposite.
     //README Function determines if sprinkler center is outside, not full sprinkler.
-    private boolean outside(double centerX, double centerY) {
+    public static boolean outside(double centerX, double centerY) {
         int counter = 0;
         for (int b = 0; b < dv.xlist.size(); b++) {
             double startX = dv.xlist.get(b);
@@ -3824,7 +4056,7 @@ public class MainActivity extends AppCompatActivity {
             // makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             Log.wtf("*  Calculations 3", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
         } else {
-            makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
+            // makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
             for (int y = 0; y < bmp.getHeight(); y++) {
                 for (int x = 0; x < bmp.getWidth(); x++) {
                     int pixel = bmp.getPixel(x, y);
@@ -4236,6 +4468,13 @@ public class MainActivity extends AppCompatActivity {
 
         return new int[]{(int) intersectionArea, (int) totalArea};
 
+    }
+
+    private static void shortToast(String s) {
+        //README I am providing a static context since makeToast is static in order to call it from
+        // ask for length which is static because it has to be called in onDraw();
+        // FIXME-- If you get any errors with making Toast, try making it unstatic.
+        Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
     }
 
     private static void makeToast(String s) {
