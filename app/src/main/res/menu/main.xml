@@ -22,6 +22,11 @@
         app:showAsAction="never"
         android:title="Calculate Wastage"
         />
+    <item
+        android:id="@+id/autoplot"
+        app:showAsAction="never"
+        android:title="Autoplot Sprinklers"
+        />
 
 
 </menu>

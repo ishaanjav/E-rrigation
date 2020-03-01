@@ -31,6 +31,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -41,6 +46,9 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
+
+import androidx.cardview.widget.CardView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,9 +78,21 @@ public class MainActivity extends AppCompatActivity {
     public TextView textview, ft;
     TextView angleText, rotateText;
     ImageView left1, left2, right1, right2;
+    static CardView autoplot;
+    public static Animation fadeIn, fadeOut;
+    Button autoplotButton;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
+        fadeIn.setDuration(800);
+
+        fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator()); //and this
+        fadeOut.setStartOffset(100);
+        fadeOut.setDuration(800);
+
         display = findViewById(R.id.textView);
         real = (TextView) findViewById(R.id.real);
 
@@ -86,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
         rlDvHolder = findViewById(R.id.dvHolder);
         rlDvHolder.addView(dv);
         polygon = findViewById(R.id.regular);
+
+        autoplot = findViewById(R.id.autoplot);
+        autoplotButton = findViewById(R.id.apButton);
 
         button = findViewById(R.id.button);
         background = findViewById(R.id.layout);
@@ -126,7 +149,175 @@ public class MainActivity extends AppCompatActivity {
         sprinklerCoordinates = false;
         coordinateIds = new ArrayList<>();
 
+        autoplotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                autoPlot();
+            }
+        });
+
         //handleResults(3, 3, 3, 3, 100);
+    }
+
+    public static double[] getPixelSideLength() {
+        double pixelSideLength = 1, minSideLength = 1;
+        if (maxSideLength > 35) {
+            pixelSideLength = (double) 25d / dv.ratio;
+            minSideLength = 4d / dv.ratio;
+        }
+        if (maxSideLength > 50) {
+            pixelSideLength = (double) 35d / dv.ratio;
+            minSideLength = 4d / dv.ratio;
+        }
+        if (maxSideLength > 74) {
+            pixelSideLength = (double) 40d / dv.ratio;
+            minSideLength = 5d / dv.ratio;
+        }
+        if (maxSideLength > 90) {
+            pixelSideLength = (double) 50d / dv.ratio;
+            minSideLength = 6d / dv.ratio;
+        }
+        if (maxSideLength > 150) {
+            pixelSideLength = (double) 80d / dv.ratio;
+            minSideLength = 8d / dv.ratio;
+        }
+        if (maxSideLength > 325) {
+            pixelSideLength = (double) 250d / dv.ratio;
+            minSideLength = 10d / dv.ratio;
+        }
+        return new double[]{minSideLength, pixelSideLength};
+    }
+
+    public static double getAngle(double v1x, double v1y, double v2x, double v2y) {
+
+
+        //need to normalize:
+        double l1 = Math.sqrt(v1x * v1x + v1y * v1y);
+        v1x /= l1;
+        v1y /= l1;
+
+        //need to normalize:
+        double l2 = Math.sqrt(v2x * v2x + v2y * v2y);
+        v2x /= l2;
+        v2y /= l2;
+        double rad = Math.acos(v1x * v2x + v1y * v2y);
+        //INFO Changed method of calculating angle.
+        double degrees = Math.toDegrees(rad);
+
+        return degrees;
+    }
+
+    private static void autoPlot() {
+        if (dv.sprinkx.size() != 0)
+            dv.resetSprinklers();
+        double min = getPixelSideLength()[0];
+        double max = getPixelSideLength()[1];
+        ArrayList<Integer> distanceLeft = new ArrayList<>();
+        ArrayList<Integer> radius = new ArrayList<>();
+        ArrayList<Integer> angle = new ArrayList<>();
+        ArrayList<Integer> rotation = new ArrayList<>();
+        ArrayList<Integer> x = new ArrayList<>();
+        ArrayList<Integer> y = new ArrayList<>();
+
+        for (int a = 0; a < dv.xlist.size(); a++) {
+            int size = dv.xlist.size();
+            int s1 = a;
+            int s2 = (a + 1) % size;
+            int s3 = (a + 2) % size;
+
+            double v1x = dv.xlist.get(s1) - dv.xlist.get(s2);
+            double v1y = dv.ylist.get(s1) - dv.ylist.get(s2);
+
+            double v2x = dv.xlist.get(s3) - dv.xlist.get(s2);
+            double v2y = dv.ylist.get(s3) - dv.ylist.get(s2);
+
+            //INFO Changed method of calculating angle.
+            double degrees1 = getAngle(v1x, v1y, v2x, v2y);
+            double degrees2 = getAngle(v1x, v1y, 200, 0);
+            Log.wtf("*-Degrees", "" + degrees1);
+            angle.add((int) degrees1);
+            rotation.add((int) -degrees2 - 90);
+            x.add(dv.xlist.get(s1));
+            y.add(dv.ylist.get(s1));
+        }
+        for (int a = 0; a < dv.xlist.size(); a += 2) {
+            int size = dv.xlist.size();
+            int s1 = a;
+            int s2 = (a + 1) % size;
+            int s3 = (a + 2) % size;
+            //TODO Calculate length of 2 sides
+            //TODO Using shortest side, set radii to half of it.
+            // TODO If shortest side is less than 35% of other side,
+            // Set it to 80% of shortest side length
+            double side1 = Math.sqrt(Math.pow(dv.xlist.get(s1) - dv.xlist.get(s2), 2) +
+                    Math.pow(dv.ylist.get(s1) - dv.ylist.get(s2), 2));
+            double side2 = Math.sqrt(Math.pow(dv.xlist.get(s2) - dv.xlist.get(s3), 2) +
+                    Math.pow(dv.ylist.get(s2) - dv.ylist.get(s3), 2));
+            double smaller = side1, larger = side2;
+            boolean side1Larger = true;
+            if (side2 < side1) {
+                smaller = side2;
+                larger = side1;
+                side1Larger = false;
+            }
+            double radius1, radius2;
+            if (smaller >= 1.94 * maxSideLength) {
+                radius1 = maxSideLength;
+                radius2 = maxSideLength;
+            } else {
+                if (smaller > .4 * larger) {
+                    radius1 = smaller * .5;
+                    radius2 = smaller * .5;
+                } else {
+                    radius1 = smaller * .4;
+                    radius2 = smaller * .6;
+                }
+            }
+            Log.wtf("Radii:", radius1+ " " + radius2);            radius1 /= 4;
+            radius2 /= 4;
+            if (side1Larger) {
+                radius.add((int) (radius2 / dv.ratio));
+                radius.add((int) (radius1 / dv.ratio));
+            } else {
+                radius.add((int) (radius1 / dv.ratio));
+                radius.add((int) (radius2 / dv.ratio));
+            }
+
+        }
+        for (int a = 0; a < dv.xlist.size(); a++) {
+            int size = dv.xlist.size();
+            int s1 = (a) % size;
+            int s2 = (a + 1) % size;
+            int s3 = (a + 2) % size;
+            //TODO Calculate length of 2 sides
+            //TODO Using shortest side, set radii to half of it.
+            // TODO If shortest side is less than 35% of other side,
+            // Set it to 80% of shortest side length
+            double side1 = Math.sqrt(Math.pow(dv.xlist.get(s1) - dv.xlist.get(s2), 2) +
+                    Math.pow(dv.ylist.get(s1) - dv.ylist.get(s2), 2));
+            distanceLeft.add((int) (side1 - radius.get((a - 1 + size) % size)
+                    - radius.get(a)));
+
+        }
+        if (radius.size() > x.size()) {
+            radius.remove(radius.size() - 1);
+        }
+        Log.wtf("Lists:", angle.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+                + rotation.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + radius.toString()
+                + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + distanceLeft.toString());
+        dv.sprinkx.addAll(x);
+        dv.sprinky.addAll(y);
+        int last = angle.get(angle.size()-1);
+        angle.add(0, last);
+        angle.remove(angle.size()-1);
+        /*rotation.set(1, rotation.get(1) -90);
+        rotation.set(2, rotation.get(2) +90);
+        rotation.set(3, rotation.get(3)*-1);*/
+        dv.rotationList.addAll(rotation);
+        dv.angleList.addAll(angle);
+        dv.sprinkr.addAll(radius);
+        //dv.sprinkx.addAll(x);
+        dv.invalidate();
     }
 
     public boolean leaveAlone = false;
@@ -200,11 +391,18 @@ public class MainActivity extends AppCompatActivity {
                                 //TODO Have to also set the value of dv.ratio to get
                                 // the ratio between their length and pixel length;
                                 dv.length = numVal;
-                                if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                                if (dv.pastMode == DrawingView.PastMode.CIRCLE && (dv.currentMode
+                                        == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc)) {
                                     //dv.ratio = dv.radius / numVal;
-                                    dv.ratio = dv.radius / (dv.radius * (dv.screenW / 200));
+                                    dv.ratio = dv.backUpRadius / (dv.backUpRadius * (dv.screenW / 200));
                                     Log.wtf("**Ratio, ", "Ratio is: " + dv.ratio);
 
+                                } else if (dv.wasCircle && (dv.currentMode == DrawingView.Mode.splot ||
+                                        dv.currentMode == DrawingView.Mode.sreset)) {
+                                    if (dv.radius == -5)
+                                        dv.radius = 300;
+                                    else
+                                        dv.radius = dv.backUpRadius * (dv.screenW / 200);
                                 } else {
                                     dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
                                             Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
@@ -312,8 +510,13 @@ public class MainActivity extends AppCompatActivity {
                 if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
                     dv.ratio = dv.radius / numVal;
                 } else {
-                    dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
-                            Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                    if (dv.wasCircle)
+                        dv.ratio = (double) numVal / (double) dv.backUpRadius;
+                        /*dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));*/
+                    else
+                        dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                                Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
                     Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
                             Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
                 }
@@ -650,6 +853,7 @@ public class MainActivity extends AppCompatActivity {
                     if (messageCount % 15 == 0)
                         makeToast("ATTENTION!\nEnter the length of the circle's radius in feet.");
                     dv.radius = progress;
+                    dv.backUpRadius = progress;
                     //dv.ratio =
                 }
 
@@ -974,6 +1178,7 @@ public class MainActivity extends AppCompatActivity {
         public int height;
         public int radius = -5;
         public static int sradius = -5;
+        public static int backUpRadius = -5;
         List<Integer> xlist = new ArrayList<>();
         List<Integer> ylist = new ArrayList<>();
         List<Integer> sprinkx = new ArrayList<>();
@@ -1116,6 +1321,14 @@ public class MainActivity extends AppCompatActivity {
             //drawCustomLine(mCanvas, downx, downy, upx, upy);
             switch (currentMode) {
                 case splot:
+                    if (sprinkx.size() == 0) {
+                        autoplot.setAnimation(fadeIn);
+                        autoplot.setVisibility(View.VISIBLE);
+                    } else {
+                        autoplot.setAnimation(fadeOut);
+                        autoplot.setVisibility(View.INVISIBLE);
+                    }
+
                     plotSprinklers2(canvas);
                     //makeToast("Plotting sprinklers");
                     //mmakeToast("Was Circle? : " + wasCircle);
@@ -1125,6 +1338,8 @@ public class MainActivity extends AppCompatActivity {
                         handleCoordinates();
                         drawLine(canvas);
                     } else {
+                        resetCoordinates();
+                        handleCircleCoordinates();
                         if (radius == -5) {
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                     300, fillPaint);
@@ -1132,10 +1347,10 @@ public class MainActivity extends AppCompatActivity {
                                     308, linePaint);
                         } else {
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
-                                    radius * (screenW / 200), fillPaint);
+                                    backUpRadius * (screenW / 200), fillPaint);
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
-                                    radius * (screenW / 200) + 8, linePaint);
-                            Log.wtf("*Sprinkler Being Drawn INFO", ":" + (radius * (screenW / 200)));
+                                    backUpRadius * (screenW / 200) + 8, linePaint);
+                            Log.wtf("*Sprinkler Being Drawn INFO", ":" + (backUpRadius * (screenW / 200)));
                         }
                     }
                     /*angle = 360;
@@ -1146,7 +1361,16 @@ public class MainActivity extends AppCompatActivity {
                     currentMode = Mode.splot;
                     resetSprinklers();
                     resetCoordinates();
-                    handleCoordinates();
+                    if (wasCircle)
+                        handleCircleCoordinates();
+                    else handleCoordinates();
+                    if (sprinkx.size() == 0) {
+                        autoplot.setAnimation(fadeIn);
+                        autoplot.setVisibility(View.VISIBLE);
+                    } else {
+                        autoplot.setAnimation(fadeOut);
+                        autoplot.setVisibility(View.INVISIBLE);
+                    }
                     //makeToast("Resetting sprinklers.");
                     break;
                 case DOTPLOT:
@@ -1156,6 +1380,8 @@ public class MainActivity extends AppCompatActivity {
                     showDots(canvas);
                     handleCoordinates();
                     drawLine(canvas);
+                    //autoplot.setAnimation(fadeOut);
+                    autoplot.setVisibility(View.INVISIBLE);
                     if (xlist.size() == 2) {
                         //TODO Make an ALert Dialog asking for the length of the side that has been drawn.
                         //NOTES Make it non-dimissible, but provide an Undo and a done button. for undo,
@@ -1169,6 +1395,8 @@ public class MainActivity extends AppCompatActivity {
                 case RESET:
                     //Need to reset the canvas
                     currentMode = Mode.DOTPLOT;
+                    autoplot.setAnimation(fadeOut);
+                    autoplot.setVisibility(View.INVISIBLE);
                     resetTouchPoints();
                     resetSprinklers();
                     removeAllLengths(true);
@@ -1180,9 +1408,12 @@ public class MainActivity extends AppCompatActivity {
                 case PLOT:
                     resetCoordinates();
                     handleCoordinates();
+                    autoplot.setAnimation(fadeOut);
+                    autoplot.setVisibility(View.INVISIBLE);
                     drawCustomLine(mCanvas, downx, downy, upx, upy);
                     break;
                 case resetc:
+                    autoplot.setAnimation(fadeOut);
                     currentMode = Mode.drawc;
                     //makeToast("Reset c. Mode is draw c");
                     break;
@@ -1191,6 +1422,10 @@ public class MainActivity extends AppCompatActivity {
                     //README This is for drawing the circle region.
                     //MainActivity.askForLength(false);
                     wasCircle = true;
+                    resetCoordinates();
+                    autoplot.setAnimation(fadeOut);
+                    autoplot.setVisibility(View.INVISIBLE);
+                    handleCircleCoordinates();
                     if (radius == -5) {
                         setCircleRadiusTo = 300;
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
@@ -1198,7 +1433,7 @@ public class MainActivity extends AppCompatActivity {
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                 setCircleRadiusTo + 8, linePaint);
                     } else {
-                        setCircleRadiusTo = radius * (screenW / 200);
+                        setCircleRadiusTo = backUpRadius * (screenW / 200);
                         Log.wtf("*BIG CIRCLE RADIUS: ", setCircleRadiusTo + " radius:" + radius + " ScreenW:" + screenW);
                         mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                 setCircleRadiusTo, fillPaint);
@@ -1218,6 +1453,20 @@ public class MainActivity extends AppCompatActivity {
             super.onDraw(canvas);
         }
 
+        private void handleCircleCoordinates() {
+            if (landCoordinates) {
+                dv.idCounter++;
+                coordinateIds.add(new Coordinates(dv.idCounter, screenW / 2 + 63, screenH / 2 - 425, false));
+            }
+            if (sprinklerCoordinates) {
+                for (int i = 0; i < sprinkx.size(); i++) {
+                    dv.idCounter++;
+                    coordinateIds.add(new Coordinates(dv.idCounter, sprinkx.get(i), sprinky.get(i), true));
+                }
+            }
+            drawCoordinates(coordinateIds);
+        }
+
         private void handleCoordinates() {
             if (landCoordinates) {
                 for (int i = 0; i < xlist.size(); i++) {
@@ -1228,7 +1477,7 @@ public class MainActivity extends AppCompatActivity {
             if (sprinklerCoordinates) {
                 for (int i = 0; i < sprinkx.size(); i++) {
                     dv.idCounter++;
-                    coordinateIds.add(new Coordinates(dv.idCounter, sprinkx.get(i), sprinky.get(i),true));
+                    coordinateIds.add(new Coordinates(dv.idCounter, sprinkx.get(i), sprinky.get(i), true));
                 }
             }
             drawCoordinates(coordinateIds);
@@ -1281,8 +1530,8 @@ public class MainActivity extends AppCompatActivity {
                 String str1, str2;
                 TextView textView = new TextView(context);
                 if (c.isSprinkler()) {
-                    setToX = c.getX()-84;
-                    setToY = c.getY()-21;
+                    setToX = c.getX() - 84;
+                    setToY = c.getY() - 21;
                     str1 = String.format("%.1f", xDif * dv.ratio);
                     if (str1.charAt(str1.length() - 1) == '0' && str1.charAt(str1.length() - 2) == '.')
                         str1 = str1.substring(0, str1.length() - 2);
@@ -1293,16 +1542,22 @@ public class MainActivity extends AppCompatActivity {
                     textView.setTextColor(Color.parseColor("#1665a6"));
                     textView.setText(str1 + ", " + str2);
                 } else {
-                    str1 = String.format("%.0f", xDif * dv.ratio);
-                    str2 = String.format("%.0f", yDif * dv.ratio);
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-                    textView.setTextColor(Color.parseColor("#458f61"));
+                    if (!wasCircle) {
+                        str1 = String.format("%.0f", xDif * dv.ratio);
+                        str2 = String.format("%.0f", yDif * dv.ratio);
+                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+                        textView.setTextColor(Color.parseColor("#458f61"));
+                    } else {
+                        str1 = "0";
+                        str2 = "0";
+                        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                        textView.setTextColor(Color.parseColor("#000000"));
+                    }
                     textView.setText("(" + str1 + "," + str2 + ")");
                 }
 
                 params.leftMargin = setToX;
                 params.topMargin = setToY;
-
 
 
                 textView.setId(c.getTextId());
@@ -1465,8 +1720,11 @@ public class MainActivity extends AppCompatActivity {
                     double dif = pixelSideLength - minSideLength;
                     /*progress -= 50;
                     progress *= 2;*/
-                    setToI = pixelSideLength - ((double) 100 - sradius) / 100 * dif;
-
+                    if (!wasCircle)
+                        setToI = pixelSideLength - ((double) 100 - sradius) / 100 * dif;
+                    else
+                        setToI = (double) sradius / 100d * backUpRadius;
+                    Log.wtf("Radius adding", sradius + " " + setToI);
 
                     //makeToast("Side Length : " + maxSideLength);
                     //Log.wtf("*- Set to I", (int) setToI + " " + (int) pixelSideLength + " " + sradius + " " + (int) maxSideLength + " " + (int) dv.ratio);
@@ -1524,15 +1782,15 @@ public class MainActivity extends AppCompatActivity {
             if (xlist.size() > 2) {
                 posCount = xlist.size() - 2;
 
-                for(int i = 0; i < xlist.size(); i++){
+                for (int i = 0; i < xlist.size(); i++) {
                     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
                             ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
-                    params.leftMargin = (xlist.get(i) + xlist.get((i+1)%xlist.size())) / 2;
-                    params.topMargin = (ylist.get(i) + ylist.get((i+1)%xlist.size())) / 2;
+                    params.leftMargin = (xlist.get(i) + xlist.get((i + 1) % xlist.size())) / 2;
+                    params.topMargin = (ylist.get(i) + ylist.get((i + 1) % xlist.size())) / 2;
 
                     TextView textView = new TextView(context);
-                    int val = (int) (Math.hypot(Math.abs(xlist.get(i) - xlist.get((i+1)%xlist.size())),
-                            Math.abs(ylist.get(i) - ylist.get((i+1)%xlist.size()))) * ratio);
+                    int val = (int) (Math.hypot(Math.abs(xlist.get(i) - xlist.get((i + 1) % xlist.size())),
+                            Math.abs(ylist.get(i) - ylist.get((i + 1) % xlist.size()))) * ratio);
                     if (maxSideLength < val) maxSideLength = val;
                     textView.setText("" + val);
                     textView.setId(idCounter);
@@ -1636,7 +1894,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void plotSprinklers2(Canvas canvas) {
-
+            Log.wtf("*- Plotting Sprinklers", "" + sprinkx.size());
             if (sprinkx.size() > 0) {
                 //String logger = "";
                 /*for (int i = 0; i < rotationList.size(); i++) {
@@ -1645,7 +1903,7 @@ public class MainActivity extends AppCompatActivity {
                 }*/
                 //Log.wtf("*-Lists", logger);
                 for (int i = 0; i < sprinkx.size() - 1; i++) {
-                    //Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
+                    Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
                     // canvas.dra wCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                     int m = i;
                     float radius = sprinkr.get(m);
@@ -1716,7 +1974,6 @@ public class MainActivity extends AppCompatActivity {
 
         enum PastMode {DRAW, CIRCLE}
 
-        ;
 
         public double polygonArea() {
             // Initialze area
@@ -1750,12 +2007,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public static Menu menuOptions;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main, menu);
+        MenuItem item = menu.findItem(R.id.autoplot);
+        item.setVisible(false);
+        MenuItem item2 = menu.findItem(R.id.calculate);
+        item2.setVisible(false);
+        menuOptions = menu;
         return super.onCreateOptionsMenu(menu);
     }
+
 
     boolean rectangle = false;
 
@@ -1799,6 +2065,14 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.circle:
                 //TODO Have to draw circle.
+                MenuItem item4 = menuOptions.findItem(R.id.calculate);
+                item4.setVisible(false);
+                MenuItem item5 = menuOptions.findItem(R.id.autoplot);
+                item5.setVisible(false);
+                autoplot.setAnimation(fadeOut);
+                autoplot.setVisibility(View.INVISIBLE);
+
+
                 if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
                     //INFO Need to switch from circle to polygon
                     radius.setVisibility(View.INVISIBLE);
@@ -1845,7 +2119,19 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.sprinklers:
                 //polygon.setText("");
-                if (dv.xlist.size() < 3 && dv.currentMode != DrawingView.Mode.drawc && dv.currentMode != DrawingView.Mode.resetc) {
+                MenuItem item3 = menuOptions.findItem(R.id.calculate);
+                item3.setVisible(true);
+                if (dv.sprinkx.size() == 0) {
+                    MenuItem item2 = menuOptions.findItem(R.id.autoplot);
+                    item2.setVisible(true);
+                } else if (dv.sprinkx.size() > 0) {
+                    MenuItem item2 = menuOptions.findItem(R.id.autoplot);
+                    item2.setVisible(false);
+                }
+
+                //onCreateOptionsMenu(menuOptions);
+                if (dv.xlist.size() < 3 && dv.currentMode != DrawingView.Mode.drawc
+                        && dv.currentMode != DrawingView.Mode.resetc && !dv.wasCircle) {
                     makeToast("You must first plot the area of land.");
                 } else if (!handleSideLength()) {
                     //INFO They have not entered a side length/radius
@@ -1862,6 +2148,14 @@ public class MainActivity extends AppCompatActivity {
                     right2.setVisibility(View.VISIBLE);
                     right1.setVisibility(View.VISIBLE);
                     dv.currentMode = DrawingView.Mode.splot;
+
+                    if (dv.sprinkx.size() == 0) {
+                        autoplot.setAnimation(fadeIn);
+                        autoplot.setVisibility(View.VISIBLE);
+                    } else {
+                        autoplot.setAnimation(fadeOut);
+                        autoplot.setVisibility(View.INVISIBLE);
+                    }
                 }
                 return true;
 
@@ -1871,6 +2165,8 @@ public class MainActivity extends AppCompatActivity {
                 //Bitmap tr = takeScreenShot(dv);
                 //showLoading();
 
+                //showResults(1,1,"Not known");
+                //TODO Uncomment Below
                 calculateSprinklerOverflow();
 /*
                 //INFO Wait a bit so that the Dialog is showing, then do the calculations.
@@ -1923,6 +2219,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     double overFlowWastage = 0;      //INFO This is numerator for wastage
     double totalOverflowArea = 0;    //INFO This is denominator for wastage
@@ -2547,12 +2844,26 @@ public class MainActivity extends AppCompatActivity {
         perMonth.setText((format2(waterWasted * 4)) + " gal");
         perYear.setText((format2(waterWasted * 52)) + " gal");
 
-        double notWastedWater = 1 - percentageWasted;
+        //double notWastedWater = 1 - percentageWasted;
+        //double notWastedWater = 1 - percentageWasted + overflowWater/total + overCounted3 / total;
+        double notWastedWater = 1 - percentageWasted +
+                overflowWater / total;
         double landCoveredArea = notWastedWater * total / dv.polygonArea() * landArea;
         double percentLandCovered = landCoveredArea / landArea;
+        if (percentLandCovered > 1) {
+            percentLandCovered = 0.992;
+            landCoveredArea = landArea * percentLandCovered;
+        }
+        Log.wtf("Percent Land", " " + Math.round(notWastedWater * 100) + " " +
+                Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));
+        Log.wtf("\"-_Land Covered", " " + Math.round(notWastedWater * 100) + " " +
+                Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));
         Log.wtf("*- Land Coverage - ", dv.polygonArea() + " " + notWastedWater + " " + landCoveredArea
                 + " " + percentLandCovered);
         landCovered.setText(format(landCoveredArea) + " sq. ft");
+        double variable = notWastedWater * total / dv.polygonArea();
+        /*totalLandA.setText(Math.round(variable * 100) + " " + Math.round(notWastedWater * 100) + " == " +
+                Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));*/
         percentCoveredA.setText(format(percentLandCovered * 100) + "%");
 
 
