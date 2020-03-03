@@ -237,11 +237,10 @@ public class MainActivity extends AppCompatActivity {
             //INFO Changed method of calculating angle.
             double degrees1 = getAngle(v1x, v1y, v2x, v2y);
             double degrees2 = getAngle(v1x, v1y, 0, 200);
-            //Log.wtf("*-Degrees", "" + degrees1);
-            angle.add((int) degrees1);
+            Log.wtf("*-Degrees " + (m + 1), "" + degrees1);
             rotation.add((int) (Math.pow(-1, m) * degrees2));
 
-            double y1 = dv.ylist.get(s1)*-1, y2 = dv.ylist.get(s2)*-1, y3 = dv.ylist.get(s3)*-1;
+            double y1 = dv.ylist.get(s1) * -1, y2 = dv.ylist.get(s2) * -1, y3 = dv.ylist.get(s3) * -1;
             double x1 = dv.xlist.get(s1), x2 = dv.xlist.get(s2), x3 = dv.xlist.get(s3);
 
             //INFO Standard equation for 1st line. ax + by + c = 0
@@ -258,12 +257,45 @@ public class MainActivity extends AppCompatActivity {
 
             double inverseSlope = slope;
             double distance = Math.sqrt(1 + inverseSlope * inverseSlope);
-            double checkX = x2 + (6 / distance) * 1;
-            double checkY = y2 + (6 / distance) * slope;
+            double factorX = (10 / distance) * 1;
+            double factorY = (10 / distance) * slope;
+            if (factorX < 2 || factorY < 2) {
+                factorX *= 2;
+                factorY *= 2;
+            }
 
+            double checkX = x2 + factorX;
+            double checkY = y2 + factorY;
+
+            boolean outside = outside(checkX, -1 * checkY);
+            boolean inside = !outside;
+
+
+            double realAngle = 0;
+            //README Logic:
+            //  If point is inside and 2x angle to point and side is >180, use 360-degrees
+            //  If point is outside, project it inside:
+            //    If 2x angle to projected (inside) point to side is > 180, use 360-degrees
+            //    (Alternately could've done if 2x outside point to side is < 180, use 360-degrees)
+            //  Otherwise use degrees.
+
+            double angleToSide = getAngle(x3 - x2, y3 - y2, checkX - x2, checkY - y2);
+            if (inside && 2 * angleToSide > 180)
+                realAngle = 2*angleToSide;
+            else if (outside) {
+                checkX = checkX - factorX * 2;
+                checkY = checkY - factorY * 2;
+                angleToSide = getAngle(x3 - x2, y3 - y2, checkX - x2, checkY - y2);
+                if (2 * angleToSide > 180) realAngle = 2*angleToSide;
+                else realAngle = 2*angleToSide;
+            } else realAngle = 2*angleToSide;
+
+
+            angle.add((int) realAngle);
             Log.wtf("Point To Check", "Intersecton: " + x2 + "," + y2
-                    + "   --->  " + checkX + "," + checkY+"\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
-            +a+"x + " + b+"y + " + c + ",  " +r+"x + " + s+"y + " + t + "\n,  ");
+                    + "   --->  " + checkX + "," + checkY + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+                    + a + "x + " + b + "y + " + c + ",  " + r + "x + " + s + "y + " + t + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tOutside:"
+                    + outside + "  Angle: " + (2 * angleToSide) + " ------- Real Angle: " + realAngle + "\n,  ");
            /* //INFO Get the intersection of 2 lines using the slopes and y-intercept.
             double intersectX = intersectionOf2Lines(-a/b, -c/b, -r/s,-t/s)[0];
             double intersectY = intersectionOf2Lines(-a/b, -c/b, -r/s,-t/s)[1];
