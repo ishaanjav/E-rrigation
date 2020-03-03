@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
@@ -212,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
             dv.resetSprinklers();
         double min = getPixelSideLength()[0];
         double max = getPixelSideLength()[1];
+        Log.wtf("Lengths", "Min- " + min + "  Max- " + max);
         ArrayList<Integer> distanceLeft = new ArrayList<>();
         ArrayList<Integer> radius = new ArrayList<>();
         ArrayList<Integer> angle = new ArrayList<>();
@@ -219,12 +221,13 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Integer> x = new ArrayList<>();
         ArrayList<Integer> y = new ArrayList<>();
 
-        for (int a = 0; a < dv.xlist.size(); a++) {
+        for (int m = 0; m < dv.xlist.size(); m++) {
             int size = dv.xlist.size();
-            int s1 = a;
-            int s2 = (a + 1) % size;
-            int s3 = (a + 2) % size;
+            int s1 = m;
+            int s2 = (m + 1) % size;
+            int s3 = (m + 2) % size;
 
+            //README Vectors NOT coordinates
             double v1x = dv.xlist.get(s1) - dv.xlist.get(s2);
             double v1y = dv.ylist.get(s1) - dv.ylist.get(s2);
 
@@ -233,13 +236,48 @@ public class MainActivity extends AppCompatActivity {
 
             //INFO Changed method of calculating angle.
             double degrees1 = getAngle(v1x, v1y, v2x, v2y);
-            double degrees2 = getAngle(v1x, v1y, 200, 0);
-            Log.wtf("*-Degrees", "" + degrees1);
+            double degrees2 = getAngle(v1x, v1y, 0, 200);
+            //Log.wtf("*-Degrees", "" + degrees1);
             angle.add((int) degrees1);
-            rotation.add((int) -degrees2 - 90);
-            x.add(dv.xlist.get(s1));
-            y.add(dv.ylist.get(s1));
-        }
+            rotation.add((int) (Math.pow(-1, m) * degrees2));
+
+            double y1 = dv.ylist.get(s1)*-1, y2 = dv.ylist.get(s2)*-1, y3 = dv.ylist.get(s3)*-1;
+            double x1 = dv.xlist.get(s1), x2 = dv.xlist.get(s2), x3 = dv.xlist.get(s3);
+
+            //INFO Standard equation for 1st line. ax + by + c = 0
+            double a = y2 - y1;
+            double b = x1 - x2;
+            double c = -1 * (a * (x1) + b * (y1));
+            //INFO Standard equation for 2nd line. rx + sy + t = 0
+            double r = y3 - y2;
+            double s = x2 - x3;
+            double t = -1 * (a * (x2) + b * (y2));
+
+            double slope = (a * Math.sqrt(r * r + s * s) - r * Math.sqrt(a * a + b * b));
+            slope = slope / (s * Math.sqrt(a * a + b * b) - b * Math.sqrt(r * r + s * s));
+
+            double inverseSlope = slope;
+            double distance = Math.sqrt(1 + inverseSlope * inverseSlope);
+            double checkX = x2 + (6 / distance) * 1;
+            double checkY = y2 + (6 / distance) * slope;
+
+            Log.wtf("Point To Check", "Intersecton: " + x2 + "," + y2
+                    + "   --->  " + checkX + "," + checkY+"\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+            +a+"x + " + b+"y + " + c + ",  " +r+"x + " + s+"y + " + t + "\n,  ");
+           /* //INFO Get the intersection of 2 lines using the slopes and y-intercept.
+            double intersectX = intersectionOf2Lines(-a/b, -c/b, -r/s,-t/s)[0];
+            double intersectY = intersectionOf2Lines(-a/b, -c/b, -r/s,-t/s)[1];
+
+            Log.wtf("Line Intersections", "Line 1: " + x1 + "," + y1 +
+                    "  " + x2+","+y2+"  " + x3 +","+y3 +" --->  " +
+                    intersectX + "," +intersectY);*/
+
+            //x.add(dv.xlist.get(s1));
+            //y.add(dv.ylist.get(s1));
+        }/*
+        //TODO Need to rewrite whole algorithm for radius,
+        // For each corner, need to take into account both sides
+        // as well as next corner and both sides.
         for (int a = 0; a < dv.xlist.size(); a += 2) {
             int size = dv.xlist.size();
             int s1 = a;
@@ -254,26 +292,32 @@ public class MainActivity extends AppCompatActivity {
             double side2 = Math.sqrt(Math.pow(dv.xlist.get(s2) - dv.xlist.get(s3), 2) +
                     Math.pow(dv.ylist.get(s2) - dv.ylist.get(s3), 2));
             double smaller = side1, larger = side2;
-            boolean side1Larger = true;
+            boolean side1Larger = false;
             if (side2 < side1) {
-                smaller = side2;
                 larger = side1;
-                side1Larger = false;
+                smaller = side2;
+                side1Larger = true;
             }
             double radius1, radius2;
-            if (smaller >= 1.94 * maxSideLength) {
+            if (smaller >= 1.94 * max) {
                 radius1 = maxSideLength;
                 radius2 = maxSideLength;
             } else {
                 if (smaller > .4 * larger) {
                     radius1 = smaller * .5;
                     radius2 = smaller * .5;
-                } else {
+                } else if (smaller < .22 * larger){
+                    radius1 = smaller*.5;
+                    radius2 = smaller*.65;
+                }
+                else {
                     radius1 = smaller * .4;
                     radius2 = smaller * .6;
                 }
             }
-            Log.wtf("Radii:", radius1+ " " + radius2);            radius1 /= 4;
+            Log.wtf("Radii:", radius1 + " " + radius2 + "   " + smaller
+                    + " " + larger + " " + side1Larger);
+            radius1 /= 4;
             radius2 /= 4;
             if (side1Larger) {
                 radius.add((int) (radius2 / dv.ratio));
@@ -301,15 +345,32 @@ public class MainActivity extends AppCompatActivity {
         }
         if (radius.size() > x.size()) {
             radius.remove(radius.size() - 1);
-        }
+        }*/
+        x.addAll(dv.xlist);
+        y.addAll(dv.ylist);
+        radius.add((int) max);
+        radius.add((int) max);
+        radius.add((int) min);
+        radius.add((int) min);
+        rotation.add(0);
+        rotation.add(0);
+        rotation.add(0);
+        rotation.add(0);
+        /*rotation.add(90);
+        rotation.add(180);
+        rotation.add(360);*/
+        /*angle.add(90);
+        angle.add(145);
+        angle.add(30);
+        angle.add(90);*/
         Log.wtf("Lists:", angle.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
                 + rotation.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + radius.toString()
                 + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + distanceLeft.toString());
         dv.sprinkx.addAll(x);
         dv.sprinky.addAll(y);
-        int last = angle.get(angle.size()-1);
+        int last = angle.get(angle.size() - 1);
         angle.add(0, last);
-        angle.remove(angle.size()-1);
+        angle.remove(angle.size() - 1);
         /*rotation.set(1, rotation.get(1) -90);
         rotation.set(2, rotation.get(2) +90);
         rotation.set(3, rotation.get(3)*-1);*/
@@ -377,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
                     }*/
                     } else if (dv.xlist.size() > 1) {
                         timesR = 0;
-                        Log.wtf("* Inside: ", "inside here deeper");
+                        //Log.wtf("* Inside: ", "inside here deeper");
                         String temp = length.getText().toString();
                         if (temp == null) {
                             shortToast("Please enter the side length.");
@@ -409,7 +470,7 @@ public class MainActivity extends AppCompatActivity {
                                     Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
                                             Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
                                 }
-                                Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
+                                //Log.wtf("*  INFORMATION ON RATIO: ", "Ratio: " + dv.ratio + "  Length: " + dv.length);
                             }
                         }
                     } else if (length.getText().toString().equals("") || length.getText().toString().equals(previous)) {
@@ -517,8 +578,8 @@ public class MainActivity extends AppCompatActivity {
                     else
                         dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
                                 Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
-                    Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
-                            Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
+                    //Log.wtf("Side Length Calculations", "Hypotenuse - " + Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
+                    //        Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));
                 }
                 return true;
             }
@@ -1894,7 +1955,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void plotSprinklers2(Canvas canvas) {
-            Log.wtf("*- Plotting Sprinklers", "" + sprinkx.size());
+            //Log.wtf("*- Plotting Sprinklers", "" + sprinkx.size());
             if (sprinkx.size() > 0) {
                 //String logger = "";
                 /*for (int i = 0; i < rotationList.size(); i++) {
@@ -1903,7 +1964,7 @@ public class MainActivity extends AppCompatActivity {
                 }*/
                 //Log.wtf("*-Lists", logger);
                 for (int i = 0; i < sprinkx.size() - 1; i++) {
-                    Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
+                    //Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
                     // canvas.dra wCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                     int m = i;
                     float radius = sprinkr.get(m);
@@ -2014,8 +2075,8 @@ public class MainActivity extends AppCompatActivity {
 
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main, menu);
-        MenuItem item = menu.findItem(R.id.autoplot);
-        item.setVisible(false);
+        /*MenuItem item = menu.findItem(R.id.autoplot);
+        item.setVisible(false);*/
         MenuItem item2 = menu.findItem(R.id.calculate);
         item2.setVisible(false);
         menuOptions = menu;
@@ -2067,8 +2128,8 @@ public class MainActivity extends AppCompatActivity {
                 //TODO Have to draw circle.
                 MenuItem item4 = menuOptions.findItem(R.id.calculate);
                 item4.setVisible(false);
-                MenuItem item5 = menuOptions.findItem(R.id.autoplot);
-                item5.setVisible(false);
+                /*MenuItem item5 = menuOptions.findItem(R.id.autoplot);
+                item5.setVisible(false);*/
                 autoplot.setAnimation(fadeOut);
                 autoplot.setVisibility(View.INVISIBLE);
 
@@ -2121,13 +2182,13 @@ public class MainActivity extends AppCompatActivity {
                 //polygon.setText("");
                 MenuItem item3 = menuOptions.findItem(R.id.calculate);
                 item3.setVisible(true);
-                if (dv.sprinkx.size() == 0) {
+                /*if (dv.sprinkx.size() == 0) {
                     MenuItem item2 = menuOptions.findItem(R.id.autoplot);
                     item2.setVisible(true);
                 } else if (dv.sprinkx.size() > 0) {
                     MenuItem item2 = menuOptions.findItem(R.id.autoplot);
                     item2.setVisible(false);
-                }
+                }*/
 
                 //onCreateOptionsMenu(menuOptions);
                 if (dv.xlist.size() < 3 && dv.currentMode != DrawingView.Mode.drawc
@@ -2903,6 +2964,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     double overCounted3 = 0;
+
+    public static double[] intersectionOf2Lines(double m1, double b1, double m2, double b2) {
+        double x = (b1 - b2) / (m2 - m1);
+        double y = m2 * x + b2;
+
+        return new double[]{x, y};
+    }
 
     private void calculate3CircleOverlap() {
         Log.wtf("*- 3 Overlapping Circles", "_______________________________________");
