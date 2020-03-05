@@ -300,19 +300,23 @@ public class MainActivity extends AppCompatActivity {
             //double degrees2 = getAngle(v1x, v1y, 300, 0);
 
             double vectorUpY = dv.ylist.get(s2) - dv.ylist.get(s1);
-            double upAngle = getAngle(v1x,v1y,0,300);
+            double upAngle = getAngle(v1x, v1y, 0, 300);
 
             double degrees3 = getAngle(v2x, v2y, -300, 0);
             double degrees2 = getAngle(v1x, v1y, -300, 0);
             if (degrees2 == 180) degrees2 = 0;
             double originalDegrees = degrees2;
             //README Better solution found
-            if(upAngle <= 90) degrees2*=-1;
+            if (upAngle <= 90) degrees2 *= -1;
             //if (m >= size / 2) degrees2 *=-1;
             degrees2 += 90;
-            //README Below line is experimental and seems to fix
+            //README Below line seems to fix
             // the 3rd angle in the square which is 180 off.
-            if (m >= size / 2 && degrees2-90 == 0) degrees2 += 180;
+            if ((dv.xlist.get((s1 - 1 + size) % size) - dv.xlist.get((s2 - 1 + size) % size) == 0) &&
+                    (dv.ylist.get((s2 - 1 + size) % size) - dv.ylist.get((s3 - 1 + size) % size) == 0) &&
+                    dv.xlist.get(s2) - dv.xlist.get(s1) < 0)
+                degrees2 += 180;
+            //if (m >= size / 2 && degrees2-90 == 0) degrees2 += 180;
             //NOTES 3/4/20 Have made quite a bit of progress
             // Discovered that you need to multiply degrees2 by -1 for certain cases
             // Before adding the 90 (thereby changing the original angle)
@@ -321,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
             // the angle, you should be subtracting it.
             //TODO Figure out when you have to add vs subtract angle.
             Log.wtf(",                   Vectors:", v1x + " " + v1y + "     " + v2x + " " +
-                    v2y + "-----> " + vectorUpY +"_" +(int)upAngle+ "   Angle: " + degrees1);
+                    v2y + "-----> " + vectorUpY + "_" + (int) upAngle + "   : " + (int) getAngle(v2x, v2y, 300, 0));
             Log.wtf("*-Rotation " + (m + 1), "" + (int) originalDegrees + " " + ((int) (1 * (degrees2))) + " " +
                     ((int) (1 * (degrees3))) + "   " + "    (" + x2 + "," + y2 + ")");
 
@@ -475,6 +479,13 @@ public class MainActivity extends AppCompatActivity {
         }*/
         //x.addAll(dv.xlist);
         //y.addAll(dv.ylist);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
         radius.add((int) max / 2);
         radius.add((int) max / 2);
         radius.add((int) max / 2);
