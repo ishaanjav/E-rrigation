@@ -185,28 +185,72 @@ public class MainActivity extends AppCompatActivity {
         if (maxSideLength > 325) {
             pixelSideLength = (double) 250d / dv.ratio;
             minSideLength = 10d / dv.ratio;
+        } else if (maxSideLength <= 35) {
+            pixelSideLength = 15d / dv.ratio;
+            minSideLength = 4d / dv.ratio;
         }
         return new double[]{minSideLength, pixelSideLength};
     }
 
     public static double getAngle(double v1x, double v1y, double v2x, double v2y) {
-
-
-        //need to normalize:
         double l1 = Math.sqrt(v1x * v1x + v1y * v1y);
         v1x /= l1;
         v1y /= l1;
-
-        //need to normalize:
         double l2 = Math.sqrt(v2x * v2x + v2y * v2y);
         v2x /= l2;
         v2y /= l2;
         double rad = Math.acos(v1x * v2x + v1y * v2y);
         //INFO Changed method of calculating angle.
-        double degrees = Math.toDegrees(rad);
-
-        return degrees;
+        return Math.toDegrees(rad);
     }
+
+    public static void customPlotter() {
+        autoplot.setAnimation(fadeIn);
+        autoplot.setVisibility(View.VISIBLE);
+        dv.xlist.clear();
+        dv.ylist.clear();
+        rectangle();
+        //hexagon();
+        dv.invalidate();
+    }
+
+    public static void customPlotter(boolean hex) {
+        autoplot.setAnimation(fadeIn);
+        autoplot.setVisibility(View.VISIBLE);
+        dv.xlist.clear();
+        dv.ylist.clear();
+        hexagon();
+        dv.invalidate();
+    }
+
+    public static void rectangle() {
+        dv.xlist.add(300);
+        dv.xlist.add(1150);
+        dv.xlist.add(1150);
+        dv.xlist.add(300);
+
+        dv.ylist.add(300);
+        dv.ylist.add(300);
+        dv.ylist.add(1660);
+        dv.ylist.add(1660);
+    }
+
+    public static void hexagon() {
+        dv.xlist.add(250);
+        dv.xlist.add(725);
+        dv.xlist.add(1200);
+        dv.xlist.add(1200);
+        dv.xlist.add(725);
+        dv.xlist.add(250);
+
+        dv.ylist.add(400);
+        dv.ylist.add(230);
+        dv.ylist.add(400);
+        dv.ylist.add(1400);
+        dv.ylist.add(1570);
+        dv.ylist.add(1400);
+    }
+
 
     private static void autoPlot() {
         if (dv.sprinkx.size() != 0)
@@ -221,6 +265,20 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Integer> x = new ArrayList<>();
         ArrayList<Integer> y = new ArrayList<>();
 
+        /*rotation.add(0);
+        rotation.add(90);
+        rotation.add(180);
+        rotation.add(270);*/
+        /*rotation.add(0);
+        rotation.add(0);
+        rotation.add(0);
+        rotation.add(0);
+        rotation.add(0);*/
+        /*angle.add(90);
+        angle.add(180);
+        angle.add(270);
+        angle.add(90);
+        angle.add(90);*/
         for (int m = 0; m < dv.xlist.size(); m++) {
             int size = dv.xlist.size();
             int s1 = m;
@@ -233,15 +291,44 @@ public class MainActivity extends AppCompatActivity {
 
             double v2x = dv.xlist.get(s3) - dv.xlist.get(s2);
             double v2y = dv.ylist.get(s3) - dv.ylist.get(s2);
+            double y1 = dv.ylist.get(s1) * -1, y2 = dv.ylist.get(s2) * -1, y3 = dv.ylist.get(s3) * -1;
+            double x1 = dv.xlist.get(s1), x2 = dv.xlist.get(s2), x3 = dv.xlist.get(s3);
 
             //INFO Changed method of calculating angle.
             double degrees1 = getAngle(v1x, v1y, v2x, v2y);
-            double degrees2 = getAngle(v1x, v1y, 0, 200);
-            Log.wtf("*-Degrees " + (m + 1), "" + degrees1);
-            rotation.add((int) (Math.pow(-1, m) * degrees2));
+            //README Below works for rectangle
+            //double degrees2 = getAngle(v1x, v1y, 300, 0);
 
-            double y1 = dv.ylist.get(s1) * -1, y2 = dv.ylist.get(s2) * -1, y3 = dv.ylist.get(s3) * -1;
-            double x1 = dv.xlist.get(s1), x2 = dv.xlist.get(s2), x3 = dv.xlist.get(s3);
+            double vectorUpY = dv.ylist.get(s2) - dv.ylist.get(s1);
+            double upAngle = getAngle(v1x,v1y,0,300);
+
+            double degrees3 = getAngle(v2x, v2y, -300, 0);
+            double degrees2 = getAngle(v1x, v1y, -300, 0);
+            if (degrees2 == 180) degrees2 = 0;
+            double originalDegrees = degrees2;
+            //README Better solution found
+            if(upAngle <= 90) degrees2*=-1;
+            //if (m >= size / 2) degrees2 *=-1;
+            degrees2 += 90;
+            //README Below line is experimental and seems to fix
+            // the 3rd angle in the square which is 180 off.
+            if (m >= size / 2 && degrees2-90 == 0) degrees2 += 180;
+            //NOTES 3/4/20 Have made quite a bit of progress
+            // Discovered that you need to multiply degrees2 by -1 for certain cases
+            // Before adding the 90 (thereby changing the original angle)
+            // because it doesn't know whether the side it is measuring to is on the left (-)
+            // or on the right which is (+). If it's on the left, you shouldn't be adding
+            // the angle, you should be subtracting it.
+            //TODO Figure out when you have to add vs subtract angle.
+            Log.wtf(",                   Vectors:", v1x + " " + v1y + "     " + v2x + " " +
+                    v2y + "-----> " + vectorUpY +"_" +(int)upAngle+ "   Angle: " + degrees1);
+            Log.wtf("*-Rotation " + (m + 1), "" + (int) originalDegrees + " " + ((int) (1 * (degrees2))) + " " +
+                    ((int) (1 * (degrees3))) + "   " + "    (" + x2 + "," + y2 + ")");
+
+            if (m < 1)
+                rotation.add((int) degrees2);
+            else
+                rotation.add((int) ((degrees2)));
 
             //INFO Standard equation for 1st line. ax + by + c = 0
             double a = y2 - y1;
@@ -281,21 +368,22 @@ public class MainActivity extends AppCompatActivity {
 
             double angleToSide = getAngle(x3 - x2, y3 - y2, checkX - x2, checkY - y2);
             if (inside && 2 * angleToSide > 180)
-                realAngle = 2*angleToSide;
+                realAngle = 2 * angleToSide;
             else if (outside) {
                 checkX = checkX - factorX * 2;
                 checkY = checkY - factorY * 2;
                 angleToSide = getAngle(x3 - x2, y3 - y2, checkX - x2, checkY - y2);
-                if (2 * angleToSide > 180) realAngle = 2*angleToSide;
-                else realAngle = 2*angleToSide;
-            } else realAngle = 2*angleToSide;
+                if (2 * angleToSide > 180) realAngle = 2 * angleToSide;
+                else realAngle = 2 * angleToSide;
+            } else realAngle = 2 * angleToSide;
 
 
             angle.add((int) realAngle);
-            Log.wtf("Point To Check", "Intersecton: " + x2 + "," + y2
+            /*Log.wtf("Point To Check", "Intersecton: " + x2 + "," + y2
                     + "   --->  " + checkX + "," + checkY + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
                     + a + "x + " + b + "y + " + c + ",  " + r + "x + " + s + "y + " + t + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tOutside:"
                     + outside + "  Angle: " + (2 * angleToSide) + " ------- Real Angle: " + realAngle + "\n,  ");
+         */
            /* //INFO Get the intersection of 2 lines using the slopes and y-intercept.
             double intersectX = intersectionOf2Lines(-a/b, -c/b, -r/s,-t/s)[0];
             double intersectY = intersectionOf2Lines(-a/b, -c/b, -r/s,-t/s)[1];
@@ -304,9 +392,16 @@ public class MainActivity extends AppCompatActivity {
                     "  " + x2+","+y2+"  " + x3 +","+y3 +" --->  " +
                     intersectX + "," +intersectY);*/
 
-            //x.add(dv.xlist.get(s1));
-            //y.add(dv.ylist.get(s1));
-        }/*
+            x.add(dv.xlist.get(s1));
+            y.add(dv.ylist.get(s1));
+        }
+//        angle.add(90);
+//        angle.add(180);
+//        angle.add(300);
+//        angle.add(270);
+
+        /*
+        //TODO Need to work on rotation.
         //TODO Need to rewrite whole algorithm for radius,
         // For each corner, need to take into account both sides
         // as well as next corner and both sides.
@@ -378,16 +473,15 @@ public class MainActivity extends AppCompatActivity {
         if (radius.size() > x.size()) {
             radius.remove(radius.size() - 1);
         }*/
-        x.addAll(dv.xlist);
-        y.addAll(dv.ylist);
-        radius.add((int) max);
-        radius.add((int) max);
-        radius.add((int) min);
-        radius.add((int) min);
-        rotation.add(0);
-        rotation.add(0);
-        rotation.add(0);
-        rotation.add(0);
+        //x.addAll(dv.xlist);
+        //y.addAll(dv.ylist);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+        radius.add((int) max / 2);
+
         /*rotation.add(90);
         rotation.add(180);
         rotation.add(360);*/
@@ -395,9 +489,7 @@ public class MainActivity extends AppCompatActivity {
         angle.add(145);
         angle.add(30);
         angle.add(90);*/
-        Log.wtf("Lists:", angle.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
-                + rotation.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + radius.toString()
-                + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + distanceLeft.toString());
+
         dv.sprinkx.addAll(x);
         dv.sprinky.addAll(y);
         int last = angle.get(angle.size() - 1);
@@ -406,6 +498,11 @@ public class MainActivity extends AppCompatActivity {
         /*rotation.set(1, rotation.get(1) -90);
         rotation.set(2, rotation.get(2) +90);
         rotation.set(3, rotation.get(3)*-1);*/
+
+        Log.wtf("Lists:", angle.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+                + rotation.toString() + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + radius.toString()
+                + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" + x.toString() + "  " + y.toString());
+
         dv.rotationList.addAll(rotation);
         dv.angleList.addAll(angle);
         dv.sprinkr.addAll(radius);
@@ -1185,6 +1282,7 @@ public class MainActivity extends AppCompatActivity {
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
                 //makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                Log.wtf("Angle: " + dv.angle, "  Rotate: " + rotateDisplay);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -1206,6 +1304,7 @@ public class MainActivity extends AppCompatActivity {
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
                 shortToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                Log.wtf("Angle: " + dv.angle, "  Rotate: " + rotateDisplay);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -1231,6 +1330,7 @@ public class MainActivity extends AppCompatActivity {
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
                 shortToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                Log.wtf("Angle: " + dv.angle, "  Rotate: " + dv.rotate);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -1253,6 +1353,7 @@ public class MainActivity extends AppCompatActivity {
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
                 shortToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                Log.wtf("Angle: " + dv.angle, "  Rotate: " + dv.rotate);
 
                 if (dv.sprinkx.size() > 0) {
                     dv.rotationList.set(dv.sprinkx.size() - 1, dv.rotate);
@@ -1995,11 +2096,19 @@ public class MainActivity extends AppCompatActivity {
                             + " " + sprinky.get(i) + " " + sprinkr.get(i) + " " + "\n";
                 }*/
                 //Log.wtf("*-Lists", logger);
+                /*rotationList.clear();
+                rotationList.add(0);
+                rotationList.add(90);
+                rotationList.add(110);
+                rotationList.add(180);
+                rotationList.add(270);
+                rotationList.add(360);*/
                 for (int i = 0; i < sprinkx.size() - 1; i++) {
                     //Log.wtf("*Sprinkler Location: ", sprinkx.get(i) + " " + sprinky.get(i) + " " + sprinkr.get(i));
                     // canvas.dra wCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                     int m = i;
                     float radius = sprinkr.get(m);
+                    Log.wtf("Drawing Rotation", rotationList.get(i) + " " + xlist.get(i) + "," + ylist.get(i));
                     canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
                                     sprinky.get(m) + radius), (rotationList.get(i)) % 360 - 90,
                             /*(rotationList.get(i))%360 + */angleList.get(i), true, sprinklerC);
@@ -2158,6 +2267,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.circle:
                 //TODO Have to draw circle.
+                /*customPlotter(true);
+                dv.currentMode = DrawingView.Mode.splot;*/
                 MenuItem item4 = menuOptions.findItem(R.id.calculate);
                 item4.setVisible(false);
                 /*MenuItem item5 = menuOptions.findItem(R.id.autoplot);
@@ -2211,7 +2322,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.sprinklers:
-                //polygon.setText("");
+               /* customPlotter();
+                dv.currentMode = DrawingView.Mode.splot;*/
                 MenuItem item3 = menuOptions.findItem(R.id.calculate);
                 item3.setVisible(true);
                 /*if (dv.sprinkx.size() == 0) {
