@@ -279,8 +279,8 @@ public class MainActivity extends AppCompatActivity {
         angle.add(270);
         angle.add(90);
         angle.add(90);*/
+        int size = dv.xlist.size();
         for (int m = 0; m < dv.xlist.size(); m++) {
-            int size = dv.xlist.size();
             int s1 = m;
             int s2 = (m + 1) % size;
             int s3 = (m + 2) % size;
@@ -479,27 +479,47 @@ public class MainActivity extends AppCompatActivity {
         }*/
         //x.addAll(dv.xlist);
         //y.addAll(dv.ylist);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
-        radius.add((int) max / 2);
+        if (dv.xlist.size() == 3) {
+            int s1 = getLength(0, 1);
+            int s2 = getLength(2, 1);
+            int s3 = getLength(0, 2);
+            int[] ar = new int[3];
+            int r1, r2, r3;
+            int min1 = (s1 < s3) ? s1 : s3;
+            int min2 = (s1 < s2) ? s1 : s2;
+            int min3 = (s2 < s3) ? s2 : s3;
 
-        /*rotation.add(90);
-        rotation.add(180);
-        rotation.add(360);*/
-        /*angle.add(90);
-        angle.add(145);
-        angle.add(30);
-        angle.add(90);*/
+            if (min1 / 2d <= min) r1 = (int) min;
+            else if (min1 >= max * 1.92) r1 = (int) max;
+            else r1 = min1 / 2;
+
+            if (min2 / 2d <= min) r2 = (int) min;
+            else if (min2 >= max * 1.92) r2 = (int) max;
+            else r2 = min2 / 2;
+
+            if (min3 / 2d <= min) r3 = (int) min;
+            else if (min3 >= max * 1.92) r3 = (int) max;
+            else r3 = min3 / 2;
+
+            radius.add(r1);
+            radius.add(r2);
+            radius.add(r3);
+        } else {
+            for (int i = 0; i < dv.xlist.size(); i++) {
+                int cur = i;
+                int prev = (i - 1 + size) % size;
+                int prev2 = (i - 2 + size) % size;
+                int next = (i + 1) % size;
+                int next2 = (i + 1) % size;
+
+                int n1 = getLength(cur, prev);
+                int n2 = getLength(prev, prev2);
+                int s1 = getLength(cur, next);
+                int s2 = getLength(next, next2);
+
+                radius.add((int) max / 2);
+            }
+        }
 
         dv.sprinkx.addAll(x);
         dv.sprinky.addAll(y);
@@ -519,6 +539,17 @@ public class MainActivity extends AppCompatActivity {
         dv.sprinkr.addAll(radius);
         //dv.sprinkx.addAll(x);
         dv.invalidate();
+    }
+
+    public static int assignCheck(boolean b, int n, int newVal) {
+        if (b) return n;
+        return newVal;
+    }
+
+    public static int getLength(int cur, int prev) {
+        int n1 = (int) Math.round(Math.sqrt(Math.pow(dv.xlist.get(cur) - dv.xlist.get(prev), 2) +
+                Math.pow(dv.ylist.get(cur) - dv.ylist.get(prev), 2)));
+        return n1;
     }
 
     public boolean leaveAlone = false;
@@ -1520,6 +1551,21 @@ public class MainActivity extends AppCompatActivity {
            canvas.drawPath(path, paint);*/
             mCanvas = canvas;
 
+            Paint wallpaint = new Paint();
+            wallpaint.setColor(Color.parseColor("#4Fcffcc7"));
+            wallpaint.setColor(Color.parseColor("#4Fc3fcb8"));
+            wallpaint.setColor(Color.parseColor("#4Fc0f7b5"));
+            wallpaint.setStyle(Paint.Style.FILL);
+
+            Path wallpath = new Path();
+            wallpath.reset(); // only needed when reusing this path for a new build
+            if (dv.xlist.size() > 0)
+                wallpath.moveTo(dv.xlist.get(0), dv.ylist.get(0)); // used for first point
+            for (int i = 1; i < dv.xlist.size(); i++) {
+                wallpath.lineTo(dv.xlist.get(i), dv.ylist.get(i));
+            }
+            canvas.drawPath(wallpath, wallpaint);
+
 
             //INFO I think when you call invalidate() it calls onDraw again. Check it out by putting
             // your custom draw function for the line here. Test it out.
@@ -1936,7 +1982,7 @@ public class MainActivity extends AppCompatActivity {
                     //Log.d("***--- Set to I", (int) setToI + " " + (int) pixelSideLength + " " + sradius + " " + (int) maxSideLength + " " + (int) dv.ratio+"\n..---...");
                     //sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 5.9f, 2)) - 50);
                     sprinkr.add((int) setToI);
-                    //Log.d("*-", "Radii: " + sprinkr.toString());
+                    Log.wtf("*-", "Radii: " + sprinkr.toString());
                     //sprinkr.add((int) ((double) (sradius/dv.ratio)));
                     //Log.wtf("*- IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
                     //Log.wtf("*- IMPORTANT: ", "Change Rotation Size: " + changeRotation.size() + "  rotation-" + rotate + "  angle-" + angle);
@@ -2119,7 +2165,7 @@ public class MainActivity extends AppCompatActivity {
                     // canvas.dra wCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                     int m = i;
                     float radius = sprinkr.get(m);
-                    Log.wtf("Drawing Rotation", rotationList.get(i) + " " + xlist.get(i) + "," + ylist.get(i));
+                    Log.wtf("Drawing Rotation", rotationList.get(i) + " " + sprinkx.get(i) + "," + sprinky.get(i));
                     canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
                                     sprinky.get(m) + radius), (rotationList.get(i)) % 360 - 90,
                             /*(rotationList.get(i))%360 + */angleList.get(i), true, sprinklerC);
@@ -3668,7 +3714,7 @@ public class MainActivity extends AppCompatActivity {
                                 + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t1 circle- " + (int) (r1 * r1 * Math.PI) + "  X1: " + (int) x1 + " Y1: " + (int) y1 + " X2: " +
                                 (int) x2 + " Y2: " + (int) y2 + " Arc1-" + (int) arc1 + " Arc2- " + (int) arc2 + " Triangle-" + (int) triangleArea);
 
-                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
+                        /*RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams
                                 ((int) ViewGroup.LayoutParams.WRAP_CONTENT, (int) ViewGroup.LayoutParams.WRAP_CONTENT);
                         params.leftMargin = (int) ix1 - 3;
                         params.topMargin = (int) iy1;
@@ -3706,7 +3752,7 @@ public class MainActivity extends AppCompatActivity {
                         textView3.setTextSize(7);
                         //makeToast("Making the text");
                         rlDvHolder.addView(textView3);
-                        dv.idCounter++;
+                        dv.idCounter++;*/
                     }
 
                     /* Log.wtf("*- Information: ", "X1: " + (int) x1 + " Y1: " + (int) y1 + " X2: " + (int) x2 + " Y2: " + (int) y2
