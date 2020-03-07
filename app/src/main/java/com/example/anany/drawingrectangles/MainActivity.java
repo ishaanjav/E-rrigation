@@ -512,12 +512,39 @@ public class MainActivity extends AppCompatActivity {
                 int next = (i + 1) % size;
                 int next2 = (i + 1) % size;
 
-                int n1 = getLength(cur, prev);
+                /*int n1 = getLength(cur, prev);
                 int n2 = getLength(prev, prev2);
                 int s1 = getLength(cur, next);
-                int s2 = getLength(next, next2);
+                int s2 = getLength(next, next2);*/
 
-                radius.add((int) max / 2);
+                int s1 = getLength(prev, cur);
+                int s2 = getLength(cur, next);
+                int r1;
+                int min2 = (s1 < s2) ? s1 : s2;
+
+                boolean adjusted = false;
+                if (min2 / 2d <= min) {
+                    r1 = (int) min;
+                    adjusted = true;
+                }
+                if (min2 >= max * 1.92) {
+                    r1 = (int) max;
+                    adjusted = true;
+                } else r1 = min2 / 2;
+
+                if (i > 0) {
+                    boolean c1, c2;
+                    int nextMax = (int) (s2 / 1.92);
+                    nextMax = (int) Math.min(nextMax, max);
+                    int curMax = (int) (s1 - radius.get(i - 1));
+                    curMax = (int) Math.min(max, curMax);
+                    r1 = Math.max(r1, Math.min(curMax, nextMax));
+                    adjusted = true;
+                }
+
+                radius.add(r1);
+
+                //radius.add((int) max / 2);
             }
         }
 
