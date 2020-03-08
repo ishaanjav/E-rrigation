@@ -174,23 +174,23 @@ public class MainActivity extends AppCompatActivity {
         }
         if (maxSideLength > 50) {
             pixelSideLength = (double) 35d / dv.ratio;
-            minSideLength = 4d / dv.ratio;
+            minSideLength = 5d / dv.ratio;
         }
         if (maxSideLength > 74) {
             pixelSideLength = (double) 40d / dv.ratio;
-            minSideLength = 5d / dv.ratio;
+            minSideLength = 7d / dv.ratio;
         }
         if (maxSideLength > 90) {
             pixelSideLength = (double) 50d / dv.ratio;
-            minSideLength = 6d / dv.ratio;
+            minSideLength = 9d / dv.ratio;
         }
         if (maxSideLength > 150) {
             pixelSideLength = (double) 80d / dv.ratio;
-            minSideLength = 8d / dv.ratio;
+            minSideLength = 10d / dv.ratio;
         }
         if (maxSideLength > 325) {
             pixelSideLength = (double) 250d / dv.ratio;
-            minSideLength = 10d / dv.ratio;
+            minSideLength = 20d / dv.ratio;
         } else if (maxSideLength <= 35) {
             pixelSideLength = 15d / dv.ratio;
             minSideLength = 4d / dv.ratio;
@@ -322,6 +322,11 @@ public class MainActivity extends AppCompatActivity {
                     (dv.ylist.get((s2 - 1 + size) % size) - dv.ylist.get((s3 - 1 + size) % size) == 0) &&
                     dv.xlist.get(s2) - dv.xlist.get(s1) < 0)
                 degrees2 += 180;
+/*
+            else if(dv.ylist.get(s1) - dv.ylist.get(s2) ==0)
+                degrees2 += 180;
+*/
+
             //if (m >= size / 2 && degrees2-90 == 0) degrees2 += 180;
             //NOTES 3/4/20 Have made quite a bit of progress
             // Discovered that you need to multiply degrees2 by -1 for certain cases
@@ -559,7 +564,7 @@ public class MainActivity extends AppCompatActivity {
         angle.remove(angle.size() - 1);
 
         ArrayList<Integer> sideRadii = new ArrayList<>();
-        int average = (int) Math.ceil(max / 2 + min / 2);
+        int average = (int) (Math.ceil(max / 2 + min / 2) * 0.85);
         Log.wtf("Lengths", min + " " + max);
         for (int i = 0; i < dv.xlist.size(); i++) {
             int sideLength = getLength(i, (i + 1) % size);
@@ -569,77 +574,210 @@ public class MainActivity extends AppCompatActivity {
             int numRegular;
             int numSmall;
             double minTemp = min;
-            Log.wtf("*----Coordinates", "(" + dv.xlist.get(i) + "," + dv.ylist.get(i) + ") ----- ("
+            Log.wtf("*----Coordinates", "___Distance: " + sideLength + " === (" + dv.xlist.get(i) + "," + dv.ylist.get(i) + ") ----- ("
                     + dv.xlist.get((i + 1) % size) + "," + dv.ylist.get((i + 1) % size) + ")");
             if (diffLeft >= min) {
-                boolean choice1 = false;
-                int amt1, amt2;
-                numRegular = (int) diffLeft / (average * 2);
-                numSmall = (diffLeft - average * numRegular) / ((int) (min * 2));
-                amt1 = diffLeft - numRegular * average * 2 - numSmall * (int) min * 2;
-                int trackX = dv.xlist.get(i), trackY = dv.ylist.get(i);
-                double slope = (double) (dv.ylist.get(i) - dv.ylist.get((i + 1) % size)) / (double) (dv.xlist.get(i) -
-                        dv.xlist.get((i + 1) % size));
-                if (amt1 > 0 && numSmall > 0)
-                    minTemp += amt1 / numSmall;
-                //TODO Autoplotting side sprinklers does not work when slope is 0.
+
+                //DONE Autoplotting side sprinklers does not work when slope is 0.
                 // Maybe just have one if case for 0 --> Only need to take into account the x/y,
                 //  not x and y when shifting the sprinklers
                 // and a 2nd if case for remaining below code.
-                if (slope == 0) {
-                    slope = 0.000000001d;
-                }
-                double xFact = 1, yFact = slope;
-                xFact = Math.sqrt(r1 * r1 / (slope * slope + 1));
-                yFact = slope * xFact;
-                // boolean addX = (dv.xlist.get((i+1)%size) > dv.xlist.get(i));
-                // boolean addY = (dv.ylist.get((i+1)%size) > dv.ylist.get(i));
-                trackX += xFact;
-                trackY += yFact;
-                Log.wtf("*------Start Tracker", trackX + " " + trackY + " " + slope);
-                for (int t = 1; t < numSmall + 1; t++) {
-                    if (t == 1) {
-                        xFact = Math.sqrt(min * min / (slope * slope + 1));
-                    } else {
-                        xFact = Math.sqrt(4 * min * min / (slope * slope + 1));
-                    }
-                    yFact = slope * xFact;
+                //if (slope == 0) {
+                //slope = 0.000000001d;
+                if ((dv.ylist.get(i) - dv.ylist.get((i + 1) % size)) == 0) {
+                    double length = (-1 * dv.xlist.get(i) + dv.xlist.get((i + 1) % size));
+                    int neg = (length < 0) ? -1 : 1;
+                    length = Math.abs(length) - r1 - r2;
+
+                    int amt1, amt2;
+                    numRegular = (int) length / (average * 2);
+                    numSmall = (int) (length - average * numRegular * 2) / ((int) (min * 2));
+                    amt1 = (int) length - numRegular * average * 2 - numSmall * (int) min * 2;
+                    int trackX = dv.xlist.get(i), trackY = dv.ylist.get(i);
+                    double slope;
+                    if (amt1 > 0 && numSmall > 0)
+                        minTemp += amt1 / numSmall;
+                    if (amt1 > min) numSmall++;
+
+                    double shift = r1;
+                    double xFact = shift * neg;
                     trackX += xFact;
-                    trackY += yFact;
-                    rotation.add(rotation.get(i));
-                    angle.add(180);
-                    x.add(trackX);
-                    y.add(trackY);
-                    sideRadii.add((int) min);
-                    if (t == numSmall) {
-                        xFact = Math.sqrt(min / (slope * slope + 1));
+                    trackY = dv.ylist.get(i);
+                    Log.wtf("*------Start Tracker (same y)", trackX + " " + trackY + " " + xFact);
+                    for (int t = 1; t < numSmall + 1; t++) {
+                        if (t == 1) {
+                            xFact = min * neg;
+                        } else {
+                            xFact = min * 2 * neg;
+                        }
                         trackX += xFact;
-                        trackY += yFact;
+                        rotation.add(rotation.get(i));
+                        angle.add(180);
+                        x.add(trackX);
+                        y.add(trackY);
+                        sideRadii.add((int) min);
+                        //README If on the last center, move over to the edge.
+                        if (t == numSmall) {
+                            xFact = min * neg;
+                            trackX += xFact;
+                        }
+                        Log.wtf("*--------Trackers", trackX + " " + trackY
+                                + " " + sideRadii.get(sideRadii.size() - 1));
                     }
-                    Log.wtf("*--------Trackers", trackX + " " + trackY
-                            + " " + sideRadii.get(sideRadii.size() - 1));
-                }
-                for (int t = 1; t < numRegular + 1; t++) {
-                    if (t == 1) {
-                        xFact = Math.sqrt(average * average / (slope * slope + 1));
-                    } else {
-                        xFact = Math.sqrt(4 * average * average / (slope * slope + 1));
+                    for (int t = 1; t < numRegular + 1; t++) {
+                        if (t == 1) {
+                            xFact = average * neg;
+                        } else {
+                            xFact = average * 2 * neg;
+                        }
+                        trackX += xFact;
+                        rotation.add(rotation.get(i));
+                        angle.add(180);
+                        x.add(trackX);
+                        y.add(trackY);
+                        sideRadii.add((int) average);
+                        if (t == numSmall) {
+                            xFact = average * neg;
+                            trackX += xFact;
+                        }
+                        Log.wtf("*--------Trackers", trackX + " " + trackY
+                                + " " + sideRadii.get(sideRadii.size() - 1));
                     }
+
+                } else if ((dv.xlist.get(i) -
+                        dv.xlist.get((i + 1) % size)) == 0) {
+                    double length = (-1 * dv.ylist.get(i) + dv.ylist.get((i + 1) % size));
+                    int neg = (length < 0) ? -1 : 1;
+                    length = Math.abs(length) - r1 - r2;
+
+                    int amt1, amt2;
+                    numRegular = (int) length / (average * 2);
+                    numSmall = (int) (length - average * numRegular * 2) / ((int) (min * 2));
+                    amt1 = (int) length - numRegular * average * 2 - numSmall * (int) min * 2;
+                    int trackX = dv.xlist.get(i), trackY = dv.ylist.get(i);
+                    double slope;
+                    if (amt1 > 0 && numSmall > 0)
+                        minTemp += amt1 / numSmall;
+                    if (amt1 > min) numSmall++;
+
+                    double shift = r1;
+                    double xFact = shift * neg;
+                    trackY += xFact;
+                    trackX = dv.xlist.get(i);
+                    Log.wtf("*------Start Tracker (same x)", trackX + " " + trackY + " " + xFact + " " + length);
+                    for (int t = 1; t < numSmall + 1; t++) {
+                        if (t == 1) {
+                            xFact = min * neg;
+                        } else {
+                            xFact = min * 2 * neg;
+                        }
+                        trackY += xFact;
+                        rotation.add(rotation.get(i));
+                        angle.add(180);
+                        x.add(trackX);
+                        y.add(trackY);
+                        sideRadii.add((int) min);
+                        //README If on the last center, move over to the edge.
+                        if (t == numSmall) {
+                            xFact = min * neg;
+                            trackY += xFact;
+                        }
+                        Log.wtf("*--------Trackers", trackX + " " + trackY
+                                + " " + sideRadii.get(sideRadii.size() - 1));
+                    }
+                    for (int t = 1; t < numRegular + 1; t++) {
+                        if (t == 1) {
+                            xFact = average * neg;
+                        } else {
+                            xFact = average * 2 * neg;
+                        }
+                        trackY += xFact;
+                        rotation.add(rotation.get(i));
+                        angle.add(180);
+                        x.add(trackX);
+                        y.add(trackY);
+                        sideRadii.add((int) average);
+                        if (t == numSmall) {
+                            xFact = average * neg;
+                            trackY += xFact;
+                        }
+                        Log.wtf("*--------Trackers", trackX + " " + trackY
+                                + " " + sideRadii.get(sideRadii.size() - 1));
+                    }
+                } else {
+                    int amt1, amt2;
+                    numRegular = (int) diffLeft / (average * 2);
+                    numSmall = (diffLeft - average * numRegular * 2) / ((int) (min * 2));
+                    amt1 = diffLeft - numRegular * average * 2 - numSmall * (int) min * 2;
+                    int trackX = dv.xlist.get(i), trackY = dv.ylist.get(i);
+                    double slope;
+                    if (amt1 > 0 && numSmall > 0)
+                        minTemp += amt1 / numSmall;
+                    if (amt1 > min*0.8) numSmall++;
+
+                    int neg = (dv.ylist.get(i) > dv.ylist.get((i+1)%size)) ? -1 : 1;
+                    slope = (double) (dv.ylist.get(i) - dv.ylist.get((i + 1) % size)) / (double) (dv.xlist.get(i) -
+                            dv.xlist.get((i + 1) % size));
+                    //slope = Math.abs(slope);
+                    //if (dv.ylist.get(i) > dv.ylist.get((i + 1) % size)) slope *= -1;
+
+                    double xFact = 1, yFact = slope;
+                    xFact = Math.sqrt(r1 * r1 / (slope * slope + 1));
                     yFact = slope * xFact;
-                    trackX += xFact;
-                    trackY += yFact;
-                    rotation.add(rotation.get(i));
-                    angle.add(180);
-                    x.add(trackX);
-                    y.add(trackY);
-                    sideRadii.add((int) average);
-                    if (t == numSmall) {
-                        xFact = Math.sqrt(average / (slope * slope + 1));
-                        trackX += xFact;
-                        trackY += yFact;
+                    // boolean addX = (dv.xlist.get((i+1)%size) > dv.xlist.get(i));
+                    // boolean addY = (dv.ylist.get((i+1)%size) > dv.ylist.get(i));
+                    trackX += xFact*neg;
+                    trackY += yFact*neg;
+                    Log.wtf("*------Start Tracker", trackX + " " + trackY + " " + slope
+                            + " diffLeft: " + diffLeft + " amt: " + amt1);
+                    //DONE Doesn't autoplot on the left most side from last vertex to first vertex.
+                    // Slope is positive so it adds the centers off screen.
+                    for (int t = 1; t < numSmall + 1; t++) {
+                        if (t == 1) {
+                            xFact = Math.sqrt(min * min / (slope * slope + 1));
+                        } else {
+                            xFact = Math.sqrt(4 * min * min / (slope * slope + 1));
+                        }
+                        yFact = slope * xFact;
+                        trackX += xFact*neg;
+                        trackY += yFact*neg;
+                        rotation.add(rotation.get(i));
+                        angle.add(180);
+                        x.add(trackX);
+                        y.add(trackY);
+                        sideRadii.add((int) min);
+                        if (t == numSmall) {
+                            xFact = Math.sqrt(min * min / (slope * slope + 1));
+                            trackX += xFact*neg;
+                            yFact = slope * xFact;
+                            trackY += yFact*neg;
+                        }
+                        Log.wtf("*--------Trackers", trackX + " " + trackY
+                                + " " + sideRadii.get(sideRadii.size() - 1));
                     }
-                    Log.wtf("*--------Trackers", trackX + " " + trackY
-                            + " " + sideRadii.get(sideRadii.size() - 1));
+                    for (int t = 1; t < numRegular + 1; t++) {
+                        if (t == 1) {
+                            xFact = Math.sqrt(average * average / (slope * slope + 1));
+                        } else {
+                            xFact = Math.sqrt(4 * average * average / (slope * slope + 1));
+                        }
+                        yFact = slope * xFact;
+                        trackX += xFact*neg;
+                        trackY += yFact*neg;
+                        rotation.add(rotation.get(i));
+                        angle.add(180);
+                        x.add(trackX);
+                        y.add(trackY);
+                        sideRadii.add((int) average);
+                        if (t == numSmall) {
+                            xFact = Math.sqrt(average * average / (slope * slope + 1));
+                            yFact = slope * xFact;
+                            trackX += xFact*neg;
+                            trackY += yFact*neg;
+                        }
+                        Log.wtf("*--------Trackers", trackX + " " + trackY
+                                + " " + sideRadii.get(sideRadii.size() - 1));
+                    }
                 }
             }
         }
@@ -2557,6 +2695,8 @@ public class MainActivity extends AppCompatActivity {
 
                 //showResults(1,1,"Not known");
                 //TODO Uncomment Below
+                //TODO If user does autoplot sprinklers, set wastage to
+                // 6,7.5, 8.5, 9, 10, 11, 12% at random.
                 calculateSprinklerOverflow();
 /*
                 //INFO Wait a bit so that the Dialog is showing, then do the calculations.
@@ -2629,7 +2769,7 @@ public class MainActivity extends AppCompatActivity {
 
         TreeMap<Double, Integer> radii = new TreeMap<>();
         for (double r : dv.sprinkr) {
-            double converted = r * dv.ratio;
+            double converted = Math.round(r * dv.ratio*2)/2d;
             if (radii.containsKey(converted))
                 radii.put(converted, radii.get(converted) + 1);
             else
@@ -2651,7 +2791,7 @@ public class MainActivity extends AppCompatActivity {
         params.height = Math.min(185 * 5 + 10, 186 * sprinklerList.size());
         list.setLayoutParams(params);
 
-        //TODO ListView not showing up
+        //DONE ListView not showing up
         list.setAdapter(sprinklerAdapter);
         makeToast("Size: " + sprinklerList.size());
 
