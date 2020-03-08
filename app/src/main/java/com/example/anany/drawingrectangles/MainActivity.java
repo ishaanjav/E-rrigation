@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -43,7 +44,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -63,6 +66,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -576,13 +580,13 @@ public class MainActivity extends AppCompatActivity {
                 int trackX = dv.xlist.get(i), trackY = dv.ylist.get(i);
                 double slope = (double) (dv.ylist.get(i) - dv.ylist.get((i + 1) % size)) / (double) (dv.xlist.get(i) -
                         dv.xlist.get((i + 1) % size));
-                if (amt1 > 0)
+                if (amt1 > 0 && numSmall > 0)
                     minTemp += amt1 / numSmall;
                 //TODO Autoplotting side sprinklers does not work when slope is 0.
                 // Maybe just have one if case for 0 --> Only need to take into account the x/y,
                 //  not x and y when shifting the sprinklers
                 // and a 2nd if case for remaining below code.
-                if (slope == 0){
+                if (slope == 0) {
                     slope = 0.000000001d;
                 }
                 double xFact = 1, yFact = slope;
@@ -1659,6 +1663,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public static boolean interacted;
+        public static boolean subMenuAdded;
 
         @Override
         protected void onDraw(Canvas canvas) {
@@ -1678,15 +1683,19 @@ public class MainActivity extends AppCompatActivity {
             if (interacted)
                 if (dv.sprinkx.size() > 0) {
                     Log.wtf("Adding", "adding sub");
-                    measurements = menuOptions.addSubMenu("Measurements");
-                    measurements.add("Show Coordinates");
-                    measurements.add("Sprinkler Info");
+                    if (!subMenuAdded) {
+                        measurements = menuOptions.addSubMenu("Measurements");
+                        measurements.add(0, 1, Menu.FIRST, "Show Coordinates");
+                        measurements.add(0, 2, Menu.NONE, "Sprinkler Info");
+                    }
+                    subMenuAdded = true;
                     MenuItem item2 = menuOptions.findItem(R.id.coordinates);
                     item2.setVisible(false);
                 } else {
                     //measurements.clear();
-                    if(measurements!= null)
-                    menuOptions.removeItem(measurements.getItem().getItemId());
+                    subMenuAdded = false;
+                    if (measurements != null)
+                        menuOptions.removeItem(measurements.getItem().getItemId());
                     MenuItem item2 = menuOptions.findItem(R.id.coordinates);
                     item2.setVisible(true);
                 }
@@ -2432,39 +2441,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //makeToast("Polygon area: " + dv.polygonArea());
         switch (item.getItemId()) {
+            case 1:
+                coordinateBox();
+                break;
+            case 2:
+                sprinklerInfoBox();
+                break;
             case R.id.coordinates:
-                final Dialog dialog = new Dialog(MainActivity.this);
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setCancelable(true);
-                dialog.setContentView(R.layout.ask_coordinates);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-                Button back = (Button) dialog.findViewById(R.id.back);
-                final CheckBox sprinklers = dialog.findViewById(R.id.sprinklers);
-                final CheckBox land = dialog.findViewById(R.id.land);
-                sprinklers.setChecked(sprinklerCoordinates);
-                land.setChecked(landCoordinates);
-
-                back.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        sprinklerCoordinates = sprinklers.isChecked();
-                        landCoordinates = land.isChecked();
-                        dialog.dismiss();
-                        dialog.cancel();
-                        dv.invalidate();
-                    }
-                });
-                dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        sprinklerCoordinates = sprinklers.isChecked();
-                        landCoordinates = land.isChecked();
-                        dv.invalidate();
-                    }
-                });
-
-                dialog.show();
+                coordinateBox();
                 return true;
             case R.id.circle:
                 //TODO Have to draw circle.
@@ -2624,6 +2608,89 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void sprinklerInfoBox() {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.sprinkler_inflo);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        Button back = (Button) dialog.findViewById(R.id.back);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                dialog.cancel();
+                dv.invalidate();
+            }
+        });
+
+        TreeMap<Double, Integer> radii = new TreeMap<>();
+        for (double r : dv.sprinkr) {
+            double converted = r * dv.ratio;
+            if (radii.containsKey(converted))
+                radii.put(converted, radii.get(converted) + 1);
+            else
+                radii.put(converted, 1);
+        }
+
+        ArrayList<Double> radiusList = new ArrayList<>(radii.keySet());
+        ArrayList<Integer> frequency = new ArrayList<>(radii.values());
+        ArrayList<SprinklerInfo> sprinklerList = new ArrayList<>();
+        for (int i = 0; i < radiusList.size(); i++) {
+            sprinklerList.add(new SprinklerInfo(radiusList.get(i), frequency.get(i)));
+        }
+
+        //sprinklerList.add(new SprinklerInfo(3, 2));
+        SprinklerAdapter sprinklerAdapter = new SprinklerAdapter(MainActivity.this, sprinklerList);
+        ListView list = dialog.findViewById(R.id.list);
+
+        ViewGroup.LayoutParams params = list.getLayoutParams();
+        params.height = Math.min(185 * 5 + 10, 186 * sprinklerList.size());
+        list.setLayoutParams(params);
+
+        //TODO ListView not showing up
+        list.setAdapter(sprinklerAdapter);
+        makeToast("Size: " + sprinklerList.size());
+
+        dialog.show();
+    }
+
+    private void coordinateBox() {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.ask_coordinates);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        Button back = (Button) dialog.findViewById(R.id.back);
+        final CheckBox sprinklers = dialog.findViewById(R.id.sprinklers);
+        final CheckBox land = dialog.findViewById(R.id.land);
+        sprinklers.setChecked(sprinklerCoordinates);
+        land.setChecked(landCoordinates);
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sprinklerCoordinates = sprinklers.isChecked();
+                landCoordinates = land.isChecked();
+                dialog.dismiss();
+                dialog.cancel();
+                dv.invalidate();
+            }
+        });
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                sprinklerCoordinates = sprinklers.isChecked();
+                landCoordinates = land.isChecked();
+                dv.invalidate();
+            }
+        });
+
+        dialog.show();
     }
 
 

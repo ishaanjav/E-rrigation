@@ -2,6 +2,10 @@
     <string name="app_name">E-rrigation</string>
     <string name="general"><u>General Statistics</u></string>
     <string name="wastage"><u>Wastage Statistics</u></string>
+
+    <string name="radii"><u>Radii</u></string>
+    <string name="quant"><u>Quantity</u></string>
+
     <string name="edittext_hint1"><font size="15">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;≈ 2.5+</font></string>
     <string name="edittext_hint2"><font size="15">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;≈ 60-90</font></string>
     <string-array name="soil_types">

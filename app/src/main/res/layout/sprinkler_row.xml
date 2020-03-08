@@ -1,0 +1,59 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:background="#CBEBFF"
+    android:id="@+id/background"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="61sp"
+        android:id="@+id/radius"
+        android:layout_marginTop="9sp"
+        android:layout_marginBottom="5sp"
+        android:text="ASDf"
+        android:textSize="21sp"
+        android:textColor="#0061AF"
+        android:fontFamily="@font/ralewayregular"
+        />
+
+    <RelativeLayout
+        android:layout_width="2sp"
+        android:layout_height="30sp"
+        android:background="#3D7EA8"
+        android:layout_marginRight="125sp"
+        android:layout_alignParentRight="true"
+        android:id="@+id/bar"
+        android:layout_marginTop="7sp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/x"
+        android:layout_toRightOf="@+id/bar"
+        android:layout_marginLeft="-78sp"
+        android:textSize="17sp"
+        android:fontFamily="@font/ralewaysemibold"
+        android:layout_marginTop="10sp"
+        android:text="x"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10sp"
+        android:id="@+id/quantity"
+        android:text="aaa"
+        android:layout_marginTop="7sp"
+        android:layout_toRightOf="@id/x"
+        android:layout_marginLeft="6sp"
+        android:layout_marginBottom="11sp"
+        android:textSize="22sp"
+        android:textColor="#000000"
+        android:fontFamily="@font/ralewaysemibold"
+        />
+
+</RelativeLayout>

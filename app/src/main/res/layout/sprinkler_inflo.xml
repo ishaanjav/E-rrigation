@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="20sp">
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#fff">
+
+            <RelativeLayout
+                android:id="@+id/titleContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:background="#DAF0FF">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="6sp"
+                    android:fontFamily="@font/ralewaysemibold"
+                    android:paddingBottom="4sp"
+                    android:text="Sprinkler Info"
+                    android:textColor="#000"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:id="@+id/categories"
+                android:layout_below="@id/titleContainer"
+                android:orientation="horizontal"
+                android:layout_marginTop="6sp"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_weight="240"
+                    android:textAlignment="center"
+                    android:text="@string/radii"
+                    android:textSize="22sp"
+                    android:fontFamily="@font/ralewaysemibold"
+                    android:textColor="#0068A7"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:textAlignment="center"
+                    android:text="@string/quant"
+                    android:layout_width="wrap_content"
+                    android:layout_weight="71"
+                    android:textSize="22sp"
+                    android:fontFamily="@font/ralewaysemibold"
+                    android:textColor="#0068A7"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/list"
+                android:layout_width="291sp"
+                android:layout_height="match_parent"
+                android:layout_below="@id/categories"
+                android:layout_marginTop="5sp"
+                android:divider="#007FC5"
+                android:dividerHeight="5sp"
+                android:visibility="visible" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/list"
+                android:layout_marginTop="2sp"
+                android:orientation="horizontal">
+
+
+                <Button
+                    android:id="@+id/back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="103"
+                    android:background="#3D7EA8"
+                    android:text="Back"
+                    android:textAllCaps="true"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+            </LinearLayout>
+
+        </RelativeLayout>
+    </ScrollView>
+</androidx.cardview.widget.CardView>

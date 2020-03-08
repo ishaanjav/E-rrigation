@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/container"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="3sp"
+        android:layout_marginBottom="1sp"
         android:background="#fff">
 
 
