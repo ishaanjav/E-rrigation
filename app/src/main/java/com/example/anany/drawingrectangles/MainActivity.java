@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
         fadeIn.setDuration(800);
 
+        dv.interacted = false;
         fadeOut = new AlphaAnimation(1, 0);
         fadeOut.setInterpolator(new AccelerateInterpolator()); //and this
         fadeOut.setStartOffset(100);
@@ -490,15 +492,15 @@ public class MainActivity extends AppCompatActivity {
             int min3 = (s2 < s3) ? s2 : s3;
 
             if (min1 / 2d <= min) r1 = (int) min;
-            else if (min1 >= max * 1.92) r1 = (int) max;
+            else if (min1 >= max * 1.945) r1 = (int) max;
             else r1 = min1 / 2;
 
             if (min2 / 2d <= min) r2 = (int) min;
-            else if (min2 >= max * 1.92) r2 = (int) max;
+            else if (min2 >= max * 1.945) r2 = (int) max;
             else r2 = min2 / 2;
 
             if (min3 / 2d <= min) r3 = (int) min;
-            else if (min3 >= max * 1.92) r3 = (int) max;
+            else if (min3 >= max * 1.945) r3 = (int) max;
             else r3 = min3 / 2;
 
             radius.add(r1);
@@ -527,14 +529,14 @@ public class MainActivity extends AppCompatActivity {
                     r1 = (int) min;
                     adjusted = true;
                 }
-                if (min2 >= max * 1.92) {
+                if (min2 >= max * 1.945) {
                     r1 = (int) max;
                     adjusted = true;
                 } else r1 = min2 / 2;
 
                 if (i > 0) {
                     boolean c1, c2;
-                    int nextMax = (int) (s2 / 1.92);
+                    int nextMax = (int) (s2 / 1.945);
                     nextMax = (int) Math.min(nextMax, max);
                     int curMax = (int) (s1 - radius.get(i - 1));
                     curMax = (int) Math.min(max, curMax);
@@ -548,11 +550,100 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        dv.sprinkx.addAll(x);
-        dv.sprinky.addAll(y);
         int last = angle.get(angle.size() - 1);
         angle.add(0, last);
         angle.remove(angle.size() - 1);
+
+        ArrayList<Integer> sideRadii = new ArrayList<>();
+        int average = (int) Math.ceil(max / 2 + min / 2);
+        Log.wtf("Lengths", min + " " + max);
+        for (int i = 0; i < dv.xlist.size(); i++) {
+            int sideLength = getLength(i, (i + 1) % size);
+            int r1 = radius.get(i);
+            int r2 = radius.get((i + 1) % size);
+            int diffLeft = sideLength - r1 - r2;
+            int numRegular;
+            int numSmall;
+            double minTemp = min;
+            Log.wtf("*----Coordinates", "(" + dv.xlist.get(i) + "," + dv.ylist.get(i) + ") ----- ("
+                    + dv.xlist.get((i + 1) % size) + "," + dv.ylist.get((i + 1) % size) + ")");
+            if (diffLeft >= min) {
+                boolean choice1 = false;
+                int amt1, amt2;
+                numRegular = (int) diffLeft / (average * 2);
+                numSmall = (diffLeft - average * numRegular) / ((int) (min * 2));
+                amt1 = diffLeft - numRegular * average * 2 - numSmall * (int) min * 2;
+                int trackX = dv.xlist.get(i), trackY = dv.ylist.get(i);
+                double slope = (double) (dv.ylist.get(i) - dv.ylist.get((i + 1) % size)) / (double) (dv.xlist.get(i) -
+                        dv.xlist.get((i + 1) % size));
+                if (amt1 > 0)
+                    minTemp += amt1 / numSmall;
+                //TODO Autoplotting side sprinklers does not work when slope is 0.
+                // Maybe just have one if case for 0 --> Only need to take into account the x/y,
+                //  not x and y when shifting the sprinklers
+                // and a 2nd if case for remaining below code.
+                if (slope == 0){
+                    slope = 0.000000001d;
+                }
+                double xFact = 1, yFact = slope;
+                xFact = Math.sqrt(r1 * r1 / (slope * slope + 1));
+                yFact = slope * xFact;
+                // boolean addX = (dv.xlist.get((i+1)%size) > dv.xlist.get(i));
+                // boolean addY = (dv.ylist.get((i+1)%size) > dv.ylist.get(i));
+                trackX += xFact;
+                trackY += yFact;
+                Log.wtf("*------Start Tracker", trackX + " " + trackY + " " + slope);
+                for (int t = 1; t < numSmall + 1; t++) {
+                    if (t == 1) {
+                        xFact = Math.sqrt(min * min / (slope * slope + 1));
+                    } else {
+                        xFact = Math.sqrt(4 * min * min / (slope * slope + 1));
+                    }
+                    yFact = slope * xFact;
+                    trackX += xFact;
+                    trackY += yFact;
+                    rotation.add(rotation.get(i));
+                    angle.add(180);
+                    x.add(trackX);
+                    y.add(trackY);
+                    sideRadii.add((int) min);
+                    if (t == numSmall) {
+                        xFact = Math.sqrt(min / (slope * slope + 1));
+                        trackX += xFact;
+                        trackY += yFact;
+                    }
+                    Log.wtf("*--------Trackers", trackX + " " + trackY
+                            + " " + sideRadii.get(sideRadii.size() - 1));
+                }
+                for (int t = 1; t < numRegular + 1; t++) {
+                    if (t == 1) {
+                        xFact = Math.sqrt(average * average / (slope * slope + 1));
+                    } else {
+                        xFact = Math.sqrt(4 * average * average / (slope * slope + 1));
+                    }
+                    yFact = slope * xFact;
+                    trackX += xFact;
+                    trackY += yFact;
+                    rotation.add(rotation.get(i));
+                    angle.add(180);
+                    x.add(trackX);
+                    y.add(trackY);
+                    sideRadii.add((int) average);
+                    if (t == numSmall) {
+                        xFact = Math.sqrt(average / (slope * slope + 1));
+                        trackX += xFact;
+                        trackY += yFact;
+                    }
+                    Log.wtf("*--------Trackers", trackX + " " + trackY
+                            + " " + sideRadii.get(sideRadii.size() - 1));
+                }
+            }
+        }
+        radius.addAll(sideRadii);
+
+        dv.sprinkx.addAll(x);
+        dv.sprinky.addAll(y);
+
         /*rotation.set(1, rotation.get(1) -90);
         rotation.set(2, rotation.get(2) +90);
         rotation.set(3, rotation.get(3)*-1);*/
@@ -566,6 +657,11 @@ public class MainActivity extends AppCompatActivity {
         dv.sprinkr.addAll(radius);
         //dv.sprinkx.addAll(x);
         dv.invalidate();
+    }
+
+    public int addOrSubtract(boolean add, int orig, int val) {
+        if (add) return orig + val;
+        return orig - val;
     }
 
     public static int assignCheck(boolean b, int n, int newVal) {
@@ -1562,6 +1658,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        public static boolean interacted;
+
         @Override
         protected void onDraw(Canvas canvas) {
            /*Path path = new Path();
@@ -1577,6 +1675,21 @@ public class MainActivity extends AppCompatActivity {
            }
            canvas.drawPath(path, paint);*/
             mCanvas = canvas;
+            if (interacted)
+                if (dv.sprinkx.size() > 0) {
+                    Log.wtf("Adding", "adding sub");
+                    measurements = menuOptions.addSubMenu("Measurements");
+                    measurements.add("Show Coordinates");
+                    measurements.add("Sprinkler Info");
+                    MenuItem item2 = menuOptions.findItem(R.id.coordinates);
+                    item2.setVisible(false);
+                } else {
+                    //measurements.clear();
+                    if(measurements!= null)
+                    menuOptions.removeItem(measurements.getItem().getItemId());
+                    MenuItem item2 = menuOptions.findItem(R.id.coordinates);
+                    item2.setVisible(true);
+                }
 
             Paint wallpaint = new Paint();
             wallpaint.setColor(Color.parseColor("#4Fcffcc7"));
@@ -1884,7 +1997,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-
+            interacted = true;
             int x = (int) event.getX();
             int y = (int) event.getY();
             //makeToast("TAPPED");
@@ -2192,7 +2305,8 @@ public class MainActivity extends AppCompatActivity {
                     // canvas.dra wCissdddddcrcle(sprinkx.get(i), sprinky.get(i), sprinkr.get(i), sprinklerC);
                     int m = i;
                     float radius = sprinkr.get(m);
-                    Log.wtf("Drawing Rotation", rotationList.get(i) + " " + sprinkx.get(i) + "," + sprinky.get(i));
+                    //Log.wtf("Drawing Rotation", rotationList.get(i) + " " + sprinkx.get(i) + "," + sprinky.get(i));
+                    //if (i > 4)
                     canvas.drawArc(new RectF(sprinkx.get(m) - radius, sprinky.get(m) - radius, sprinkx.get(m) + radius,
                                     sprinky.get(m) + radius), (rotationList.get(i)) % 360 - 90,
                             /*(rotationList.get(i))%360 + */angleList.get(i), true, sprinklerC);
@@ -2294,6 +2408,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static Menu menuOptions;
+    public static SubMenu measurements;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -2304,7 +2419,9 @@ public class MainActivity extends AppCompatActivity {
         item.setVisible(false);*/
         MenuItem item2 = menu.findItem(R.id.calculate);
         item2.setVisible(false);
+
         menuOptions = menu;
+
         return super.onCreateOptionsMenu(menu);
     }
 
