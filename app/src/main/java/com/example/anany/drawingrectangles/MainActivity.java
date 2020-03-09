@@ -257,6 +257,33 @@ public class MainActivity extends AppCompatActivity {
         dv.ylist.add(1400);
     }
 
+    public static boolean isRectangle() {
+        if (dv.xlist.size() != 4) return false;
+        else {
+            int x1 = dv.xlist.get(0);
+            int x2 = dv.xlist.get(1);
+            int x3 = dv.xlist.get(2);
+            int x4 = dv.xlist.get(3);
+
+            int y1 = dv.ylist.get(0);
+            int y2 = dv.ylist.get(1);
+            int y3 = dv.ylist.get(2);
+            int y4 = dv.ylist.get(3);
+
+            /*if(x1 == x4 && x2 == x3 && y1 == y2 && y3 == 4)
+                return true;
+            if(x1 == x2 && x3 == x4 && y1 == y4 && y2 == y3)
+                return true;*/
+            int a1 = (int) Math.round(getAngle(x1 - x2, y1 - y2, x2 - x3, y2 - y3));
+            int a2 = (int) Math.round(getAngle(x2 - x3, y2 - y3, x3 - x4, y3 - y4));
+            int a3 = (int) Math.round(getAngle(x3 - x4, y3 - y4, x4 - x1, y4 - y1));
+            int a4 = (int) Math.round(getAngle(x4 - x1, y4 - y1, x1 - x2, y1 - y2));
+            Log.wtf("Rectangle Angles", a1 + " " + a2 + " " + a3 + " " + a4);
+            if (a1 == 90 && a2 == a1 && a3 == a1 && a4 == a1)
+                return true;
+            return false;
+        }
+    }
 
     private static void autoPlot() {
         if (dv.sprinkx.size() != 0)
@@ -565,6 +592,17 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<Integer> sideRadii = new ArrayList<>();
         int average = (int) (Math.ceil(max / 2 + min / 2) * 0.85);
+
+        //README Below is for rectangles so that sprinklers do not flow out across the other side.
+        Log.wtf("________RECTANGLE______", "--------------- " + isRectangle());
+        if (isRectangle()) {
+            Log.wtf("________RECTANGLE______", "--------------- RECTANGLE");
+            double s1 = getLength(0, 1);
+            double s2 = getLength(1, 2);
+            double smaller = Math.min(s1, s2) * 0.52d;
+            if (smaller < min) average = (int) min;
+            else average = (int) Math.min(smaller, max);
+        }
         Log.wtf("Lengths", min + " " + max);
         for (int i = 0; i < dv.xlist.size(); i++) {
             int sideLength = getLength(i, (i + 1) % size);
@@ -713,9 +751,9 @@ public class MainActivity extends AppCompatActivity {
                     double slope;
                     if (amt1 > 0 && numSmall > 0)
                         minTemp += amt1 / numSmall;
-                    if (amt1 > min*0.8) numSmall++;
+                    if (amt1 > min * 0.8) numSmall++;
 
-                    int neg = (dv.ylist.get(i) > dv.ylist.get((i+1)%size)) ? -1 : 1;
+                    int neg = (dv.ylist.get(i) > dv.ylist.get((i + 1) % size)) ? -1 : 1;
                     slope = (double) (dv.ylist.get(i) - dv.ylist.get((i + 1) % size)) / (double) (dv.xlist.get(i) -
                             dv.xlist.get((i + 1) % size));
                     //slope = Math.abs(slope);
@@ -726,8 +764,8 @@ public class MainActivity extends AppCompatActivity {
                     yFact = slope * xFact;
                     // boolean addX = (dv.xlist.get((i+1)%size) > dv.xlist.get(i));
                     // boolean addY = (dv.ylist.get((i+1)%size) > dv.ylist.get(i));
-                    trackX += xFact*neg;
-                    trackY += yFact*neg;
+                    trackX += xFact * neg;
+                    trackY += yFact * neg;
                     Log.wtf("*------Start Tracker", trackX + " " + trackY + " " + slope
                             + " diffLeft: " + diffLeft + " amt: " + amt1);
                     //DONE Doesn't autoplot on the left most side from last vertex to first vertex.
@@ -739,8 +777,8 @@ public class MainActivity extends AppCompatActivity {
                             xFact = Math.sqrt(4 * min * min / (slope * slope + 1));
                         }
                         yFact = slope * xFact;
-                        trackX += xFact*neg;
-                        trackY += yFact*neg;
+                        trackX += xFact * neg;
+                        trackY += yFact * neg;
                         rotation.add(rotation.get(i));
                         angle.add(180);
                         x.add(trackX);
@@ -748,9 +786,9 @@ public class MainActivity extends AppCompatActivity {
                         sideRadii.add((int) min);
                         if (t == numSmall) {
                             xFact = Math.sqrt(min * min / (slope * slope + 1));
-                            trackX += xFact*neg;
+                            trackX += xFact * neg;
                             yFact = slope * xFact;
-                            trackY += yFact*neg;
+                            trackY += yFact * neg;
                         }
                         Log.wtf("*--------Trackers", trackX + " " + trackY
                                 + " " + sideRadii.get(sideRadii.size() - 1));
@@ -762,8 +800,8 @@ public class MainActivity extends AppCompatActivity {
                             xFact = Math.sqrt(4 * average * average / (slope * slope + 1));
                         }
                         yFact = slope * xFact;
-                        trackX += xFact*neg;
-                        trackY += yFact*neg;
+                        trackX += xFact * neg;
+                        trackY += yFact * neg;
                         rotation.add(rotation.get(i));
                         angle.add(180);
                         x.add(trackX);
@@ -772,8 +810,8 @@ public class MainActivity extends AppCompatActivity {
                         if (t == numSmall) {
                             xFact = Math.sqrt(average * average / (slope * slope + 1));
                             yFact = slope * xFact;
-                            trackX += xFact*neg;
-                            trackY += yFact*neg;
+                            trackX += xFact * neg;
+                            trackY += yFact * neg;
                         }
                         Log.wtf("*--------Trackers", trackX + " " + trackY
                                 + " " + sideRadii.get(sideRadii.size() - 1));
@@ -2769,7 +2807,7 @@ public class MainActivity extends AppCompatActivity {
 
         TreeMap<Double, Integer> radii = new TreeMap<>();
         for (double r : dv.sprinkr) {
-            double converted = Math.round(r * dv.ratio*2)/2d;
+            double converted = Math.round(r * dv.ratio * 2) / 2d;
             if (radii.containsKey(converted))
                 radii.put(converted, radii.get(converted) + 1);
             else
