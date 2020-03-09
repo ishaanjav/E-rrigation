@@ -437,10 +437,6 @@ public class MainActivity extends AppCompatActivity {
             x.add(dv.xlist.get(s1));
             y.add(dv.ylist.get(s1));
         }
-//        angle.add(90);
-//        angle.add(180);
-//        angle.add(300);
-//        angle.add(270);
 
         /*
         //TODO Need to work on rotation.
@@ -635,7 +631,7 @@ public class MainActivity extends AppCompatActivity {
                     double slope;
                     if (amt1 > 0 && numSmall > 0)
                         minTemp += amt1 / numSmall;
-                    if (amt1 > min) numSmall++;
+                    if (amt1 > min * 1.6) numSmall++;
 
                     double shift = r1;
                     double xFact = shift * neg;
@@ -696,7 +692,7 @@ public class MainActivity extends AppCompatActivity {
                     double slope;
                     if (amt1 > 0 && numSmall > 0)
                         minTemp += amt1 / numSmall;
-                    if (amt1 > min) numSmall++;
+                    if (amt1 > min * 1.6) numSmall++;
 
                     double shift = r1;
                     double xFact = shift * neg;
@@ -751,12 +747,17 @@ public class MainActivity extends AppCompatActivity {
                     double slope;
                     if (amt1 > 0 && numSmall > 0)
                         minTemp += amt1 / numSmall;
-                    if (amt1 > min * 0.8) numSmall++;
+                    if (amt1 > min * 1.6) numSmall++;
 
-                    int neg = (dv.ylist.get(i) > dv.ylist.get((i + 1) % size)) ? -1 : 1;
                     slope = (double) (dv.ylist.get(i) - dv.ylist.get((i + 1) % size)) / (double) (dv.xlist.get(i) -
                             dv.xlist.get((i + 1) % size));
                     //slope = Math.abs(slope);
+                    //int neg = (dv.ylist.get(i) > dv.ylist.get((i + 1) % size) && slope > 0) ? -1 : 1;
+                    int neg = 1;
+                    if((dv.ylist.get(i) < dv.ylist.get((i+1)%size) && dv.xlist.get(i) >
+                    dv.xlist.get((i+1)%size)) || (dv.ylist.get(i) > dv.ylist.get((i+1)%size)
+                    && dv.xlist.get(i) > dv.xlist.get((i+1)%size))) neg = -1;
+
                     //if (dv.ylist.get(i) > dv.ylist.get((i + 1) % size)) slope *= -1;
 
                     double xFact = 1, yFact = slope;
