@@ -837,6 +837,7 @@ public class MainActivity extends AppCompatActivity {
         dv.angleList.addAll(angle);
         dv.sprinkr.addAll(radius);
         //dv.sprinkx.addAll(x);
+        ignoreSprinklers = dv.sprinkr.size();
         dv.invalidate();
     }
 
@@ -1564,6 +1565,7 @@ public class MainActivity extends AppCompatActivity {
                     case splot:
                         //TODO Reset the sprinkler points.
                         dv.currentMode = DrawingView.Mode.sreset;
+                        ignoreSprinklers = 0;
                         dv.resetCoordinates();
                         dv.invalidate();
                         break;
@@ -1645,6 +1647,7 @@ public class MainActivity extends AppCompatActivity {
                     //README Added below because even when undo button pressed, angle list only grew in size.
                     //  This may have potentially led to problem where randomly when plotting sprinklers
                     // sprinkler from 5 taps ago changes angles.
+                    ignoreSprinklers--;
                     if (dv.angleList.size() > 0) {
                         dv.angleList.remove(dv.angleList.size() - 1);
                         dv.rotationList.remove(dv.rotationList.size() - 1);
@@ -1782,6 +1785,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    public static int ignoreSprinklers = 0;
 
     public static class DrawingView extends View {
         private static final float TOUCH_TOLERANCE = 4;
@@ -2205,6 +2210,8 @@ public class MainActivity extends AppCompatActivity {
                     if (!wasCircle) {
                         str1 = String.format("%.0f", xDif * dv.ratio);
                         str2 = String.format("%.0f", yDif * dv.ratio);
+                        if (str1.equals("-0")) str1 = "0";
+                        if (str2.equals("-0")) str2 = "0";
                         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
                         textView.setTextColor(Color.parseColor("#458f61"));
                     } else {
@@ -3390,7 +3397,7 @@ public class MainActivity extends AppCompatActivity {
         //INFO Subtracts overlap of 3 circles
         wasted -= overCounted3;
         Log.wtf("*- End Results:", ":-:  " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
-        Log.wtf("*- Individual Circles", "Size: " + singleR.size());
+        Log.wtf("*- Wastage", "OverFlow: " + overFlowWastage + "  Overlap: " + overlapWastage +"  3 Circle: " + overCounted3);
         Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
         Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
@@ -3994,8 +4001,8 @@ public class MainActivity extends AppCompatActivity {
             percentLandCovered = 0.992;
             landCoveredArea = landArea * percentLandCovered;
         }
-        Log.wtf("----Covered Important", landCoveredArea + " = "+
-                total + " - " + wasted/soilFactor + " + " + overCounted3 + " / " + dv.polygonArea());
+        Log.wtf("----Covered Important", landCoveredArea + " = " +
+                total + " - " + wasted / soilFactor + " + " + overCounted3 + " / " + dv.polygonArea());
         Log.wtf("Percent Land", " " + Math.round(notWastedWater * 100) + " " +
                 Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));
         Log.wtf("\"-_Land Covered", " " + Math.round(notWastedWater * 100) + " " +
@@ -5211,17 +5218,29 @@ public class MainActivity extends AppCompatActivity {
                         + triangleArea + "\n\t\t\t\t\t\t\t\t\t\t\t\t\tSector Area - " + sectorArea +
                         "\n\t\t\t\t\t\t\t\t\t\t\t\tTotal Area: " + totalArea + "\n\t\t\t\t\t\t\t\t\t\t\t    Final Area - " + wastedArea);*/
 
+                if (ignoreSprinklers < 0) ignoreSprinklers = 0;
+
                 previousWastage = overFlowWastage - initialWastage;
                 overFlowWastage += wastedArea;
+
+                //INFO `ignoreSprinklers` is number of auto-plotted sprinklers
+                // Purpose is to avoid calculating overflow for auto plotted sprinklers unless land is rectangle
+                if (overflowInfo.getCirclePos() < ignoreSprinklers )
+                    overFlowWastage -= wastedArea;
 
                 if (fullCircleUsed.contains(overflowInfo.getCirclePos())) {
                     //double latestGain = overFlowWastage - initialWastage - previousWastage;
                     double latestGain = wastedArea;
                     //README If the latest addition was larger, then subtract 80% of previous smaller one.
                     double toAdd = previousWastage * .24 + wastedArea * .21;
-                    overFlowWastage += toAdd;
-                    if (overFlowWastage > totalOverflowArea)
-                        overFlowWastage -= toAdd * .9;
+
+                    //INFO
+                    // Purpose is to avoid calculating overflow for auto plotted sprinklers unless land is rectangle
+                    if (overflowInfo.getCirclePos() >= ignoreSprinklers ) {
+                        overFlowWastage += toAdd;
+                        if (overFlowWastage > totalOverflowArea)
+                            overFlowWastage -= toAdd * .9;
+                    }
                     //TODO Fix problem that overflowwastage can go above totalOverflowArea
                     //if(overFlowWastage )
                     if (latestGain >= previousWastage) {
