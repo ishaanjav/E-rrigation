@@ -3019,7 +3019,7 @@ public class MainActivity extends AppCompatActivity {
 
         waste += overflowWaste;
 
-        makeToast(Math.round(waste * 100 / total) + "% water wasted");
+        //makeToast(Math.round(waste * 100 / total) + "% water wasted");
         Log.wtf("Statistics: ", "Overflow: " + overflowWaste + "  " + overCounted3 + "   " + waste + " " + total);
         displayCircleResults(waste, total, overflowWaste, overflowingCount, outsideCount);
     }
@@ -3389,7 +3389,7 @@ public class MainActivity extends AppCompatActivity {
         wasted += overlapWastage;
         //INFO Subtracts overlap of 3 circles
         wasted -= overCounted3;
-        Log.wtf("*- End Results:", "- " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
+        Log.wtf("*- End Results:", ":-:  " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
         Log.wtf("*- Individual Circles", "Size: " + singleR.size());
         Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
         Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
@@ -3690,8 +3690,8 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showCircleResults(double waste, double total, double overflowWaste
-            , int overflowingCount, int outsideCount, double waterUsed, double duration, String choice) {
+    private void showCircleResults(final double waste, final double total, final double overflowWaste
+            , final int overflowingCount, final int outsideCount, double waterUsed, double duration, String choice) {
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
@@ -3731,7 +3731,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 dialog.dismiss();
                 dialog.cancel();
-                if (view.getId() == back.getId()) displayResults();
+                if (view.getId() == back.getId()) displayCircleResults(waste, total,
+                        overflowWaste, overflowingCount, outsideCount);
             }
         };
         back.setOnClickListener(clicker);
@@ -3839,31 +3840,6 @@ public class MainActivity extends AppCompatActivity {
         /*totalLandA.setText(Math.round(variable * 100) + " " + Math.round(notWastedWater * 100) + " == " +
                 Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));*/
         percentCoveredA.setText(format(percentLandCovered * 100) + "%");
-
-
-
-
-        /* numSprink.setText(dv.sprinkx.size() + "");
-                    Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
-                    numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
-                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
-                    Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
-                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
-                    percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
-                    percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
-                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-                    perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-                    totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-                    totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-                    wasted.setText(String.format("%1$,.2f",
-                            duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
-
-
-                    nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
-                    //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
-                    overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
-                    //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
-*/
 
     }
 
@@ -4009,12 +3985,17 @@ public class MainActivity extends AppCompatActivity {
         //double notWastedWater = 1 - percentageWasted + overflowWater/total + overCounted3 / total;
         double notWastedWater = 1 - percentageWasted +
                 overflowWater / total;
-        double landCoveredArea = notWastedWater * total / dv.polygonArea() * landArea;
+        //double landCoveredArea = notWastedWater * total / dv.polygonArea() * landArea;
+        double landCoveredArea = (total - wasted / soilFactor + overCounted3) / dv.polygonArea()
+                * landArea;
+        //notWastedWater * total / dv.polygonArea() * landArea;
         double percentLandCovered = landCoveredArea / landArea;
         if (percentLandCovered > 1) {
             percentLandCovered = 0.992;
             landCoveredArea = landArea * percentLandCovered;
         }
+        Log.wtf("----Covered Important", landCoveredArea + " = "+
+                total + " - " + wasted/soilFactor + " + " + overCounted3 + " / " + dv.polygonArea());
         Log.wtf("Percent Land", " " + Math.round(notWastedWater * 100) + " " +
                 Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));
         Log.wtf("\"-_Land Covered", " " + Math.round(notWastedWater * 100) + " " +
