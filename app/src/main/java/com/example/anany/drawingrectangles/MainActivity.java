@@ -754,9 +754,9 @@ public class MainActivity extends AppCompatActivity {
                     //slope = Math.abs(slope);
                     //int neg = (dv.ylist.get(i) > dv.ylist.get((i + 1) % size) && slope > 0) ? -1 : 1;
                     int neg = 1;
-                    if((dv.ylist.get(i) < dv.ylist.get((i+1)%size) && dv.xlist.get(i) >
-                    dv.xlist.get((i+1)%size)) || (dv.ylist.get(i) > dv.ylist.get((i+1)%size)
-                    && dv.xlist.get(i) > dv.xlist.get((i+1)%size))) neg = -1;
+                    if ((dv.ylist.get(i) < dv.ylist.get((i + 1) % size) && dv.xlist.get(i) >
+                            dv.xlist.get((i + 1) % size)) || (dv.ylist.get(i) > dv.ylist.get((i + 1) % size)
+                            && dv.xlist.get(i) > dv.xlist.get((i + 1) % size))) neg = -1;
 
                     //if (dv.ylist.get(i) > dv.ylist.get((i + 1) % size)) slope *= -1;
 
@@ -921,20 +921,23 @@ public class MainActivity extends AppCompatActivity {
                             shortToast("You must enter the side length in feet");
                         } else {
                             int numVal = Integer.parseInt(temp);
+                            dv.circleFeet = numVal;
                             if (numVal < 2) {
                                 shortToast("Please make your side length larger");
                             } else {
                                 //TODO Have to also set the value of dv.ratio to get
                                 // the ratio between their length and pixel length;
                                 dv.length = numVal;
+                                //README Land is circle and currently drawing circle
                                 if (dv.pastMode == DrawingView.PastMode.CIRCLE && (dv.currentMode
                                         == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc)) {
                                     //dv.ratio = dv.radius / numVal;
-                                    dv.ratio = dv.backUpRadius / (dv.backUpRadius * (dv.screenW / 200));
+                                    dv.ratio = (double) numVal / (dv.backUpRadius * (dv.screenW / 200));
                                     Log.wtf("**Ratio, ", "Ratio is: " + dv.ratio);
 
                                 } else if (dv.wasCircle && (dv.currentMode == DrawingView.Mode.splot ||
                                         dv.currentMode == DrawingView.Mode.sreset)) {
+                                    //README Land is circle and currently drawing sprinklers
                                     if (dv.radius == -5)
                                         dv.radius = 300;
                                     else
@@ -964,13 +967,16 @@ public class MainActivity extends AppCompatActivity {
                         shortToast("You must enter the radius in feet");
                     } else {
                         int numVal = Integer.parseInt(temp);
+                        dv.circleFeet = numVal;
                         if (numVal < 2) {
-                            shortToast("Please make your radius larger");
+                            //shortToast("Please make your radius larger");
                         } else {
                             //TODO Have to also set the value of dv.ratio to get
                             // the ratio between their length and pixel length;
                             dv.length = numVal;
-                            dv.ratio = dv.radius / numVal;
+                            //README Below was commented to try to get correct ratio for circle land
+                            //dv.ratio = dv.radius / numVal;
+                            dv.ratio = (double) numVal / (dv.backUpRadius * (dv.screenW / 200));
                         }
                     }
                 }
@@ -1044,10 +1050,15 @@ public class MainActivity extends AppCompatActivity {
                 // the ratio between their length and pixel length;
                 dv.length = numVal;
                 if (dv.currentMode == DrawingView.Mode.drawc || dv.currentMode == DrawingView.Mode.resetc) {
-                    dv.ratio = dv.radius / numVal;
+                    dv.ratio = (double) numVal / (dv.backUpRadius * (dv.screenW / 200));
+
+                    //dv.ratio = dv.radius / numVal;
                 } else {
                     if (dv.wasCircle)
-                        dv.ratio = (double) numVal / (double) dv.backUpRadius;
+                        dv.ratio = (double) numVal / (dv.backUpRadius * (dv.screenW / 200));
+
+                        //README Below is old method of ratio for circle land.
+                        //dv.ratio = (double) numVal / (double) dv.backUpRadius;
                         /*dv.ratio = (double) numVal / (double) (Math.hypot(Math.abs(dv.xlist.get(0) - dv.xlist.get(1)),
                                 Math.abs(dv.ylist.get(0) - dv.ylist.get(1))));*/
                     else
@@ -1257,7 +1268,7 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    int messageCount = 0;
+    static int messageCount = 0, specifyCount = 0;
 
     private void setRadiusBar() {
         radius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1278,80 +1289,21 @@ public class MainActivity extends AppCompatActivity {
                 progress *= 2;
                 dv.sradius = progress;
 
-                double pixelSideLength = (double) maxSideLength / dv.ratio * 0.7d;
-                double setToI = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2)) - 50;
-                setToI = ((double) progress / 100d * pixelSideLength) / 2;
-                double minSideLength = 4d / dv.ratio;
-
-                if (maxSideLength > 35) {
-                    pixelSideLength = (double) 25d / dv.ratio;
-                    minSideLength = 4d / dv.ratio;
-                }
-                if (maxSideLength > 50) {
-                    pixelSideLength = (double) 35d / dv.ratio;
-                    minSideLength = 4d / dv.ratio;
-                }
-                if (maxSideLength > 74) {
-                    pixelSideLength = (double) 40d / dv.ratio;
-                    minSideLength = 5d / dv.ratio;
-                }
-                if (maxSideLength > 90) {
-                    pixelSideLength = (double) 50d / dv.ratio;
-                    minSideLength = 6d / dv.ratio;
-                }
-                if (maxSideLength > 150) {
-                    pixelSideLength = (double) 80d / dv.ratio;
-                    minSideLength = 8d / dv.ratio;
-                }
-                if (maxSideLength > 325) {
-                    pixelSideLength = (double) 250d / dv.ratio;
-                    minSideLength = 10d / dv.ratio;
+                if (dv.pastMode == DrawingView.PastMode.CIRCLE
+                        && (dv.currentMode == DrawingView.Mode.splot ||
+                        dv.currentMode == DrawingView.Mode.sreset)) {
+                    double dif = Math.min(350, Math.ceil(dv.circleFeet / 1.75)) - 5;
+                    //README SetToI is radius in feet.
+                    double setToI = Math.min(350, Math.ceil(dv.circleFeet / 1.75)) - ((double) 100 - progress) / 100 * dif;
+                    shortToast("Radius: " + (String.format("%1$,.1f", (setToI)) + " feet."));
                 }
 
-                double dif = pixelSideLength - minSideLength;
-                setToI = pixelSideLength - ((double) 100 - progress) / 100 * dif;
-
-                /*double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2));
-                double scale = (double) bigCircleRadius / (bigCircleFeet - 2);
-                double t = seekBar.getProgress() / 100 * scale;
-                double newProgress = scale * dv.sradius;*/
-
-                if (dv.currentMode != DrawingView.Mode.drawc) {
-
-                    Log.wtf("**IMPORTANT INFO :", (double) pixelSideLength + " " + sprinklerRadius
-                            + " " + dv.sradius /*+ " " + dv.radius*/ + " Max - " + maxSideLength + " Min- " + minSideLength + " Part 1- " + (((double) 100 - progress) * dif) + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tProgress: " + progress +
-                            "   Set to I - " + ((int) Math.round(setToI * 100000) / 100000));
-                    //makeToast("Radius: " + (String.format("%1$,.1f", (sprinklerRadius * bigCircleFeet /bigCircleRadius))) + " feet.");
-                    //makeToast("Radius: " + (String.format("%1$,.1f", (newProgress * dv.ratio))) + " feet.");
-                    shortToast("Radius: " + (String.format("%1$,.1f", (setToI * ((double) dv.ratio)))) + " feet.");
-                }
-
-
-                //makeToast("Radius: " + (String.format("%1$,.1f", (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24))) + " feet.");
-                // dv.sradius = (int) (40f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 18);
-                /*Log.wtf("* Sprinkler Radius Info: ", "Pixel radius (setTo): " + setToI + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
-                        + "Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet");*/
-                //makeToast("Updating sradius: " + dv.sradius);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                //dv.sradius = progress;
-                if (dv.sprinkr.size() > 0) {
-                    //dv.sprinkr.set(dv.sprinkr.size() - 1, (int) ((double) ((double) dv.screenW / 1000) * Math.pow(progress / 5.9f, 2)) - 50);
+                if (dv.pastMode == DrawingView.PastMode.DRAW) {
                     double pixelSideLength = (double) maxSideLength / dv.ratio * 0.7d;
-                    progress -= 50;
-                    progress *= 2;
-                    dv.sradius = progress;
                     double setToI = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2)) - 50;
                     setToI = ((double) progress / 100d * pixelSideLength) / 2;
                     double minSideLength = 4d / dv.ratio;
+
                     if (maxSideLength > 35) {
                         pixelSideLength = (double) 25d / dv.ratio;
                         minSideLength = 4d / dv.ratio;
@@ -1376,13 +1328,131 @@ public class MainActivity extends AppCompatActivity {
                         pixelSideLength = (double) 250d / dv.ratio;
                         minSideLength = 10d / dv.ratio;
                     }
+
                     double dif = pixelSideLength - minSideLength;
                     setToI = pixelSideLength - ((double) 100 - progress) / 100 * dif;
-                    dv.sprinkr.set(dv.sprinkr.size() - 1, (int) setToI);
-                    //dv.sprinkr.set(dv.sprinkr.size() - 1, (int) (((double) progress / 100d * pixelSideLength) / 2));
+
+
+                    Log.wtf("**IMPORTANT INFO :", (double) pixelSideLength + " " + sprinklerRadius
+                            + " " + dv.sradius /*+ " " + dv.radius*/ + " Max - " + maxSideLength + " Min- " + minSideLength + " Part 1- " + (((double) 100 - progress) * dif) + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tProgress: " + progress +
+                            "   Set to I - " + ((int) Math.round(setToI * 100000) / 100000));
+                    //makeToast("Radius: " + (String.format("%1$,.1f", (sprinklerRadius * bigCircleFeet /bigCircleRadius))) + " feet.");
+                    //makeToast("Radius: " + (String.format("%1$,.1f", (newProgress * dv.ratio))) + " feet.");
+                    shortToast("Radius: " + (String.format("%1$,.1f", (setToI * ((double) dv.ratio)))) + " feet.");
+                }
+
+                /*double setTo = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2));
+                double scale = (double) bigCircleRadius / (bigCircleFeet - 2);
+                double t = seekBar.getProgress() / 100 * scale;
+                double newProgress = scale * dv.sradius;*/
+
+                //README IF not on circle mode
+                if (dv.currentMode != DrawingView.Mode.drawc) {
+
+                    /*Log.wtf("**IMPORTANT INFO :", (double) pixelSideLength + " " + sprinklerRadius
+                            + " " + dv.sradius *//*+ " " + dv.radius*//* + " Max - " + maxSideLength + " Min- " + minSideLength + " Part 1- " + (((double) 100 - progress) * dif) + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tProgress: " + progress +
+                            "   Set to I - " + ((int) Math.round(setToI * 100000) / 100000));
+                    //makeToast("Radius: " + (String.format("%1$,.1f", (sprinklerRadius * bigCircleFeet /bigCircleRadius))) + " feet.");
+                    //makeToast("Radius: " + (String.format("%1$,.1f", (newProgress * dv.ratio))) + " feet.");
+                    shortToast("Radius: " + (String.format("%1$,.1f", (setToI * ((double) dv.ratio)))) + " feet.");
+                */
+                }
+
+                if (dv.currentMode == DrawingView.Mode.drawc) {
+                    messageCount++;
+                    if (messageCount % 3 == 1)
+                        makeToast("ATTENTION!\nEnter the length of the circle's radius in feet.");
+                    //dv.radius = progress;
+                    //dv.backUpRadius = progress;
+                    //dv.ratio =
+                }
+
+                //makeToast("Radius: " + (String.format("%1$,.1f", (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24))) + " feet.");
+                // dv.sradius = (int) (40f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 18);
+                /*Log.wtf("* Sprinkler Radius Info: ", "Pixel radius (setTo): " + setToI + "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+                        + "Radius: " + (String.format("%1$,.1f", (setToI * dv.ratio))) + " feet");*/
+                //makeToast("Updating sradius: " + dv.sradius);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                //dv.sradius = progress;
+
+
+                if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                    double dif = Math.min(350, Math.ceil(dv.circleFeet / 1.75)) - 5;
+                    //README SetToI is radius in feet.
+                    double setToI = Math.min(350, Math.ceil(dv.circleFeet / 1.75)) - ((double) 100 - (progress - 50) * 2) / 100 * dif;
+                    //double pixelRadius = setToI/dv.ratio;
+                    //Log.wtf("--Radius", setToI + " / " + dv.ratio + " ==== " + pixelRadius);
+                    double pixelRadius = setToI / dv.length * (dv.backUpRadius * (dv.screenW / 200));
+                    Log.wtf("--Radius", setToI + " / " + dv.length + " / " +
+                            +(int) ((dv.backUpRadius * (dv.screenW / 200))) + " ==== " + pixelRadius);
+                    //   Log.wtf("----Extremes", radius.getMin() + " " + radius.getMax());
+                    dv.circleSprinklerRadius = pixelRadius;
+                }
+                if (dv.sprinkr.size() > 0) {
+                    //dv.sprinkr.set(dv.sprinkr.size() - 1, (int) ((double) ((double) dv.screenW / 1000) * Math.pow(progress / 5.9f, 2)) - 50);
+
+                    if (dv.pastMode == DrawingView.PastMode.CIRCLE) {
+                        double dif = Math.min(350, Math.ceil(dv.circleFeet / 1.75)) - 5;
+                        //README SetToI is radius in feet.
+                        double setToI = Math.min(350, Math.ceil(dv.circleFeet / 1.75)) - ((double) 100 - (progress - 50) * 2) / 100 * dif;
+                        //double pixelRadius = setToI/dv.ratio;
+                        //Log.wtf("--Radius", setToI + " / " + dv.ratio + " ==== " + pixelRadius);
+                        double pixelRadius = setToI / dv.length * (dv.backUpRadius * (dv.screenW / 200));
+                        Log.wtf("--Radius", setToI + " / " + dv.length + " / " +
+                                +(int) ((dv.backUpRadius * (dv.screenW / 200))) + " ==== " + pixelRadius);
+                        // Log.wtf("----Extremes", radius.getMin() + " " + radius.getMax());
+                        dv.circleSprinklerRadius = pixelRadius;
+                        dv.sprinkr.set(dv.sprinkr.size() - 1, (int) pixelRadius);
+                    }
+
+                    if (dv.pastMode == DrawingView.PastMode.DRAW) {
+                        double pixelSideLength = (double) maxSideLength / dv.ratio * 0.7d;
+                        progress -= 50;
+                        progress *= 2;
+                        dv.sradius = progress;
+                        double setToI = ((double) ((double) dv.screenW / 1000) * Math.pow(seekBar.getProgress() / 5.9f, 2)) - 50;
+                        setToI = ((double) progress / 100d * pixelSideLength) / 2;
+                        double minSideLength = 4d / dv.ratio;
+                        if (maxSideLength > 35) {
+                            pixelSideLength = (double) 25d / dv.ratio;
+                            minSideLength = 4d / dv.ratio;
+                        }
+                        if (maxSideLength > 50) {
+                            pixelSideLength = (double) 35d / dv.ratio;
+                            minSideLength = 4d / dv.ratio;
+                        }
+                        if (maxSideLength > 74) {
+                            pixelSideLength = (double) 40d / dv.ratio;
+                            minSideLength = 5d / dv.ratio;
+                        }
+                        if (maxSideLength > 90) {
+                            pixelSideLength = (double) 50d / dv.ratio;
+                            minSideLength = 6d / dv.ratio;
+                        }
+                        if (maxSideLength > 150) {
+                            pixelSideLength = (double) 80d / dv.ratio;
+                            minSideLength = 8d / dv.ratio;
+                        }
+                        if (maxSideLength > 325) {
+                            pixelSideLength = (double) 250d / dv.ratio;
+                            minSideLength = 10d / dv.ratio;
+                        }
+                        double dif = pixelSideLength - minSideLength;
+                        setToI = pixelSideLength - ((double) 100 - progress) / 100 * dif;
+                        dv.sprinkr.set(dv.sprinkr.size() - 1, (int) setToI);
+                        //dv.sprinkr.set(dv.sprinkr.size() - 1, (int) (((double) progress / 100d * pixelSideLength) / 2));
+                    }
                 }
                 //dv.sradius = (int) (50f*((double)seekBar.getProgress()/(double)seekBar.getMax()) - 24);
-
 
                 if (dv.currentMode == DrawingView.Mode.drawc) {
                     messageCount++;
@@ -1392,6 +1462,7 @@ public class MainActivity extends AppCompatActivity {
                     dv.backUpRadius = progress;
                     //dv.ratio =
                 }
+
 
                 dv.invalidate();
             }
@@ -1717,8 +1788,10 @@ public class MainActivity extends AppCompatActivity {
         public int width;
         public int height;
         public int radius = -5;
+        public int circleFeet;
         public static int sradius = -5;
         public static int backUpRadius = -5;
+        public static double circleSprinklerRadius = -1;
         List<Integer> xlist = new ArrayList<>();
         List<Integer> ylist = new ArrayList<>();
         List<Integer> sprinkx = new ArrayList<>();
@@ -1859,7 +1932,7 @@ public class MainActivity extends AppCompatActivity {
             mCanvas = canvas;
             if (interacted)
                 if (dv.sprinkx.size() > 0) {
-                    Log.wtf("Adding", "adding sub");
+                    // Log.wtf("Adding", "adding sub");
                     if (!subMenuAdded) {
                         measurements = menuOptions.addSubMenu("Measurements");
                         measurements.add(0, 1, Menu.FIRST, "Show Coordinates");
@@ -1899,14 +1972,19 @@ public class MainActivity extends AppCompatActivity {
             switch (currentMode) {
                 case splot:
                     if (sprinkx.size() == 0) {
-                        autoplot.setAnimation(fadeIn);
-                        autoplot.setVisibility(View.VISIBLE);
+                        if (dv.pastMode == PastMode.DRAW) {
+                            autoplot.setAnimation(fadeIn);
+                            autoplot.setVisibility(View.VISIBLE);
+                        } else autoplot.setVisibility(View.INVISIBLE);
                     } else {
-                        autoplot.setAnimation(fadeOut);
-                        autoplot.setVisibility(View.INVISIBLE);
+                        if (dv.pastMode == PastMode.DRAW) {
+                            autoplot.setAnimation(fadeOut);
+                            autoplot.setVisibility(View.INVISIBLE);
+                        } else autoplot.setVisibility(View.INVISIBLE);
                     }
 
                     plotSprinklers2(canvas);
+                    Log.wtf("--Sprinkler List", sprinkr.toString());
                     //makeToast("Plotting sprinklers");
                     //mmakeToast("Was Circle? : " + wasCircle);
                     if (!wasCircle) {
@@ -1918,6 +1996,7 @@ public class MainActivity extends AppCompatActivity {
                         resetCoordinates();
                         handleCircleCoordinates();
                         if (radius == -5) {
+                            backUpRadius = 292 * 200 / screenW;
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                     300, fillPaint);
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
@@ -1927,7 +2006,7 @@ public class MainActivity extends AppCompatActivity {
                                     backUpRadius * (screenW / 200), fillPaint);
                             mCanvas.drawCircle(screenW / 2, screenH / 2 - (screenH / 8) - 30,
                                     backUpRadius * (screenW / 200) + 8, linePaint);
-                            Log.wtf("*Sprinkler Being Drawn INFO", ":" + (backUpRadius * (screenW / 200)));
+                            Log.wtf("Land Area Being Drawn INFO", ":" + (backUpRadius * (screenW / 200)));
                         }
                     }
                     /*angle = 360;
@@ -1942,11 +2021,15 @@ public class MainActivity extends AppCompatActivity {
                         handleCircleCoordinates();
                     else handleCoordinates();
                     if (sprinkx.size() == 0) {
-                        autoplot.setAnimation(fadeIn);
-                        autoplot.setVisibility(View.VISIBLE);
+                        if (dv.pastMode == PastMode.DRAW) {
+                            autoplot.setAnimation(fadeIn);
+                            autoplot.setVisibility(View.VISIBLE);
+                        }
                     } else {
-                        autoplot.setAnimation(fadeOut);
-                        autoplot.setVisibility(View.INVISIBLE);
+                        if (dv.pastMode == PastMode.DRAW) {
+                            autoplot.setAnimation(fadeOut);
+                            autoplot.setVisibility(View.INVISIBLE);
+                        }
                     }
                     //makeToast("Resetting sprinklers.");
                     break;
@@ -2000,7 +2083,7 @@ public class MainActivity extends AppCompatActivity {
                     //MainActivity.askForLength(false);
                     wasCircle = true;
                     resetCoordinates();
-                    autoplot.setAnimation(fadeOut);
+                    //autoplot.setAnimation(fadeOut);
                     autoplot.setVisibility(View.INVISIBLE);
                     handleCircleCoordinates();
                     if (radius == -5) {
@@ -2229,7 +2312,9 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     if (xlist.size() <= 12) {
                         if (xlist.size() > 1 && length == 0) {
-                            makeToast("Please specify the length of the first side you drew.");
+                            if (specifyCount % 3 == 0)
+                                makeToast("Please specify the length of the first side you drew.");
+                            specifyCount++;
                         } else {
                             xlist.add((int) x);
                             ylist.add((int) y);
@@ -2303,11 +2388,25 @@ public class MainActivity extends AppCompatActivity {
                         setToI = (double) sradius / 100d * backUpRadius;
                     Log.wtf("Radius adding", sradius + " " + setToI);
 
+
+                    if (wasCircle) {
+                        if (circleSprinklerRadius == -1) {
+                            double differ = Math.ceil(dv.circleFeet / 1.75) - 5;
+                            //README SetToI is radius in feet.
+                            setToI = Math.ceil(dv.circleFeet / 1.75) - ((double) 100 - progress) / 100 * differ;
+                            setToI = setToI / dv.length * (backUpRadius * (screenW / 200));
+                            circleSprinklerRadius = setToI;
+                            sprinkr.add((int) circleSprinklerRadius);
+                        } else
+                            sprinkr.add((int) circleSprinklerRadius);
+                        Log.wtf("-- Circle Sprinkler Radius", " " + circleSprinklerRadius);
+                    } else {
+                        sprinkr.add((int) setToI);
+                    }
                     //makeToast("Side Length : " + maxSideLength);
                     //Log.wtf("*- Set to I", (int) setToI + " " + (int) pixelSideLength + " " + sradius + " " + (int) maxSideLength + " " + (int) dv.ratio);
                     //Log.d("***--- Set to I", (int) setToI + " " + (int) pixelSideLength + " " + sradius + " " + (int) maxSideLength + " " + (int) dv.ratio+"\n..---...");
                     //sprinkr.add((int) ((double) ((double) screenW / 1000) * Math.pow(sradius / 5.9f, 2)) - 50);
-                    sprinkr.add((int) setToI);
                     Log.wtf("*-", "Radii: " + sprinkr.toString());
                     //sprinkr.add((int) ((double) (sradius/dv.ratio)));
                     //Log.wtf("*- IMPORTANT: ", " SRADIUS: " + sradius + " " + " RATIO: " + dv.ratio);
@@ -2649,6 +2748,7 @@ public class MainActivity extends AppCompatActivity {
                     dv.resetSprinklers();
                     dv.resetTouchPoints();
                     ft.setVisibility(View.VISIBLE);
+                    dv.pastMode = DrawingView.PastMode.DRAW;
                     textview.setVisibility(View.VISIBLE);
                     length.setVisibility(View.VISIBLE);
                     angleText.setVisibility(View.INVISIBLE);
@@ -2665,6 +2765,7 @@ public class MainActivity extends AppCompatActivity {
                     dv.wasCircle = true;
                     item.setTitle("Draw Shapes");
                     dv.resetTouchPoints();
+                    dv.pastMode = DrawingView.PastMode.CIRCLE;
                     ft.setVisibility(View.VISIBLE);
                     textview.setVisibility(View.VISIBLE);
                     length.setVisibility(View.VISIBLE);
@@ -2736,7 +2837,10 @@ public class MainActivity extends AppCompatActivity {
                 //TODO Uncomment Below
                 //TODO If user does autoplot sprinklers, set wastage to
                 // 6,7.5, 8.5, 9, 10, 11, 12% at random.
-                calculateSprinklerOverflow();
+                if (dv.pastMode == DrawingView.PastMode.CIRCLE)
+                    circleCalculations();
+                else
+                    calculateSprinklerOverflow();
 /*
                 //INFO Wait a bit so that the Dialog is showing, then do the calculations.
                 Handler h = new Handler();
@@ -2787,6 +2891,145 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void circleCalculations() {
+        double waste = 0, total = 0;
+        overCounted3 = 0;
+        insideCircles = new ArrayList<>();
+        int overflowingCount = 0, outsideCount = 0;
+        overlappingCount = 0;
+        //README 2 Circle Overlap
+        overlaps = new HashSet<>();
+        for (int i = 0; i < dv.sprinkx.size() - 1; i++) {
+            for (int j = i + 1; j < dv.sprinkx.size(); j++) {
+                double r1 = dv.sprinkr.get(i);
+                double r2 = dv.sprinkr.get(j);
+                double y1 = dv.sprinky.get(i);
+                double y2 = dv.sprinky.get(j);
+                double x1 = dv.sprinkx.get(i);
+                double x2 = dv.sprinkx.get(j);
+                int circle1 = i, circle2 = j;
+                double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+                if (distance <= r1 + r2 - 2) {
+                    overlappingCount++;
+                    overlaps.add(i);
+                    overlaps.add(j);
+                    double intersectionArea = 0;
+                    Double r = r1;
+                    Double R = r2;
+                    double firstX = x1;
+                    double secondX = x2;
+                    double firstY = y1;
+                    double secondY = y2;
+                    int smallC = circle1;
+                    int bigc = circle2;
+                    Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+                    if (R < r) {
+                        // swap
+                        r = r2;
+                        R = r1;
+                        smallC = circle2;
+                        bigc = circle1;
+                    }
+                    Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+                    Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+                    Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+
+                    intersectionArea = part1 + part2 - part3;
+
+                    //README Maybe intersectionArea is 0 because circle is inside other circle.
+                    if (!(intersectionArea > 0)) {
+                        intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(smallC) / 360;
+                    }
+                    Log.wtf("Intersection Area", "(" + i + "," + j + ")----" + intersectionArea);
+                    waste += intersectionArea;
+                }
+            }
+        }
+        double overflowWaste = 0;
+        //README Overflow
+        for (int i = 0; i < dv.sprinkx.size(); i++) {
+            double r1 = dv.sprinkr.get(i);
+            double r2;
+            if (dv.radius != -5)
+                r2 = dv.backUpRadius * (dv.screenW / 200);
+            else
+                r2 = 300;
+            double y1 = dv.sprinky.get(i);
+            double y2 = dv.screenH / 2 - (dv.screenH / 8) - 30;
+            double x1 = dv.sprinkx.get(i);
+            double x2 = dv.screenW / 2;
+
+            double distance = Math.sqrt(Math.pow(x1 - dv.screenW / 2, 2)
+                    + Math.pow(y1 - (dv.screenH / 2 - (dv.screenH / 8) - 30), 2));
+            //Log.wtf("Distance", x1 + "," + y1 + " " + (int) x2 + "," + (int) y2 + " ...." + distance + " " + r1 + " >>> " + r2);
+            if (distance + r1 > r2 + 0.5) {
+                overflowingCount++;
+                double intersectionArea = 0;
+                Double r = r1;
+                Double R = r2;
+                double firstX = x1;
+                double secondX = x2;
+                double firstY = y1;
+                double secondY = y2;
+                Double d = Math.sqrt(Math.pow(firstX - secondX, 2) + Math.pow(secondY - firstY, 2));
+                if (R < r) {
+                    // swap
+                    r = r2;
+                    R = r1;
+                }
+                Double part1 = r * r * Math.acos((d * d + r * r - R * R) / (2 * d * r));
+                Double part2 = R * R * Math.acos((d * d + R * R - r * r) / (2 * d * R));
+                Double part3 = 0.5f * Math.sqrt((-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R));
+
+                intersectionArea = part1 + part2 - part3;
+
+                //README If intersection Area is greater than 2
+                if (intersectionArea > 2) {
+                    //IMPORTANT Calculated area is INSIDE (both circles)
+                    // to get overflow must subtract from total.
+                    //if (outsideCircle((int) x1, (int) y1))
+                    intersectionArea = Math.PI * dv.sprinkr.get(i)
+                            * dv.sprinkr.get(i) - intersectionArea;
+                } else if (outsideCircle((int) x1, (int) y1)) {
+                    //README Circle is completely outside
+                    intersectionArea = Math.PI * Math.pow(r, 2) * dv.angleList.get(i) / 360;
+                }
+                Log.wtf("-------Is Outside: ", " Outside: " + outsideCircle((int) x1, (int) y1));
+
+                //IMPORTANT Total Area is already calculated for overflow circles.
+                //DONE When iterating through inside circle, only if it not insideIntersecting, calculate its area.
+
+                Log.wtf("Overflow Wastage " + i, "" + intersectionArea);
+                //waste += intersectionArea;
+                overflowWaste += intersectionArea;
+            }
+        }
+        insideCircles = new ArrayList<>();
+        //README Total Area
+        for (int i = 0; i < dv.sprinkx.size(); i++) {
+            insideCircles.add(i);
+            total += Math.PI * dv.sprinkr.get(i)
+                    * dv.sprinkr.get(i) * dv.angleList.get(i) / 360;
+            if (outsideCircle(dv.sprinkx.get(i), dv.sprinky.get(i))) outsideCount++;
+        }
+        calculate3CircleOverlap();
+
+
+        waste += overflowWaste;
+
+        makeToast(Math.round(waste * 100 / total) + "% water wasted");
+        Log.wtf("Statistics: ", "Overflow: " + overflowWaste + "  " + overCounted3 + "   " + waste + " " + total);
+        displayCircleResults(waste, total, overflowWaste, overflowingCount, outsideCount);
+    }
+
+    public static boolean outsideCircle(int x, int y) {
+        double distance = Math.sqrt(Math.pow(x - dv.screenW / 2, 2)
+                + Math.pow(y - (dv.screenH / 2 - (dv.screenH / 8) - 30), 2));
+        if (distance > ((dv.radius == -5) ? 300 : dv.backUpRadius * (dv.screenW / 200)))
+            return true;
+        return false;
     }
 
     private void sprinklerInfoBox() {
@@ -3358,6 +3601,272 @@ public class MainActivity extends AppCompatActivity {
 
     int overlappingCount = 0;
     Set<Integer> overlaps;
+
+    private void displayCircleResults(final double waste, final double total, final double overflowWaste
+            , final int overflowingCount, final int outsideCount) {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.result);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        darken = false;
+        isHeadtoHead = false;
+
+        Button next = (Button) dialog.findViewById(R.id.done);
+        Button backBtn = (Button) dialog.findViewById(R.id.goBack);
+        final RelativeLayout results = (RelativeLayout) dialog.findViewById(R.id.realresults);
+        final RelativeLayout toHide = dialog.findViewById(R.id.questions);
+        final EditText waterUsedE = dialog.findViewById(R.id.waterused);
+        final EditText durationE = dialog.findViewById(R.id.duration);
+        final Spinner soilType = dialog.findViewById(R.id.soilType);
+        final CheckBox cb = dialog.findViewById(R.id.head);
+        ImageView headHelp = dialog.findViewById(R.id.headhelp);
+
+        headHelp.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                makeToast("Head to head coverage is when sprinklers require overlap to evenly distribute water. Overlap of 2 sprinklers" +
+                        " will not be included in wastage.");
+                return false;
+            }
+        });
+
+        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) buttonView.setTextColor(0XFF000000);
+                if (!isChecked) buttonView.setTextColor(0XFF757575);
+                isHeadtoHead = isChecked;
+            }
+        });
+
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+                dialog.dismiss();
+            }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String wU = waterUsedE.getText().toString();
+                boolean fgood = false;
+                boolean sgood = false;
+                double waterUsed = 0;
+                double duration = 0;
+                if (wU != null) {
+                    if (wU.length() > 0) {
+                        waterUsed = Double.parseDouble(wU);
+                        fgood = true;
+                    }
+                }
+
+                String d = durationE.getText().toString();
+                if (d != null) {
+                    if (d.length() > 0) {
+                        duration = Double.parseDouble(d);
+                        sgood = true;
+                    }
+                }
+                Log.wtf("*  Progress", fgood + " " + sgood);
+
+                if (!(fgood && sgood))
+                    shortToast("Please fill in the information.");
+                else {
+                    //DONE IT is good to contineu ahead.
+                    dialog.cancel();
+                    dialog.dismiss();
+
+                    String choice = soilType.getSelectedItem().toString();
+                    showCircleResults(waste, total, overflowWaste
+                            , overflowingCount, outsideCount, waterUsed, duration, choice);
+                }
+
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void showCircleResults(double waste, double total, double overflowWaste
+            , int overflowingCount, int outsideCount, double waterUsed, double duration, String choice) {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.real_result);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
+                (int) (dv.screenH * 0.9d));
+        dialog.show();
+        final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
+        final ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
+        final ImageView insideHelp = dialog.findViewById(R.id.insideHelp);
+        final ImageView outsideHelp = dialog.findViewById(R.id.outsideHelp);
+        View.OnTouchListener toucher = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (view.getId() == excessHelp.getId())
+                    makeToast("Amount of water wasted by overwatering" +
+                            " the same region repeatedly.");
+                if (view.getId() == insideHelp.getId())
+                    makeToast("# of sprinklers inside the land plot.");
+                if (view.getId() == outsideHelp.getId())
+                    makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
+                else if (view.getId() == overflowHelp.getId())
+                    makeToast("Amount of water wasted by overflowing out of the specified land plot.");
+                return false;
+            }
+        };
+        excessHelp.setOnTouchListener(toucher);
+        overflowHelp.setOnTouchListener(toucher);
+        insideHelp.setOnTouchListener(toucher);
+        outsideHelp.setOnTouchListener(toucher);
+
+        final Button back = dialog.findViewById(R.id.goBack);
+        Button done = dialog.findViewById(R.id.done);
+        View.OnClickListener clicker = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                dialog.cancel();
+                if (view.getId() == back.getId()) displayResults();
+            }
+        };
+        back.setOnClickListener(clicker);
+        done.setOnClickListener(clicker);
+
+        double soilFactor = 1;
+        if (choice.equals("Sandy")) {
+            soilFactor *= 0.95f;
+        } else if (choice.equals("Loam")) {
+            soilFactor *= 0.9f;
+        } else if (choice.equals("Clay")) {
+            soilFactor *= 1.15f;
+        }
+
+        wasted = waste;
+        if (isHeadtoHead) {
+            wasted = overflowWaste + overCounted3;
+        }
+
+        wasted *= soilFactor;
+        if (wasted < 0 || wasted > total)
+            wasted = total * .95;
+        Log.wtf("*- End Results:", "- " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
+        /*Log.wtf("*- Individual Circles", "Size: " + singleR.size());
+        Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
+        Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
+        Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
+        Log.wtf("*- Inside Intersecting", "Size: " + insideIntersecting.size());*/
+
+
+        TextView numSprink = (TextView) dialog.findViewById(R.id.sprinks);
+        numSprink.setText(Integer.toString(dv.sprinkx.size()));
+        TextView outsideSprink = dialog.findViewById(R.id.outsideNum);
+        TextView insideSprink = dialog.findViewById(R.id.insideNum);
+        outsideSprink.setText(Integer.toString(outsideCount));
+        insideSprink.setText(Integer.toString(dv.sprinkx.size() - outsideCount));
+        TextView overlappingSprink = dialog.findViewById(R.id.overlapNum);
+        TextView overflowSprink = dialog.findViewById(R.id.overflowNum);
+        overflowSprink.setText(Integer.toString(overflowingCount));
+        //overlappingSprink.setText(Integer.toString(Math.max(overlappingCount, dv.sprinkx.size())));
+        /*overlappingSprink.setText(Integer.toString(dv.sprinkx.size() - singleX.size()
+        -completelyOutside.size()));*/
+        overlappingSprink.setText(Integer.toString(overlaps.size()));
+        /*final TextView nonOverlapT = dialog.findViewById(R.id.noA);
+        final TextView overlapA = dialog.findViewById(R.id.oA);*/
+        final TextView totalA = dialog.findViewById(R.id.tA);
+        final TextView landCovered = dialog.findViewById(R.id.landCovered);
+        final TextView totalLandA = dialog.findViewById(R.id.totalLand);
+        final TextView percentCoveredA = dialog.findViewById(R.id.pcA);
+        final TextView wastedT = dialog.findViewById(R.id.ww);
+        final TextView totalWaterOutput = dialog.findViewById(R.id.two);
+        final TextView percentWasted = dialog.findViewById(R.id.pww);
+        final TextView perMonth = dialog.findViewById(R.id.permonth);
+        final TextView perYear = dialog.findViewById(R.id.peryear);
+        TextView overflowWaterOutput = dialog.findViewById(R.id.overflow);
+        TextView excessiveWaterOutput = dialog.findViewById(R.id.excess);
+
+        double landArea = Math.PI * dv.circleFeet * dv.circleFeet;
+        Log.wtf("Land Area", landArea + " " + dv.backUpRadius + " " + dv.ratio + " ---> " +
+                (dv.backUpRadius / dv.ratio));
+        int num = dv.sprinkx.size();
+        double totalWater = num * duration * waterUsed;
+        totalLandA.setText(format(landArea) + " sq. ft");
+        totalWaterOutput.setText(format(totalWater) + " gal/wk");
+        totalA.setText(Math.round(totalWater * 10) / 10 + " gal/wk");
+        double overflowWater = totalWater * overflowWaste / total;
+        overflowWaterOutput.setText(format(overflowWater * soilFactor) + " gal/wk");
+        double excessive = totalWater * ((waste - overflowWaste) - overCounted3) / total;
+        excessiveWaterOutput.setText(format(excessive * soilFactor) + " gal/wk");
+
+        double waterWasted = totalWater * wasted / total;
+        wastedT.setText(format(waterWasted) + " gal/wk");
+
+        double percentageWasted = wasted / total;
+        percentWasted.setText(format(percentageWasted * 100) + "%");
+
+        perMonth.setText((format2(waterWasted * 4)) + " gal");
+        perYear.setText((format2(waterWasted * 52)) + " gal");
+
+        //double notWastedWater = 1 - percentageWasted;
+        //double notWastedWater = 1 - percentageWasted + overflowWater/total + overCounted3 / total;
+        double notWastedWater = 1 - percentageWasted +
+                overflowWaste / total;
+
+        double landCoveredArea = (total - overflowWaste
+                - (waste - overflowWaste) + overCounted3) * landArea / (Math.PI * (dv.backUpRadius * (dv.screenW / 200))
+                * (dv.backUpRadius * (dv.screenW / 200)));
+        // double landCoveredArea = notWastedWater * total / (Math.PI * dv.backUpRadius * dv.backUpRadius) * landArea;
+        double percentLandCovered = landCoveredArea / landArea;
+        if (percentLandCovered > 1) {
+            percentLandCovered = 0.992;
+            landCoveredArea = landArea * percentLandCovered;
+        }
+        Log.wtf("Land Covered", landCoveredArea + " = " + total + " - " + overflowWaste
+                + " - " + (waste - overflowWaste) + " + " + overCounted3 + ") / " + (Math.PI * (dv.backUpRadius * (dv.screenW / 200))
+                * (dv.backUpRadius * (dv.screenW / 200))) + "  * " + landArea);
+        /*Log.wtf("Percent Land", " " + Math.round(notWastedWater * 100) + " " +
+                Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));
+        Log.wtf("\"-_Land Covered", " " + Math.round(notWastedWater * 100) + " " +
+                Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));
+        Log.wtf("*- Land Coverage - ", dv.polygonArea() + " " + notWastedWater + " " + landCoveredArea
+                + " " + percentLandCovered);*/
+        landCovered.setText(format(landCoveredArea) + " sq. ft");
+        double variable = notWastedWater * total / (Math.PI * dv.backUpRadius * dv.backUpRadius);
+        /*totalLandA.setText(Math.round(variable * 100) + " " + Math.round(notWastedWater * 100) + " == " +
+                Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));*/
+        percentCoveredA.setText(format(percentLandCovered * 100) + "%");
+
+
+
+
+        /* numSprink.setText(dv.sprinkx.size() + "");
+                    Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
+                    numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
+                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
+                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
+                    percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
+                    percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
+                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
+                    totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
+                    wasted.setText(String.format("%1$,.2f",
+                            duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
+
+
+                    nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
+                    //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
+                    overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
+                    //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
+*/
+
+    }
+
 
     //FUTURE FILES see how app looks with plotting sprinkler center as a black dot.
     //FUTURE FILES Give actual feedback as to how they can improve the design plan.
