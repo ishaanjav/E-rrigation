@@ -1,5 +1,5 @@
-# [E-rrigation](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
-### [Click here for video demonstration](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
+# [E-rrigation](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
+### [Click here for video demonstration](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
 
 
   <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Neighborhood%20Water%20Wastage%201.JPG" width="530" alt="Water Wastage on a Farm" align="right">
@@ -21,8 +21,8 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="left">
 
-## [Demonstration and Features](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
-#### A [video](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be) on using the app can be found [here.](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
+## [Demonstration and Features](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
+#### A [video](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be) on using the app can be found [here.](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
 
 Using the app is easy: Users simply have to plot their land area and sprinklers by tapping on the screen. **However, the calculations that take place beneath the hood are a lot more complex.** 
 
@@ -33,10 +33,12 @@ Using the app is easy: Users simply have to plot their land area and sprinklers 
  
 It also has to determine which side of a sprinkler is overflowing.
 
-<p align="center">
+<br><br><br><br>
+
+[<p align="center">
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Special%20Sprinkler%20Cases%20App%20Calculates.PNG"
 width="96%"/>
-  </p>
+  </p>](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
 
 ###### Above is a diagram illustrating  a few of the *irregular* cases that the app has to account for. 
 
