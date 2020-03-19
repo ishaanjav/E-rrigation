@@ -36,8 +36,8 @@ It also has to determine which side of a sprinkler is overflowing.
 <br><br><br><br>
 
 <p align="center">
-[<img src="https://github.com/ishaanjav/E-rrigation/blob/master/Special%20Sprinkler%20Cases%20App%20Calculates.PNG"
-width="96%"/>](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
+<img src="https://github.com/ishaanjav/E-rrigation/blob/master/Special%20Sprinkler%20Cases%20App%20Calculates.PNG"
+width="96%"/>
   </p>
 
 ###### Above is a diagram illustrating  a few of the *irregular* cases that the app has to account for. 
