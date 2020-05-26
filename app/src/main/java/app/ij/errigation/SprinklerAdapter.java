@@ -1,17 +1,12 @@
-package com.example.anany.drawingrectangles;
+package app.ij.errigation;
 
-import android.content.Context;
-import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 

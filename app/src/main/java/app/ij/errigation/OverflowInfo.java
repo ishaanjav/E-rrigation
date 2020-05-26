@@ -1,4 +1,4 @@
-package com.example.anany.drawingrectangles;
+package app.ij.errigation;
 
 public class OverflowInfo {
 
