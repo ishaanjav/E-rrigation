@@ -1,5 +1,5 @@
-# [E-rrigation](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
-### [Click here for video demonstration](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
+# [E-rrigation](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
+### [Click here for video demonstration](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
 
 
   <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Neighborhood%20Water%20Wastage%201.JPG" width="530" alt="Water Wastage on a Farm" align="right">
@@ -21,8 +21,8 @@ By providing these statistics, E-rrigation reduces water usage even *before* spr
 
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Demonstration%20GIF.gif" width="250" align="left">
 
-## [Demonstration and Features](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
-#### A [video](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be) on using the app can be found [here.](https://www.youtube.com/watch?v=nY7Rz7B1p3I&feature=youtu.be)
+## [Demonstration and Features](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
+#### A [video](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be) on using the app can be found [here.](https://www.youtube.com/watch?v=p_AtXZ3dLq0&feature=youtu.be)
 
 Using the app is easy: Users simply have to plot their land area and sprinklers by tapping on the screen. **However, the calculations that take place beneath the hood are a lot more complex.** 
 
@@ -32,6 +32,8 @@ Using the app is easy: Users simply have to plot their land area and sprinklers 
  It must also detect a special case of 3 circles overlapping vs the normal case *(both of which require lots of mathematical calculations)* 
  
 It also has to determine which side of a sprinkler is overflowing.
+
+<br><br><br><br>
 
 <p align="center">
 <img src="https://github.com/ishaanjav/E-rrigation/blob/master/Special%20Sprinkler%20Cases%20App%20Calculates.PNG"
@@ -44,7 +46,7 @@ width="96%"/>
 ## Code
 Below are links to access some of the important files containing code for the application.
 
-- [**MainActivity.java -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/java/com/example/anany/drawingrectangles/CleanMainActivity.java) Code for plotting land, sprinklers, adjusting angle/radius, and more. ***Also contains calculations** and displaying of results*.
+- [**MainActivity.java -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/java/com/example/anany/drawingrectangles/MainActivity.java) Code for plotting land, sprinklers, adjusting angle/radius, and more. ***Also contains calculations** and displaying of results*.
 - [**activity_main.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/activity_main.xml)  Layout for app's main screen.
 - [**additional_info.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/result.xml) Dialog that pops up to ask users for additional information.
 - [**result.xml -**](https://github.com/ishaanjav/E-rrigation/blob/master/app/src/main/res/layout/real_result.xml) Dialog box that displays statistics to users.
