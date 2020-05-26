@@ -1280,11 +1280,16 @@ public class MainActivity extends AppCompatActivity {
                 //makeToast("Invalidating");
                 //dv.sradius = seekBar.getProgress();
                 int max = seekBar.getMax();
-                int min = seekBar.getMin();
+                int min = 1;
+                Log.wtf("*Seek bar info:", "max: " + max + "  min: " + min + "  current: " + seekBar.getProgress());
+                try {
+                    min = seekBar.getMin();
+                } catch (Exception e) {
+                    min = 1;
+                }
                 double sprinklerRadius = seekBar.getProgress() * (dv.screenW / 200);
                 float bigCircleRadius = dv.setCircleRadiusTo;
                 float bigCircleFeet = dv.length;
-                Log.wtf("*Seek bar info:", "max: " + max + "  min: " + min + "  current: " + seekBar.getProgress());
                 int progress = seekBar.getProgress();
                 progress -= 50;
                 progress *= 2;
@@ -1701,7 +1706,8 @@ public class MainActivity extends AppCompatActivity {
                 double rotateDisplay = dv.rotate;
                 if (rotateDisplay > 180)
                     rotateDisplay -= 360;
-                //makeToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+                shortToast("Angle: " + dv.angle + "  Rotate: " + rotateDisplay);
+
                 Log.wtf("Angle: " + dv.angle, "  Rotate: " + rotateDisplay);
 
                 if (dv.sprinkx.size() > 0) {
@@ -1858,7 +1864,7 @@ public class MainActivity extends AppCompatActivity {
 
             fillPaint = new Paint();
             fillPaint.setAntiAlias(true);
-            fillPaint.setColor(0X1A187507);
+            fillPaint.setColor(0X4Fc0f7b5);
             fillPaint.setStyle(Paint.Style.FILL);
             fillPaint.setStrokeJoin(Paint.Join.MITER);
 
@@ -3397,7 +3403,7 @@ public class MainActivity extends AppCompatActivity {
         //INFO Subtracts overlap of 3 circles
         wasted -= overCounted3;
         Log.wtf("*- End Results:", ":-:  " + (int) wasted + " " + (int) total + " " + (int) (wasted * 100 / total) + "%\n---___---");
-        Log.wtf("*- Wastage", "OverFlow: " + overFlowWastage + "  Overlap: " + overlapWastage +"  3 Circle: " + overCounted3);
+        Log.wtf("*- Wastage", "OverFlow: " + overFlowWastage + "  Overlap: " + overlapWastage + "  3 Circle: " + overCounted3);
         Log.wtf("*- Outside Intersecting", "Size: " + outsideIntersecting.size());
         Log.wtf("*- Completely Inside Circle", "Size: " + completelyInside.size());
         Log.wtf("*- Inside Circles", "Size: " + insideCircles.size());
@@ -3425,7 +3431,6 @@ public class MainActivity extends AppCompatActivity {
         final RelativeLayout toHide = dialog.findViewById(R.id.questions);
         final EditText waterUsedE = dialog.findViewById(R.id.waterused);
         final EditText durationE = dialog.findViewById(R.id.duration);
-        final Spinner soilType = dialog.findViewById(R.id.soilType);
         final CheckBox cb = dialog.findViewById(R.id.head);
         ImageView headHelp = dialog.findViewById(R.id.headhelp);
 
@@ -3515,10 +3520,11 @@ public class MainActivity extends AppCompatActivity {
                     shortToast("Please fill in the information.");
                 else {
                     //DONE IT is good to contineu ahead.
+                    Spinner soilType = dialog.findViewById(R.id.soilType);
+                    String choice = soilType.getSelectedItem().toString();
                     dialog.cancel();
                     dialog.dismiss();
 
-                    String choice = soilType.getSelectedItem().toString();
                     showResults(waterUsed, duration, choice);
                     //handleResults(3, 3, 3, 3, 3);
                     /*toHide.setVisibility(View.INVISIBLE);
@@ -5225,7 +5231,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //INFO `ignoreSprinklers` is number of auto-plotted sprinklers
                 // Purpose is to avoid calculating overflow for auto plotted sprinklers unless land is rectangle
-                if (overflowInfo.getCirclePos() < ignoreSprinklers )
+                if (overflowInfo.getCirclePos() < ignoreSprinklers)
                     overFlowWastage -= wastedArea;
 
                 if (fullCircleUsed.contains(overflowInfo.getCirclePos())) {
@@ -5236,7 +5242,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //INFO
                     // Purpose is to avoid calculating overflow for auto plotted sprinklers unless land is rectangle
-                    if (overflowInfo.getCirclePos() >= ignoreSprinklers ) {
+                    if (overflowInfo.getCirclePos() >= ignoreSprinklers) {
                         overFlowWastage += toAdd;
                         if (overFlowWastage > totalOverflowArea)
                             overFlowWastage -= toAdd * .9;
@@ -5429,475 +5435,6 @@ public class MainActivity extends AppCompatActivity {
         return t;
     }
 
-    private void openScreenshot(File imageFile) {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        Uri uri = Uri.fromFile(imageFile);
-        intent.setDataAndType(uri, "image/*");
-        startActivity(intent);
-    }
-
-    ArrayList<ArrayList<String>> colors = new ArrayList<>();
-    ArrayList<String> pos2 = new ArrayList<String>() {{
-        add("4dc4ff");
-        add("54c4ff");
-        add("55caff");
-    }};
-
-    ArrayList<String> pos3 = new ArrayList<String>() {{
-        add("58c2ff");
-        add("54c3ff");
-        add("54c2ff");
-    }};
-
-    ArrayList<String> pos4 = new ArrayList<String>() {{
-        add("49c8ff");
-        add("51c0ff");
-        add("51b9ff");
-        add("4cc6ff");
-        add("51c1ff");
-    }};
-
-    ArrayList<String> pos5 = new ArrayList<String>() {{
-        add("54c5ff");
-        add("54c6ff");
-        add("54c7ff");
-    }};
-
-    //FUTURE FILES - Land Area is Circle: Water Wastage
-    //INFO Work on this so that it also calculates the water wastage for when land area is circle.
-    //  What you do is before iterateThroughPixels() is called, check pastMode to see if it was a
-    //  circle or a polygon. If circle, then make a new function to call to display stats
-    //  otherwise just call iteratethroughpixels.
-    //INFO actually you may have to make the circle background white that way it works in iteratethroughpixels
-
-    //Not important - Improve the sprinkler radius
-    //INFO Sprinkler radius is very small compared to the side.
-    // Make it so that it is Math.max of something that way it is larger. Maximum should always be at least 20 feet.
-    // README
-    //  min = 2, max >= 15-20 (Based on largest side length)
-
-    //FUTURE FILES - Calculating area outside of polygon
-    //INFO 11/29/19 to calculate the amount of water outside the polgyon, use a technique called ray-casting
-    // Basically, before iterating through pixels, create an ArrayList for the equation of each polygon side,
-    // storing m and b as well as both pairs of coordinates.
-    //  Then, when iterating through pixel, if is not white, then get the y coordinate. Then, for each line side,
-    // use the equation to calculate the x given the y. If the x is in between the xs of the line's coordinates
-    // add 1 to a counter variable.
-    // In the end, if counter % 2 == 0, then that means it is not in the polygon because it is even,
-    // If odd, that means it is located inside the polygon.
-    // Use that to add to the area variable to count that as also being wasted water.
-
-    //OLD - AlertDialog for getting side length
-    //INFO As of 11/29/19 for some reason the AlertDialog is finally working now. So what you can do is make an AlertDialog
-    //  when they place down 2 sprinklers and then ask them to enter in the length of that side.
-    //  This approach is much nicer than having an always-present EditText.
-    //  Use the Alert Dialog to ask for the side length.
-
-
-    //FUTURE FIles
-    //INFO Maybe have a feature where for the results it displays the bad sprinkler placements by making them pop out.
-    //  For example, when iterating through bitmap pixels, if the sprinkler is fine, then you edit the color and make it
-    //  greyed out, otherwise you leave it the same, that way they can see that those placements were bad.
-
-
-    //FUTURE FILES Idea for accurately calculating area:
-    //  Have an ArrayList of ArrayList<OBJECT> where OBJECT contains a position (int), x (int), y (int)
-    //  Using math formula, for each circle, go through all circles and see whether it intersects, storing
-    //  the x,y coordinate and the position of the intersecting circle from original list with all sprinklers.
-    //  ------------------------------
-    //  Now in this ArrayList of ArrayList, go through each position and check if that ArrayList length is 2.
-    //  (If 2 that means that it was intersected by 1 circle.) Then, go and calculate intersection area using
-    //  the x, y, and then position to get the radius.
-    // ----
-    // Do this for all and add themp up. Then divide by 2 for duplicates ---> Result
-    //README NOTES INFO Consideration for this is that it does not account for fact that 1 of the 2 circles
-    // may have more than 2 intersection points and may have a 3-way intersection with 2 other circles
-    // in addition to that 1 circle that was used to calculate.
-    //NOTES I have no idea how to calculate the rest of the intersections (3-way+).
-    //  Even with pixel counting, how will I avoid counting double-intersections
-    //README INFO Answer to above question is avoid counting the intersecting pairs by having an ArrayList of every circle
-    //  (x, y, r) that had ONLY 2 intersections. Then, check if point is inside intersection. If it is, don't count.
-    //  NOW YOU would have to check in case of circle that has such a pair, but also intersects other circles, how to
-    // not count regions of only that circle where it is not sharing any other regions.
-
-    private void iterateThroughPixels(Bitmap bmp) {
-        //TODO Use singleX... arraylists and in for for, check if point is inside circle.
-        //  IF inside circle, then
-        hm = new HashMap<>();
-        ArrayList<String> notGood = new ArrayList<>();
-
-        //README area is the amount of wasted water.
-        int area = 0;
-        //README Below variable is for sprinkler that intersects with others, but pixel is region of only 1 sprinkler.
-        int overlappingButOnly1SprinklerRegion = 0;
-        int tracker = 0;
-        int non = 0, counter = 0;
-        Log.wtf("* Sprinkler INFO: ", "SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
-
-        //makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
-        Log.wtf("*  Calculations 2", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
-        if (singleR.size() == dv.sprinkx.size()) {
-            //Do nothing.
-        } else if (singleR.size() + 2 == dv.sprinkx.size()) {
-//Calculate the intersection area of 2 circles.
-            int[] temp = calculateWastage(true);
-            area += temp[0];
-            //INFO Increase the area of non-individual sprinklers.
-            //counter += temp[1] - area;
-            counter = temp[1];
-
-            //makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
-            Log.wtf("*  Calculations 2", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
-        } else if (singleR.size() + 3 == dv.sprinkx.size()) {
-            //Just double the intersection area of any 2 circles.
-            int temp[] = calculateWastage(false);
-            area += temp[0] * 2;
-            //INFO Increase the area of non-individual sprinklers.
-            counter += temp[1];
-            //counter += temp[1] - area;
-            // makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
-            Log.wtf("*  Calculations 3", "WASTED: " + area + "  TOTAL WATER AREA: " + counter);
-        } else {
-            // makeToast("SINGLE SIZE: " + singleR.size() + "\tSprinkler Size: " + dv.sprinkx.size());
-            for (int y = 0; y < bmp.getHeight(); y++) {
-                for (int x = 0; x < bmp.getWidth(); x++) {
-                    int pixel = bmp.getPixel(x, y);
-
-                    int redValue = Color.red(pixel);
-                    int blueValue = Color.blue(pixel);
-                    int greenValue = Color.green(pixel);
-
-                    String red = "", blue = "", green = "";
-                    //red += (redValue < 10) ? ("0" + redValue) : (redValue);
-                    //blue += (blueValue < 10) ? ("0" + redValue) : (redValue);
-                    //green += (greenValue < 10) ? ("0" + redValue) : (redValue);
-
-
-                    String pix = red + "," + blue + "," + green;
-                    pix = redValue + "," + blueValue + "," + greenValue;
-                    pix = convertTo16(redValue) + convertTo16(greenValue) + convertTo16(blueValue);
-
-                    boolean good = true;
-
-                    for (int i = 0; i < singleR.size(); i++) {
-                        double distance = Math.sqrt(Math.pow(x - singleX.get(i), 2) + Math.pow(y - singleY.get(i), 2));
-                        if ((int) distance <= singleR.get(i)) {
-                            good = false;
-                            break;
-                        }
-                    }
-
-                    //INFO if good: pixel is not in sprinkler which means it is in an overlapping region or no sprinkler.
-                    if (good) {
-                        //TODO Since pixel is not in the sprinkler, you have to do the pixel count stuff.
-                        //TRY Checking (for pos 2 and maybe pos 3) if it is within a range of colors using compareTo
-                        //  Do not just use discrete values. Check in a range to make sure.
-
-                        if (("4b".compareTo(pix) < 0 && "51".compareTo(pix) > 0))
-                            overlappingButOnly1SprinklerRegion++;
-                        else if ("51".compareTo(pix) < 0 && "52".compareTo(pix) > 0) {
-                            area += 4;
-                            counter += 4;
-                        } else if ("54".compareTo(pix) < 0 && "57".compareTo(pix) > 0) {
-                            overlappingButOnly1SprinklerRegion++;
-                        } else if ("52".compareTo(pix) < 0 && "54".compareTo(pix) > 0) {
-                            area += 3;
-                            counter += 3;
-                        } else if ("57".compareTo(pix) < 0 && "61".compareTo(pix) > 0) {
-                            area += 2;
-                            counter += 2;
-                        } else if ("61".compareTo(pix) < 0 && "65".compareTo(pix) > 0) {
-                            area += 5;
-                            counter += 5;
-                        }
-
-                        //NOTE Keep this commented out below.
-                        /*if (pos2.contains(pix))
-                            area += 1;
-                        else if (pos3.contains(pix))
-                            area += 2;
-                        else if (pos4.contains(pix))
-                            area += 3;
-                        else if (pos5.contains(pix))
-                            area += 4;
-                        else {
-                            //INFO It was none of the above. This means that 25% 2 sprinklers, 25% 3 sprinklers, 50% 6+.
-                            //FIXME Change above weights since it overstimates.
-                            //TRY Checking if pix is in a certain range of colors by using compareTo (that way it doesn't get whites)
-                            // , then add water wastage amount using new weights.
-                            //NOTES
-                            //  maybe ignore things starting with 4d-53 and treat it like it was in only one sprinkler.
-                            //  Maybe just go up to 60 as max or something.
-                            //  Then come up with 2/3 other intervals. Give the smallest ones weights of 2 and 3, with 2 being bigger.
-                            //  Then in else case, just have it be 6;
-                            if (!pix.equals("000000") && !pix.equals("369646")) {
-                                tracker++;
-
-                                if ("4b".compareTo(pix) < 0 && "48".compareTo(pix) > 0)
-                                    overlappingButOnly1SprinklerRegion++;
-                                else if ("49a".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
-                                    area += 4;
-                                if ("4b".compareTo(pix) < 0 && "51d".compareTo(pix) > 0)
-                                    area += 4;
-                                else if ("54c5ff".compareTo(pix) < 0 && "54c8".compareTo(pix) > 0)
-                                    area += 5;
-                                else if ("6".compareTo(pix) < 0)
-                                    area += 6;
-                                else
-                                    area += 0;
-
-                                //OLD code to try to count whether 6 sprinklers are overlapping.
-                                *//**//**//*if (tracker % 4 == 1) area += 1;
-                            else if (tracker % 4 == 2) area += 2;
-                                else area += 6;*//**//**//*
-                            }
-
-
-                        }*/
-                        hm.put(pix, hm.getOrDefault(pix, 0) + 1);
-                    } else {
-                        //INFO If !good: pixel is inside sprinkler.
-                        //  Area already calculated in non.
-                        //notGood.add(pix + ":---  " + x + " " + y);
-                    }
-                    //hm.put(pix, hm.getOrDefault(pix, 0) + 1);
-
-                }
-            }
-        }
-        if (dv.sprinkx.size() == singleX.size())
-            area = 0;
-
-        //Log.wtf("*ITERATION STATUS:", "Done iterating through pixels");
-        // makeToast(hm.toString());
-        //makeToast("SIZE: " + singleX.size());
-        String logger = "Result: ";
-        int sum = 0;
-        //OLD Code for calculating non-wasted water. INACCURATE
-        //TODO CHeck if below is impacting the exact formula.
-        if (dv.sprinkx.size() < 4) {
-        } else if (dv.sprinkx.size() < 8)
-            counter *= 1.85;
-        else if (dv.sprinkx.size() < 12)
-            counter *= 3.2;
-        else if (dv.sprinkx.size() < 17)
-            counter *= 4.15;
-        else if (dv.sprinkx.size() < 25)
-            counter *= 7.5;
-        else
-            counter *= 9.6;
-
-        for (Map.Entry<String, Integer> entry : hm.entrySet()) {
-            logger += "\n" + entry.toString();
-            if (!entry.getKey().equals("000000") && !entry.getKey().equals("369646")) {
-                //README This statement is making sure that counter is a sprinkler.
-                if ("42".compareTo(entry.getKey()) < 0 && "65".compareTo(entry.getKey()) > 0)
-                    counter += entry.getValue();
-            }
-        }
-        //Log.wtf("*ITERATION STATUS:", "Done tallying");
-
-        //INFO Calculate area of nonoverlapping individual circles
-        int posCounter = 0;
-        for (double m : singleR) {
-            //README The last multiplication part was added to account for fact that the circles may not be full 360
-            non += ((double) (Math.pow(m, 2) * Math.PI)) * (double) (dv.angleList.get(posCounter)) / 360f;
-            //makeToast(non + " " + dv.angleList.get(posCounter));
-            posCounter++;
-        }
-
-
-        //hideLoading();
-        //  makeToast("Got everything");
-
-
-        Log.wtf("*                    ", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
-//        Log.wtf("*   Pixels -  METHOD ----", logger);
-//        Log.wtf("*  Not accepted ----", "O: " + output);
-
-        //INFO Area of individual sprinklers calculated with formula.           NOT WASTED
-        Log.wtf("*  Non overlap Sprinkler Area: ----", "" + non);
-        //INFO Counter is the area of each sprinkler that overlaps. FULL AREA - multicounts overlapping
-        Log.wtf("*  Everything Besides Individual (not non): --------", "" + counter);
-        //INFO Area of intersecting sprinkler, nonoverlap part.                 NOT WASTED
-        Log.wtf("*  Intersecting Sprinkler, But Only 1 Region: --------", "" + overlappingButOnly1SprinklerRegion);
-        //INFO Amount of intersecting sprinkler, overlap part.
-        Log.wtf("*    Water Being Wasted", "This much water being wasted: " + area);
-        Log.wtf("*      TOTAL AMOUNT WASTED: -------", (((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion)) + "\n"));
-        //DONE Calculate polygon area.
-        Log.wtf("*      TOTAL AREA COVERED: --------", "" + ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (dv.polygonArea())) + "\n");
-        Log.wtf("*--------------------", "_-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-__-_-_-_");
-
-        handleResults(non, counter, overlappingButOnly1SprinklerRegion, area, dv.polygonArea());
-    }
-
-    private void handleResults(final int non, final int counter, final int overlappingButOnly1SprinklerRegion, final int area, final double v) {
-        final Dialog dialog = new Dialog(MainActivity.this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
-        dialog.setContentView(R.layout.result);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        Button continueBtn = (Button) dialog.findViewById(R.id.continueBtn);
-        Button backBtn = (Button) dialog.findViewById(R.id.backBtn);
-        final RelativeLayout results = (RelativeLayout) dialog.findViewById(R.id.realresults);
-        final RelativeLayout toHide = dialog.findViewById(R.id.questions);
-        final EditText waterUsedE = dialog.findViewById(R.id.waterused);
-        final EditText durationE = dialog.findViewById(R.id.duration);
-        Button next = (Button) dialog.findViewById(R.id.continueBtn);
-        final Spinner soilType = dialog.findViewById(R.id.soilType);
-        TextView minutes = dialog.findViewById(R.id.minutes);
-        minutes.setText("23");
-        //results.setVisibility(View.VISIBLE);
-
-        //final TextView numSprink = results.findViewById(R.id.sNum);
-        /*final TextView nonOverlapT = dialog.findViewById(R.id.noA);
-        final TextView overlapA = dialog.findViewById(R.id.oA);
-        final TextView totalA = dialog.findViewById(R.id.tA);
-        final TextView landCovered = dialog.findViewById(R.id.lcA);
-        final TextView totalLandA = dialog.findViewById(R.id.tlA);
-        final TextView percentCoveredA = dialog.findViewById(R.id.pcA);
-        //final TextView numIntersect = dialog.findViewById(R.id.plc);
-        final TextView wasted = dialog.findViewById(R.id.ww);
-        final TextView totalWaterOutput = dialog.findViewById(R.id.two);
-        final TextView percentWasted = dialog.findViewById(R.id.pww);
-        final TextView perMonth = dialog.findViewById(R.id.permonth);*/
-        //final TextView perYear = dialog.findViewById(R.id.peryear);
-
-        //TODO rephrase question for how much water sprinkler uses to
-        // How much water system uses (System always outputs same amount of water)
-        // Then, change calculations (it will be easier now)
-
-        /*backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.cancel();
-                dialog.dismiss();
-            }
-        });
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String wU = waterUsedE.getText().toString();
-                boolean fgood = false;
-                boolean sgood = false;
-                double waterUsed = 0;
-                double duration = 0;
-                if (wU != null) {
-                    if (wU.length() > 0) {
-                        waterUsed = Double.parseDouble(wU);
-                        fgood = true;
-                    }
-                }
-
-                String d = durationE.getText().toString();
-                if (d != null) {
-                    if (d.length() > 0) {
-                        duration = Double.parseDouble(d);
-                        sgood = true;
-                    }
-                }
-                Log.wtf("*  Progress", fgood + " " + sgood);
-
-                if (!(fgood && sgood))
-                    makeToast("Please fill in the information.");
-                else {*/
-        //DONE IT is good to contineu ahead.
-        toHide.setVisibility(View.INVISIBLE);
-//        results.setVisibility(View.VISIBLE);
-
-        Button goBack = dialog.findViewById(R.id.goBack);
-        Button done = dialog.findViewById(R.id.done);
-        done.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-                dialog.cancel();
-            }
-        });
-
-        goBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toHide.setVisibility(View.VISIBLE);
-                results.setVisibility(View.INVISIBLE);
-            }
-        });
-        double duration = 10;
-        double waterUsed = 10;
-        //DONE Just do the calculations to display the actual stuff.
-
-        //INFO README
-        // I think a better method of calculating coverage is simply totalWaterOutput *(1-percentWastage)
-        double percentWastage = ((double) (area)) / ((double) (non + counter + overlappingButOnly1SprinklerRegion));
-        double coverage = ((double) (non + overlappingButOnly1SprinklerRegion + counter - area) / (v));
-        if (coverage > 1) {
-            coverage = 0;
-            for (int r : dv.sprinkr) {
-                coverage += Math.PI * Math.pow(r, 2);
-            }
-            coverage -= coverage * percentWastage;
-            coverage = coverage / v;
-            if (coverage > 1)
-                coverage = 0.7678;
-        }
-        //double percentWastage = area / (non + counter + overlappingButOnly1SprinklerRegion);
-
-        //README Accounting for soil type
-        String choice = soilType.getSelectedItem().toString();
-        if (choice.equals("Sandy")) {
-            percentWastage *= 0.95f;
-        } else if (choice.equals("Loam")) {
-            percentWastage *= 0.9f;
-        } else if (choice.equals("Clay")) {
-            percentWastage *= 1.15f;
-        }
-
-        //numSprink.setText(dv.sprinkx.size() + "");
-        Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
-        //numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
-//        totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
-//        Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
-//        landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
-//        percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
-//        percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
-//        perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-        // perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-//        totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-//        totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-        /*wasted.setText(String.format("%1$,.2f",
-                duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
-*/
-
-       /* nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
-        //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
-        overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
-        //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
-*/
-        //TODO Shift left and shift right
-
-        //wasted.setText(String.format("%1$,.1f", duration * pixToGallon(area, waterUsed)) + " gal/wk");
-        //totalWaterOutput.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed))) + " gal/wk");
-//
-//                }
-//
-//            }
-//        });
-
-        dialog.show();
-    }
-
-    public double pixToGallon(double pixels, double gpm) {
-        double r = dv.ratio;
-        double squarefeet = pixels * (Math.pow(r, 2));
-        double waterPerFootPerMinute = gpm / (Math.pow(2 * r, 2) * Math.PI);
-        //double waterPerFootPerMinute = gpm / (Math.pow(dv.sprinkr.get(0) * r, 2) * Math.PI);
-
-        return squarefeet * waterPerFootPerMinute;
-    }
-
     private int[] calculateWastage(boolean two) {
         double firstX = 0, firstY = 0, firstR = 0, secondX = 0, secondY = 0, secondR = 0;
         int firstAngle = 360, secondAngle = 360;
@@ -5973,18 +5510,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    static Toast shorter;
+    static Toast longer;
+
     private static void shortToast(String s) {
         //README I am providing a static context since makeToast is static in order to call it from
         // ask for length which is static because it has to be called in onDraw();
         // FIXME-- If you get any errors with making Toast, try making it unstatic.
-        Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
+        if (shorter != null) shorter.cancel();
+        shorter = Toast.makeText(context, s, Toast.LENGTH_SHORT);
+
+        /*shorter = new Toast(context);
+        //Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
+        shorter.setText(s);
+        shorter.setDuration(Toast.LENGTH_SHORT);*/
+        shorter.show();
     }
 
     private static void makeToast(String s) {
         //README I am providing a static context since makeToast is static in order to call it from
         // ask for length which is static because it has to be called in onDraw();
         // FIXME-- If you get any errors with making Toast, try making it unstatic.
-        Toast.makeText(context, s, Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, s, Toast.LENGTH_LONG).show();
+        if (longer != null) longer.cancel();
+        longer = Toast.makeText(context, s, Toast.LENGTH_LONG);
+        /*longer = new Toast(context);
+        longer.setText(s);
+        longer.setDuration(Toast.LENGTH_LONG);*/
+        longer.show();
     }
 
 }
