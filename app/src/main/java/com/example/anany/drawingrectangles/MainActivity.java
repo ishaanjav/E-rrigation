@@ -18,8 +18,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.v4.widget.NestedScrollView;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -53,6 +51,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import java.io.File;
@@ -3074,7 +3073,9 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Double> radiusList = new ArrayList<>(radii.keySet());
         ArrayList<Integer> frequency = new ArrayList<>(radii.values());
         ArrayList<SprinklerInfo> sprinklerList = new ArrayList<>();
+        int count = 0;
         for (int i = 0; i < radiusList.size(); i++) {
+            count += frequency.get(i);
             sprinklerList.add(new SprinklerInfo(radiusList.get(i), frequency.get(i)));
         }
 
@@ -3088,7 +3089,7 @@ public class MainActivity extends AppCompatActivity {
 
         //DONE ListView not showing up
         list.setAdapter(sprinklerAdapter);
-        makeToast("Size: " + sprinklerList.size());
+        makeToast( count + " sprinklers");
 
         dialog.show();
     }
