@@ -3452,7 +3452,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 makeToast("Head to head coverage is when sprinklers require overlap to evenly distribute water. Overlap of 2 sprinklers" +
-                        " will not be included in wastage.");
+                        " will not be included in wastage calculations.");
                 return false;
             }
         });
@@ -3749,30 +3749,11 @@ public class MainActivity extends AppCompatActivity {
             DisplayMetrics metrics = getResources().getDisplayMetrics();
             paramser.width = (int) (paramser.width * 1.18f);
         }
-        dialog.show();
         final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
         final ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
         final ImageView insideHelp = dialog.findViewById(R.id.insideHelp);
         final ImageView outsideHelp = dialog.findViewById(R.id.outsideHelp);
-        View.OnTouchListener toucher = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (view.getId() == excessHelp.getId())
-                    makeToast("Amount of water wasted by overwatering" +
-                            " the same region repeatedly.");
-                if (view.getId() == insideHelp.getId())
-                    makeToast("# of sprinklers inside the land plot.");
-                if (view.getId() == outsideHelp.getId())
-                    makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
-                else if (view.getId() == overflowHelp.getId())
-                    makeToast("Amount of water wasted by overflowing out of the specified land plot.");
-                return false;
-            }
-        };
-        excessHelp.setOnTouchListener(toucher);
-        overflowHelp.setOnTouchListener(toucher);
-        insideHelp.setOnTouchListener(toucher);
-        outsideHelp.setOnTouchListener(toucher);
+
 
         final Button back = dialog.findViewById(R.id.goBack);
         Button done = dialog.findViewById(R.id.done);
@@ -3848,10 +3829,13 @@ public class MainActivity extends AppCompatActivity {
         totalLandA.setText(format(landArea) + " sq. ft");
         totalWaterOutput.setText(format(totalWater) + " gal/wk");
         totalA.setText(Math.round(totalWater * 10) / 10 + " gal/wk");
-        double overflowWater = totalWater * overflowWaste / total;
+        final double overflowWater = totalWater * overflowWaste / total;
         overflowWaterOutput.setText(format(overflowWater * soilFactor) + " gal/wk");
-        double excessive = totalWater * ((waste - overflowWaste) - overCounted3) / total;
-        excessiveWaterOutput.setText(format(excessive * soilFactor) + " gal/wk");
+        final double excessive;
+        if (isHeadtoHead)
+            excessive = totalWater * (overCounted3) / total;
+        else
+            excessive = totalWater * (overlapWastage - overCounted3) / total;excessiveWaterOutput.setText(format(excessive * soilFactor) + " gal/wk");
 
         double waterWasted = totalWater * wasted / total;
         wastedT.setText(format(waterWasted) + " gal/wk");
@@ -3890,7 +3874,43 @@ public class MainActivity extends AppCompatActivity {
         /*totalLandA.setText(Math.round(variable * 100) + " " + Math.round(notWastedWater * 100) + " == " +
                 Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));*/
         percentCoveredA.setText(format(percentLandCovered * 100) + "%");
+        final double finalSoilFactor = soilFactor;
+        View.OnTouchListener toucher = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (view.getId() == excessHelp.getId()) {
+                    if (excessive == 0)
+                        if (!isHeadtoHead)
+                            makeToast("Your sprinkler design does not waste any water by excessive watering (overlapping sprinklers)!");
+                        else
+                            makeToast("Your sprinkler design does not excessively water your land!");
+                    else
+                        makeToast(format(excessive * finalSoilFactor) + " gallons per week will be wasted by overwatering" +
+                                " the same region repeatedly.");
+                }
+                if (view.getId() == insideHelp.getId()) {
+                    if (dv.sprinkr.size() - (outsideIntersecting.size() + completelyOutside.size()) == dv.sprinkr.size())
+                        makeToast("All your sprinklers are placed inside the land plot.");
+                    else
+                        makeToast("You have " + (dv.sprinkr.size() - (outsideIntersecting.size() + completelyOutside.size())) + " sprinklers placed inside the land plot.");
+                }
+                if (view.getId() == outsideHelp.getId())
+                    makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
+                else if (view.getId() == overflowHelp.getId()) {
+                    if (overflowWater == 0)
+                        makeToast("Your sprinkler design does not waste any water by overflowing outside the land plot!");
+                    else
+                        makeToast(format(overflowWater * finalSoilFactor) + " gallons per week will be wasted by overflowing out of the specified land plot.");
 
+                }
+                return false;
+            }
+        };
+        excessHelp.setOnTouchListener(toucher);
+        overflowHelp.setOnTouchListener(toucher);
+        insideHelp.setOnTouchListener(toucher);
+        outsideHelp.setOnTouchListener(toucher);
+        dialog.show();
     }
 
 
@@ -3939,25 +3959,6 @@ public class MainActivity extends AppCompatActivity {
         final ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
         final ImageView insideHelp = dialog.findViewById(R.id.insideHelp);
         final ImageView outsideHelp = dialog.findViewById(R.id.outsideHelp);
-        View.OnTouchListener toucher = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (view.getId() == excessHelp.getId())
-                    makeToast("Amount of water wasted by overwatering" +
-                            " the same region repeatedly.");
-                if (view.getId() == insideHelp.getId())
-                    makeToast("# of sprinklers inside the land plot.");
-                if (view.getId() == outsideHelp.getId())
-                    makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
-                else if (view.getId() == overflowHelp.getId())
-                    makeToast("Amount of water wasted by overflowing out of the specified land plot.");
-                return false;
-            }
-        };
-        excessHelp.setOnTouchListener(toucher);
-        overflowHelp.setOnTouchListener(toucher);
-        insideHelp.setOnTouchListener(toucher);
-        outsideHelp.setOnTouchListener(toucher);
 
         final Button back = dialog.findViewById(R.id.goBack);
         Button done = dialog.findViewById(R.id.done);
@@ -3990,6 +3991,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (isHeadtoHead) {
             wasted = overFlowWastage + overCounted3;
+            Log.wtf("HEADTOHEAD", wasted + " = " + overFlowWastage + " + " + overCounted3);
         }
 
         wasted *= soilFactor;
@@ -4044,9 +4046,13 @@ public class MainActivity extends AppCompatActivity {
         totalLandA.setText(format(landArea) + " sq. ft");
         totalWaterOutput.setText(format(totalWater) + " gal/wk");
         totalA.setText(Math.round(totalWater * 10) / 10 + " gal/wk");
-        double overflowWater = totalWater * overFlowWastage / total;
+        final double overflowWater = totalWater * overFlowWastage / total;
         overflowWaterOutput.setText(format(overflowWater * soilFactor) + " gal/wk");
-        double excessive = totalWater * (overlapWastage - overCounted3) / total;
+        final double excessive;
+        if (isHeadtoHead)
+            excessive = totalWater * (overCounted3) / total;
+        else
+            excessive = totalWater * (overlapWastage - overCounted3) / total;
         excessiveWaterOutput.setText(format(excessive * soilFactor) + " gal/wk");
 
         double waterWasted = totalWater * wasted / total;
@@ -4085,6 +4091,42 @@ public class MainActivity extends AppCompatActivity {
                 Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));*/
         percentCoveredA.setText(format(percentLandCovered * 100) + "%");
 
+        final double finalSoilFactor = soilFactor;
+        View.OnTouchListener toucher = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (view.getId() == excessHelp.getId()) {
+                    if (excessive == 0)
+                        if (!isHeadtoHead)
+                            makeToast("Your sprinkler design does not waste any water by excessive watering (overlapping sprinklers)!");
+                        else
+                            makeToast("Your sprinkler design does not excessively water your land!");
+                    else
+                        makeToast(format(excessive * finalSoilFactor) + " gallons per week will be wasted by overwatering" +
+                                " the same region repeatedly.");
+                }
+                if (view.getId() == insideHelp.getId()) {
+                    if (dv.sprinkr.size() - (outsideIntersecting.size() + completelyOutside.size()) == dv.sprinkr.size())
+                        makeToast("All your sprinklers are placed inside the land plot.");
+                    else
+                        makeToast("You have " + (dv.sprinkr.size() - (outsideIntersecting.size() + completelyOutside.size())) + " sprinklers placed inside the land plot.");
+                }
+                if (view.getId() == outsideHelp.getId())
+                    makeToast("You have " + (outsideIntersecting.size() + completelyOutside.size()) + " sprinklers placed outside your land plot.");
+                else if (view.getId() == overflowHelp.getId()) {
+                    if (overflowWater == 0)
+                        makeToast("Your sprinkler design does not waste any water by overflowing outside the land plot!");
+                    else
+                        makeToast(format(overflowWater * finalSoilFactor) + " gallons per week will be wasted by overflowing out of the specified land plot.");
+
+                }
+                return false;
+            }
+        };
+        excessHelp.setOnTouchListener(toucher);
+        overflowHelp.setOnTouchListener(toucher);
+        insideHelp.setOnTouchListener(toucher);
+        outsideHelp.setOnTouchListener(toucher);
         dialog.show();
 
     }

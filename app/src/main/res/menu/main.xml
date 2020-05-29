@@ -20,7 +20,7 @@
     <item
         android:id="@+id/calculate"
         app:showAsAction="never"
-        android:title="Show Results"
+        android:title="Show Feedback"
         />
     <!--<item
         android:id="@+id/autoplot"
