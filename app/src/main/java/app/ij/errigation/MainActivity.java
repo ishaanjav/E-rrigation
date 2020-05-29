@@ -1,9 +1,11 @@
 package app.ij.errigation;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,11 +14,13 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -1263,6 +1267,11 @@ public class MainActivity extends AppCompatActivity {
 
     static int messageCount = 0, specifyCount = 0;
 
+    @TargetApi(Build.VERSION_CODES.O)
+    int getSeek(SeekBar seekbar) {
+        return seekbar.getProgress();
+    }
+
     private void setRadiusBar() {
         radius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -1275,9 +1284,13 @@ public class MainActivity extends AppCompatActivity {
                 int min = 1;
                 Log.wtf("*Seek bar info:", "max: " + max + "  min: " + min + "  current: " + seekBar.getProgress());
                 try {
-                    min = seekBar.getMin();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        min = getSeek(seekBar);
+                    } else {
+                        min = 50;
+                    }
                 } catch (Exception e) {
-                    min = 1;
+                    min = 50;
                 }
                 double sprinklerRadius = seekBar.getProgress() * (dv.screenW / 200);
                 float bigCircleRadius = dv.setCircleRadiusTo;
@@ -3084,7 +3097,7 @@ public class MainActivity extends AppCompatActivity {
         rowHeight *= (float) densityDpi / (float) 560;
         if (isTablet())
             params.height = (int) Math.min((float) rowHeight * 8f, rowHeight * sprinklerList.size());
-else
+        else
             params.height = (int) Math.min((float) rowHeight * 5f, rowHeight * sprinklerList.size());
 
         list.setLayoutParams(params);
@@ -3704,16 +3717,10 @@ else
         dialog.show();
     }
 
-    private boolean isTablet() {
-        Display display = getWindowManager().getDefaultDisplay();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        display.getMetrics(displayMetrics);
-
-        int width = displayMetrics.widthPixels / displayMetrics.densityDpi;
-        int height = displayMetrics.heightPixels / displayMetrics.densityDpi;
-
-        double screenDiagonal = Math.sqrt(width * width + height * height);
-        return (screenDiagonal >= 6.7);
+    public boolean isTablet() {
+        return (getApplicationContext().getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
     private void showCircleResults(final double waste, final double total, final double overflowWaste
@@ -3730,17 +3737,17 @@ else
             RelativeLayout holder = dialog.findViewById(R.id.holder);
             RelativeLayout reller = dialog.findViewById(R.id.reller);
 
-            RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) holder.getLayoutParams();
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.getLayoutParams();
             params.addRule(RelativeLayout.BELOW, R.id.reller);
             params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             holder.setLayoutParams(params);
 
-            RelativeLayout.LayoutParams layoutParams= (RelativeLayout.LayoutParams) reller.getLayoutParams();
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) reller.getLayoutParams();
             layoutParams.removeRule(RelativeLayout.ABOVE);
             reller.setLayoutParams(layoutParams);
             ViewGroup.LayoutParams paramser = dialog.findViewById(R.id.carder).getLayoutParams();
             DisplayMetrics metrics = getResources().getDisplayMetrics();
-            paramser.width = (int)(paramser.width * 1.18f);
+            paramser.width = (int) (paramser.width * 1.18f);
         }
         dialog.show();
         final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
@@ -3905,17 +3912,17 @@ else
             RelativeLayout holder = dialog.findViewById(R.id.holder);
             RelativeLayout reller = dialog.findViewById(R.id.reller);
 
-            RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) holder.getLayoutParams();
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.getLayoutParams();
             params.addRule(RelativeLayout.BELOW, R.id.reller);
             params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             holder.setLayoutParams(params);
 
-            RelativeLayout.LayoutParams layoutParams= (RelativeLayout.LayoutParams) reller.getLayoutParams();
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) reller.getLayoutParams();
             layoutParams.removeRule(RelativeLayout.ABOVE);
             reller.setLayoutParams(layoutParams);
             ViewGroup.LayoutParams paramser = dialog.findViewById(R.id.carder).getLayoutParams();
             DisplayMetrics metrics = getResources().getDisplayMetrics();
-            paramser.width = (int)(paramser.width * 1.18f);
+            paramser.width = (int) (paramser.width * 1.18f);
             //dialog.findViewById(R.id.carder).setLayoutParams(params);
 
            /* WindowManager.LayoutParams lp = new WindowManager.LayoutParams();

@@ -41,7 +41,6 @@
                 android:id="@+id/ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/inscroll"
                 android:layout_marginTop="4sp"
                 android:orientation="horizontal">
 
@@ -79,9 +78,7 @@
             <ScrollView
                 android:id="@+id/scroll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@id/ll"
-                android:layout_below="@id/titleContainer">
+                android:layout_height="wrap_content">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
