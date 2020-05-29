@@ -19,6 +19,7 @@ import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +29,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -3069,19 +3071,26 @@ public class MainActivity extends AppCompatActivity {
             count += frequency.get(i);
             sprinklerList.add(new SprinklerInfo(radiusList.get(i), frequency.get(i)));
         }
-
-        //sprinklerList.add(new SprinklerInfo(3, 2));
         SprinklerAdapter sprinklerAdapter = new SprinklerAdapter(MainActivity.this, sprinklerList);
         ListView list = dialog.findViewById(R.id.list);
 
+        //sprinklerList.add(new SprinklerInfo(3, 2));
+
+        int rowHeight = 186;
+
         ViewGroup.LayoutParams params = list.getLayoutParams();
-        params.height = Math.min(185 * 5 + 10, 186 * sprinklerList.size());
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int densityDpi = (int) (metrics.density * 150f);
+        rowHeight *= (float) densityDpi / (float) 560;
+        if (isTablet())
+            params.height = (int) Math.min((float) rowHeight * 8f, rowHeight * sprinklerList.size());
+else
+            params.height = (int) Math.min((float) rowHeight * 5f, rowHeight * sprinklerList.size());
+
         list.setLayoutParams(params);
-
-        //DONE ListView not showing up
         list.setAdapter(sprinklerAdapter);
-        shortToast( count + " sprinklers");
 
+        shortToast(count + " sprinklers");
         dialog.show();
     }
 
@@ -3695,6 +3704,18 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private boolean isTablet() {
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getMetrics(displayMetrics);
+
+        int width = displayMetrics.widthPixels / displayMetrics.densityDpi;
+        int height = displayMetrics.heightPixels / displayMetrics.densityDpi;
+
+        double screenDiagonal = Math.sqrt(width * width + height * height);
+        return (screenDiagonal >= 6.7);
+    }
+
     private void showCircleResults(final double waste, final double total, final double overflowWaste
             , final int overflowingCount, final int outsideCount, double waterUsed, double duration, String choice) {
         final Dialog dialog = new Dialog(MainActivity.this);
@@ -3702,8 +3723,25 @@ public class MainActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.real_result);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
-                (int) (dv.screenH * 0.9d));
+        if (!isTablet())
+            dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
+                    (int) (dv.screenH * 0.9d));
+        else {
+            RelativeLayout holder = dialog.findViewById(R.id.holder);
+            RelativeLayout reller = dialog.findViewById(R.id.reller);
+
+            RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) holder.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.reller);
+            params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            holder.setLayoutParams(params);
+
+            RelativeLayout.LayoutParams layoutParams= (RelativeLayout.LayoutParams) reller.getLayoutParams();
+            layoutParams.removeRule(RelativeLayout.ABOVE);
+            reller.setLayoutParams(layoutParams);
+            ViewGroup.LayoutParams paramser = dialog.findViewById(R.id.carder).getLayoutParams();
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            paramser.width = (int)(paramser.width * 1.18f);
+        }
         dialog.show();
         final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
         final ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
@@ -3860,9 +3898,36 @@ public class MainActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.real_result);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
-                (int) (dv.screenH * 0.9d));
-        dialog.show();
+        if (!isTablet())
+            dialog.getWindow().setLayout(dialog.getWindow().getAttributes().width,
+                    (int) (dv.screenH * 0.9d));
+        else {
+            RelativeLayout holder = dialog.findViewById(R.id.holder);
+            RelativeLayout reller = dialog.findViewById(R.id.reller);
+
+            RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) holder.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.reller);
+            params.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            holder.setLayoutParams(params);
+
+            RelativeLayout.LayoutParams layoutParams= (RelativeLayout.LayoutParams) reller.getLayoutParams();
+            layoutParams.removeRule(RelativeLayout.ABOVE);
+            reller.setLayoutParams(layoutParams);
+            ViewGroup.LayoutParams paramser = dialog.findViewById(R.id.carder).getLayoutParams();
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            paramser.width = (int)(paramser.width * 1.18f);
+            //dialog.findViewById(R.id.carder).setLayoutParams(params);
+
+           /* WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = (int)(dialog.getWindow().getAttributes().width * 1.35f);
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                      dialog.getWindow().setAttributes(lp);
+ makeToast("I am a tablet: " + isTablet());*/
+            /*dialog.getWindow().setLayout((int) (dialog.getWindow().getAttributes().width * 1.35f),
+                    dialog.getWindow().getDecorView().getHeight());*/
+        }
+
         final ImageView excessHelp = dialog.findViewById(R.id.excessHelp);
         final ImageView overflowHelp = dialog.findViewById(R.id.overflowHelp);
         final ImageView insideHelp = dialog.findViewById(R.id.insideHelp);
@@ -4013,30 +4078,7 @@ public class MainActivity extends AppCompatActivity {
                 Math.round(percentageWasted * 100) + " " + Math.round(overflowWater * 100));*/
         percentCoveredA.setText(format(percentLandCovered * 100) + "%");
 
-
-
-
-        /* numSprink.setText(dv.sprinkx.size() + "");
-                    Log.wtf("* Stats Nums: ", waterUsed + " " + duration + " " + coverage + " " + percentWastage);
-                    numIntersect.setText("" + (dv.sprinkx.size() - singleX.size()));
-                    totalLandA.setText(String.format("%1$,.2f", (v * Math.pow(dv.ratio, 2))) + " sq. ft");
-                    Log.wtf("* INFO", coverage + " " + v + " " + dv.ratio);
-                    landCovered.setText(String.format("%1$,.2f", (coverage * v * Math.pow(dv.ratio, 2))) + " sq. ft");
-                    percentCoveredA.setText(String.format("%1$,.1f", coverage * 100) + "%");
-                    percentWasted.setText(String.format("%1$,.1f", percentWastage * 100) + "%");
-                    perMonth.setText(String.format("%1$,.0f", 4 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-                    perYear.setText(String.format("%1$,.0f", 52 * duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal");
-                    totalWaterOutput.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-                    totalA.setText(String.format("%1$,.1f", duration * waterUsed * dv.sprinky.size()) + " gal/wk");
-                    wasted.setText(String.format("%1$,.2f",
-                            duration * waterUsed * dv.sprinky.size() * percentWastage) + " gal/wk");
-
-
-                    nonOverlapT.setText(String.format("%1$,.2f", duration * waterUsed * singleX.size()) + " gal/wk");
-                    //nonOverlapT.setText(String.format("%1$,.2f", (pixToGallon(non, waterUsed) * duration)) + " gal/wk");
-                    overlapA.setText(String.format("%1$,.2f", duration * waterUsed * (dv.sprinkx.size() - singleX.size())) + " gal/wk");
-                    //overlapA.setText(String.format("%1$,.2f", duration * (pixToGallon(non + counter + overlappingButOnly1SprinklerRegion, waterUsed) - pixToGallon(non, waterUsed))) + " gal/wk");
-*/
+        dialog.show();
 
     }
 
