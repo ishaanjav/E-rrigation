@@ -20,7 +20,7 @@
     <item
         android:id="@+id/calculate"
         app:showAsAction="never"
-        android:title="Calculate Wastage"
+        android:title="Show Results"
         />
     <!--<item
         android:id="@+id/autoplot"
